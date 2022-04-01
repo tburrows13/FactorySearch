@@ -1,0 +1,12 @@
+{
+    "name": "FactorySearch",
+    "version": "1.0.0",
+    "title": "Factory Search",
+    "author": "Xorimuth",
+    "description": "Search your factory",
+    "factorio_version": "1.1",
+    "dependencies": ["base"],
+    "package": {
+      "ignore": ["resources/*", "scenarios/*"]
+    }
+  }
