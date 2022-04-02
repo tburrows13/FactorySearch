@@ -3,54 +3,79 @@ local gui = require("__FactorySearch__.scripts.gui")
 local ui = {}
 
 local function build_surface_results(surface_name, surface_data)
-  gui_elements = {}
+  local gui_elements = {}
   for _, group in pairs(surface_data) do
     table.insert(gui_elements,
       {
-        type = "flow",
-        direction = "horizontal",
-        children = {
-          --[[{
-            type = "label",
-            caption = group.count,
-            style = "caption_label"
-          },]]
-          {
-            type = "sprite-button",
-            sprite = "entity/" .. group.entity_name,
-            style = "slot_button_in_shallow_frame",
-            number = group.count,
-          },
-          {
-            type = "sprite-button",
-            style = "slot_sized_button",
-            mouse_button_filter = { "left" },
-            sprite = "utility/map",
-            tooltip = { "gui-train.open-in-map" },
-            tags = {position = group.avg_position, surface = surface_name},
-            style_mods = { padding = 4 },
-            actions = { on_click = { gui = "search", action = "open_location_in_map" } },
-          },
-        }
+        type = "sprite-button",
+        sprite = "entity/" .. group.entity_name,
+        mouse_button_filter = { "left" },
+        tooltip = { "gui-train.open-in-map" },
+        style = "slot_button",
+        number = group.count,
+        tags = {position = group.avg_position, surface = surface_name},
+        actions = { on_click = { gui = "search", action = "open_location_in_map" } },
       }
     )
   end
   return gui_elements
 end
 
+local function build_surface_name(include_surface_name, surface_name)
+  if include_surface_name then
+    return  {
+      type = "label",
+      caption = surface_name,
+      style = "bold_label",
+      style_mods = { font = "default-large-bold" }
+    }
+  else
+    return {}
+  end
+
+end
+
 local function build_result_gui(data, frame)
+  frame.clear()
+  local include_surface_name = false
+
+  local surface_count = 0
+  for _, _ in pairs(data) do
+    surface_count = surface_count + 1
+  end
+
+  if surface_count > 1 then
+    include_surface_name = true
+  end
+
+  local total_groups = 0
   for surface_name, surface_data in pairs(data) do
+    total_groups = total_groups + #surface_data
+    gui.build(frame, {
+      build_surface_name(include_surface_name, surface_name),
+      {
+        type = "frame",
+        direction = "horizontal",
+        style = "inside_deep_frame",
+        children = {
+          {
+            type = "table",
+            column_count = 8,
+            style = "map_view_options_table",
+            children = build_surface_results(surface_name, surface_data)
+          }
+        }
+      }
+    })
+  end
+
+  if total_groups == 0 then
+    frame.clear()
     gui.build(frame, {
       {
         type = "label",
-        caption = surface_name,
-        style = "bold_label",
-        style_mods = { font = "default-large-bold" }
-      },
-      {
-        type = "flow",
-        direction = "vertical",
-        children = build_surface_results(surface_name, surface_data)
+        style_mods = { font_color = {1, 0, 0, 1} },
+        caption = "No machines producing this item"
       }
     })
   end
@@ -71,7 +96,7 @@ local function build_gui(player, player_data)
       children = {
         {
           type = "flow",
-          style = "flib_titlebar_flow",
+          style = "fs_flib_titlebar_flow",
           ref = { "titlebar_flow" },
           actions = {
             on_click = { gui = "search", action = "recenter" },  -- TODO What is this?
@@ -83,7 +108,7 @@ local function build_gui(player, player_data)
               caption = { "mod-name.FactorySearch" },
               ignored_by_interaction = true,
             },
-            { type = "empty-widget", style = "flib_titlebar_drag_handle", ignored_by_interaction = true },
+            { type = "empty-widget", style = "fs_flib_titlebar_drag_handle", ignored_by_interaction = true },
             {
               type = "sprite-button",
               style = "close_button",
@@ -99,39 +124,56 @@ local function build_gui(player, player_data)
         {
           type = "frame",
           style = "inside_shallow_frame_with_padding",
-          --style_mods = { top_padding = -2 },
-          direction = "vertical",
+          --style_mods = { horizontal_spacing = 8 },
+          direction = "horizontal",
           children = {
             {
               type = "flow",
               direction = "horizontal",
+              style_mods = { horizontal_spacing = 12 },
               children = {
                 {
-                  type = "choose-elem-button",
-                  style = "slot_button_in_shallow_frame",
-                  elem_type = "item",
-                  mouse_button_filter = {"left"},
-                  ref = { "item_select" },
-                  actions = {
-                    on_elem_changed = { gui = "search", action = "item_selected" }
-                  }
+                  type = "flow",
+                  direction = "vertical",
+                  children = {
+                    {
+                      type = "choose-elem-button",
+                      style = "slot_button_in_shallow_frame",
+                      elem_type = "item",
+                      mouse_button_filter = {"left"},
+                      ref = { "item_select" },
+                      style_mods = {
+                        minimal_width = 60,
+                        minimal_height = 60,
+                      },
+                      actions = {
+                        on_elem_changed = { gui = "search", action = "item_selected" }
+                      }
+                    },
+                    --[[{
+                      type = "sprite-button",
+                      style = "slot_sized_button",
+                      sprite = "utility/search_icon",
+                      mouse_button_filter = {"left"},
+                      ref = { "search" },
+                      actions = {
+                        on_click = { gui = "search", action = "search" }
+                      }
+                    },]]
+                  },
                 },
-                --[[{
-                  type = "sprite-button",
-                  style = "slot_sized_button",
-                  sprite = "utility/search_icon",
-                  mouse_button_filter = {"left"},
-                  ref = { "search" },
-                  actions = {
-                    on_click = { gui = "search", action = "search" }
+                {
+                  type = "flow",
+                  ref = { "result_flow" },
+                  direction = "vertical",
+                  children = {
+                    {
+                      type = "label",
+                      caption = "Find machines producing this item",
+                    }
                   }
-                },]]
+                }
               }
-            },
-            {
-              type = "flow",
-              ref = { "result_flow" },
-              direction = "vertical",
             }
           },
         },
@@ -204,21 +246,6 @@ script.on_event(defines.events.on_gui_click,
       local msg = action.action
       if msg == "close" then
         destroy_gui(player)
-      elseif msg == "search" then
-        local elem_button = player_data.refs.item_select
-        local item = elem_button.elem_value
-        if item then
-          local force = player.force
-          --local force_data = global.recipes[force.index]
-          -- Exception if only one surface
-          --for surface_index, surface_data in pairs(force_data) do
-          --  local surface = game.get_surface(surface_index)
-            --local recipe_data = surface_data[item]
-            -- TODO
-          local data = find_machines(item, force.name)
-          player_data.refs.result_flow.clear()
-          build_result_gui(data, player_data.refs.result_flow)
-        end
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         local surface_name = tags.surface
