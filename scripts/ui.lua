@@ -253,7 +253,7 @@ event.on_gui_elem_changed(
   end
 )
 
-script.on_event(defines.events.on_gui_click,
+event.on_gui_click(
   function(event)
     local player = game.get_player(event.player_index)
     local player_data = global.players[event.player_index]
@@ -276,13 +276,14 @@ script.on_event(defines.events.on_gui_click,
   end
 )
 
-ui.on_gui_closed = function(event)
-  if event.element and event.element.name == "fs_frame" then
-    local player = game.get_player(event.player_index)
-    close_gui(player, global.players[event.player_index])
+event.on_gui_closed(
+  function(event)
+    if event.element and event.element.name == "fs_frame" then
+      local player = game.get_player(event.player_index)
+      close_gui(player, global.players[event.player_index])
+    end
   end
-end
-
+)
 
 
 local function on_shortcut_pressed(event)
@@ -300,4 +301,4 @@ event.on_lua_shortcut(
 )
 script.on_event("search-factory", on_shortcut_pressed)
 
-return ui
+return {destroy_gui = destroy_gui}
