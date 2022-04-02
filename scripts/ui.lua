@@ -81,7 +81,7 @@ local function build_result_gui(data, frame)
   end
 end
 
-local function build_gui(player, player_data)
+local function build_gui(player)
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
@@ -181,15 +181,26 @@ local function build_gui(player, player_data)
     }
   })
 
-  refs.frame.force_auto_center()
+  local player_data = {}
   refs.titlebar_flow.drag_target = refs.frame
-  player.opened = refs.frame
-  player.set_shortcut_toggled("search-factory", true)
+  refs.frame.force_auto_center()
   player_data.refs = refs
+  global.players[player.index] = player_data
+  return player_data
+end
+
+local function open_gui(player, player_data)
+  if not player_data then
+    player_data = build_gui(player)
+  end
+  local refs = player_data.refs
+  player.opened = refs.frame
+  refs.frame.visible = true
+  player.set_shortcut_toggled("search-factory", true)
 end
 
 local function destroy_gui(player, player_data)
-  local main_frame = player.gui.screen.fs_frame
+  local main_frame = player_data.refs.frame
   if main_frame then
     main_frame.destroy()
   end
@@ -197,15 +208,21 @@ local function destroy_gui(player, player_data)
   global.players[player.index] = nil
 end
 
-local function toggle_gui(player, player_data)
-  local main_frame = player.gui.screen.fs_frame
-
-  if main_frame == nil then
-      build_gui(player, player_data)
-  else
-      destroy_gui(player, player_data)
+local function close_gui(player, player_data)
+  local refs = player_data.refs
+  refs.frame.visible = false
+  player.set_shortcut_toggled("search-factory", false)
+  if player.opened == refs.frame then
+    player.opened = nil
   end
+end
 
+local function toggle_gui(player, player_data)
+  if player_data and player_data.refs.frame.visible then
+    close_gui(player, player_data)
+  else
+    open_gui(player, player_data)
+  end
 end
 
 event.on_gui_elem_changed(
@@ -245,7 +262,7 @@ script.on_event(defines.events.on_gui_click,
     if action then
       local msg = action.action
       if msg == "close" then
-        destroy_gui(player)
+        close_gui(player, player_data)
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         local surface_name = tags.surface
@@ -262,7 +279,7 @@ script.on_event(defines.events.on_gui_click,
 ui.on_gui_closed = function(event)
   if event.element and event.element.name == "fs_frame" then
     local player = game.get_player(event.player_index)
-    destroy_gui(player)
+    close_gui(player, global.players[event.player_index])
   end
 end
 
@@ -271,7 +288,6 @@ end
 local function on_shortcut_pressed(event)
   local player = game.get_player(event.player_index)
 
-  global.players[event.player_index] = global.players[event.player_index] or {}
   local player_data = global.players[event.player_index]
   toggle_gui(player, player_data)
 end
