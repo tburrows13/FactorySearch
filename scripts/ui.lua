@@ -14,19 +14,21 @@ end
 
 local function build_surface_results(surface_name, surface_data)
   local gui_elements = {}
-  for _, group in pairs(surface_data) do
-    table.insert(gui_elements,
-      {
-        type = "sprite-button",
-        sprite = "entity/" .. group.entity_name,
-        mouse_button_filter = { "left" },
-        tooltip = {  "", {"entity-name." .. group.entity_name}, "\n", {"gui-train.open-in-map"} },
-        style = "slot_button",
-        number = group.count,
-        tags = {position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group)},
-        actions = { on_click = { gui = "search", action = "open_location_in_map" } },
-      }
-    )
+  for entity_name, entity_surface_data in pairs(surface_data) do
+    for _, group in pairs(entity_surface_data) do
+      table.insert(gui_elements,
+        {
+          type = "sprite-button",
+          sprite = "entity/" .. entity_name,
+          mouse_button_filter = { "left" },
+          tooltip = {  "", {"entity-name." .. entity_name}, "\n", {"gui-train.open-in-map"} },
+          style = "slot_button",
+          number = group.count,
+          tags = {position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group)},
+          actions = { on_click = { gui = "search", action = "open_location_in_map" } },
+        }
+      )
+    end
   end
   return gui_elements
 end
@@ -72,21 +74,27 @@ local function build_result_gui(data, frame, no_checkboxes)
     include_surface_name = true
   end
 
-  local total_groups = 0
+  local result_found = false
   for surface_name, surface_data in pairs(data) do
-    total_groups = total_groups + #surface_data
+    result_found = result_found or next(surface_data.producers) or next(surface_data.storage)
     gui.build(frame, {
       build_surface_name(include_surface_name, surface_name),
       {
         type = "frame",
-        direction = "horizontal",
+        direction = "vertical",
         style = "inside_deep_frame",
         children = {
           {
             type = "table",
             column_count = 8,
             style = "map_view_options_table",
-            children = build_surface_results(surface_name, surface_data)
+            children = build_surface_results(surface_name, surface_data.producers)
+          },
+          {
+            type = "table",
+            column_count = 8,
+            style = "map_view_options_table",
+            children = build_surface_results(surface_name, surface_data.storage)
           }
         }
       }

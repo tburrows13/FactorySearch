@@ -84,8 +84,9 @@ local function add_entity(entity, surface_data)
   local entity_name = entity.name
   local entity_position = entity.position
   local entity_selection_box = entity.selection_box
+  local entity_surface_data = surface_data[entity_name] or {}
   local assigned_to_group = false
-  for _, group in pairs(surface_data) do
+  for _, group in pairs(entity_surface_data) do
     if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_selection_box, group.selection_box) then
       -- Add entity to group
       assigned_to_group = true
@@ -112,7 +113,7 @@ local function add_entity(entity, surface_data)
   end
   if not assigned_to_group then
     -- Create new group
-    table.insert(surface_data, {
+    table.insert(entity_surface_data, {
       count = 1,
       avg_position = entity_position,
       selection_box = {
@@ -129,7 +130,7 @@ local function add_entity(entity, surface_data)
       entities = {entity},
     })
   end
-
+  surface_data[entity_name] = entity_surface_data
 end
 
 function find_machines(target_item, force, search_products, search_inventories)
@@ -139,7 +140,7 @@ function find_machines(target_item, force, search_products, search_inventories)
   end
   for _, surface in pairs(filtered_surfaces()) do
     -- TODO filter surfaces to avoid 'fake' ones ('-transformer')
-    local surface_data = {}
+    local surface_data = {producers = {}, storage = {},}
     local entities = surface.find_entities_filtered{
       type = entity_types(target_item.type, search_products, search_inventories),
       force = force,
@@ -163,16 +164,20 @@ function find_machines(target_item, force, search_products, search_inventories)
       elseif entity_type == "mining-drill" then
         local mining_target = entity.mining_target
         if mining_target and mining_target.name == target_item.name then
-          add_entity(entity, surface_data)
+          add_entity(entity, surface_data.producers)
         end
-      elseif target_item.type == "fluid" and (entity_type == "storage-tank" or entity_type == "fluid-wagon" or entity_type == "offshore-pump") then
+      elseif target_item.type == "fluid" and entity_type == "offshore-pump" then
         if entity.get_fluid_count(target_item.name) > 0 then
-          add_entity(entity, surface_data)
+          add_entity(entity, surface_data.producers)
+        end
+      elseif target_item.type == "fluid" and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
+        if entity.get_fluid_count(target_item.name) > 0 then
+          add_entity(entity, surface_data.storage)
         end
       elseif target_item.type == "item" then
         -- Entity is an inventory entity
         if entity.get_item_count(target_item.name) > 0 then
-          add_entity(entity, surface_data)
+          add_entity(entity, surface_data.storage)
         end
       end
       if recipe then
@@ -180,7 +185,7 @@ function find_machines(target_item, force, search_products, search_inventories)
         for _, product in pairs(products) do
           local name = product.name
           if name == target_item.name then
-            add_entity(entity, surface_data)
+            add_entity(entity, surface_data.producers)
           end
         end
       end
