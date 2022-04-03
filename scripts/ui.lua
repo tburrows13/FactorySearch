@@ -5,6 +5,9 @@ local function get_selection_boxes(group)
   selection_boxes = {}
   for i, entity in pairs(group.entities) do
     selection_boxes[i] = entity.selection_box
+    --[[if entity.supports_direction then
+      selection_boxes[i].orientation = entity.orientation
+    end]]
   end
   return selection_boxes
 end
@@ -46,10 +49,20 @@ local function build_surface_name(include_surface_name, surface_name)
 
 end
 
-local function build_result_gui(data, frame)
+local function build_result_gui(data, frame, no_checkboxes)
   frame.clear()
-  local include_surface_name = false
 
+  if no_checkboxes then
+    gui.build(frame, {
+      {
+        type = "label",
+        style_mods = { font_color = {1, 0, 0, 1} },
+        caption = {"search-gui.incorrect-config"}
+      }
+    })
+  end
+
+  local include_surface_name = false
   local surface_count = 0
   for _, _ in pairs(data) do
     surface_count = surface_count + 1
@@ -161,6 +174,20 @@ local function build_gui(player)
                         on_elem_changed = { gui = "search", action = "item_selected" }
                       }
                     },
+                    {
+                      type = "checkbox",
+                      state = true,
+                      caption = "Producers",
+                      tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill]"},
+                      ref = { "include_machines" },
+                    },
+                    {
+                      type = "checkbox",
+                      state = false,
+                      caption = "Storage",
+                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=character-corpse][entity=car][entity=cargo-wagon][entity=spidertron]"},
+                      ref = { "include_inventories" }
+                    }
                     --[[{
                       type = "sprite-button",
                       style = "slot_sized_button",
@@ -244,13 +271,14 @@ event.on_gui_elem_changed(
     if action then
       local msg = action.action
       if msg == "item_selected" then
-        local elem_button = player_data.refs.item_select
+        local refs = player_data.refs
+        local elem_button = refs.item_select
         local item = elem_button.elem_value
         if item then
           local force = player.force
-          local data = find_machines(item, force.name, true, true)
+          local data = find_machines(item, force.name, refs.include_machines.state, refs.include_inventories.state)
           player_data.refs.result_flow.clear()
-          build_result_gui(data, player_data.refs.result_flow)
+          build_result_gui(data, refs.result_flow, not (refs.include_machines.state or refs.include_inventories.state))
         end
       end
     end

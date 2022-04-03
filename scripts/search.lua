@@ -17,6 +17,7 @@ local function concat(t1,t2)
   return new_table
 end
 
+-- TODO test corpse
 local product_entities = {"assembling-machine", "furnace", "offshore-pump", "mining-drill"}
 local inventory_entities = {"container", "logistic-container", "roboport", "character", "character-corpse", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
 local fluid_entities = {"storage-tank", "fluid-wagon"}  -- get_fluid_count(fluid_name)
@@ -125,7 +126,7 @@ end
 
 function find_machines(target_item, force, search_products, search_inventories)
   local data = {}
-  if target_item.type == "virtual" then
+  if target_item.type == "virtual" or not (search_products or search_inventories) then
     return {{}}
   end
   for _, surface in pairs(filtered_surfaces()) do

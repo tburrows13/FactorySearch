@@ -13,16 +13,32 @@ local function draw_markers(player, surface, selection_boxes)
 
   -- Draw new markers
   for _, selection_box in pairs(selection_boxes) do
-    rendering.draw_rectangle{
-      color = { r = 0, g = 0.9, b = 0, a = 0.9 },
-      width = 4,
-      filled = false,
-      left_top = selection_box.left_top,
-      right_bottom = selection_box.right_bottom,
-      surface = surface,
-      time_to_live = 600,
-      players = {player},
-    }
+    --[[if selection_box.orientation then
+      rendering.draw_polygon{
+        color = { r = 0, g = 0.9, b = 0, a = 0.9 },
+        width = 4,
+        filled = false,
+        --target = game.players[1].character,
+        vertices = {{target = selection_box.left_top}, {target = {selection_box.left_top.x, selection_box.right_bottom.y}}, {target=selection_box.right_bottom}, {target={selection_box.right_bottom.x, selection_box.left_top.y}}},
+        --[[left_top = selection_box.left_top,
+        right_bottom = selection_box.right_bottom,
+        orientation = selection_box.orientation,
+        surface = surface,
+        time_to_live = 600,
+        players = {player},
+      }
+    else]]
+      rendering.draw_rectangle{
+        color = { r = 0, g = 0.9, b = 0, a = 0.9 },
+        width = 4,
+        filled = false,
+        left_top = selection_box.left_top,
+        right_bottom = selection_box.right_bottom,
+        surface = surface,
+        time_to_live = 600,
+        players = {player},
+      }
+    --end
     --[[game.get_surface(surface).create_entity{
       name = "highlight-box",
       position = {0, 0},  -- Ignored by game
