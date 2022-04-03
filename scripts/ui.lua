@@ -76,7 +76,11 @@ local function build_result_gui(data, frame, no_checkboxes)
 
   local result_found = false
   for surface_name, surface_data in pairs(data) do
-    result_found = result_found or next(surface_data.producers) or next(surface_data.storage)
+    local surface_contains_results = next(surface_data.producers) or next(surface_data.storage)
+    result_found = result_found or surface_contains_results
+    if not surface_contains_results then
+      break
+    end
     gui.build(frame, {
       build_surface_name(include_surface_name, surface_name),
       {
@@ -101,7 +105,7 @@ local function build_result_gui(data, frame, no_checkboxes)
     })
   end
 
-  if total_groups == 0 then
+  if result_found == 0 then
     frame.clear()
     gui.build(frame, {
       {
