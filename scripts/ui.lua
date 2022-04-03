@@ -79,7 +79,7 @@ local function build_result_gui(data, frame)
       {
         type = "label",
         style_mods = { font_color = {1, 0, 0, 1} },
-        caption = "No machines producing this item"
+        caption = {"search-gui.no-results"}
       }
     })
   end
@@ -173,7 +173,7 @@ local function build_gui(player)
                   children = {
                     {
                       type = "label",
-                      caption = "Find machines producing this item",
+                      caption = {"search-gui.explanation"},
                     }
                   }
                 }
