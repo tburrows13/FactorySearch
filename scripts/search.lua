@@ -17,9 +17,17 @@ local function concat(t1,t2)
   return new_table
 end
 
--- TODO test corpse
+local function extend(t1, t2)
+  local t1_len = #t1
+  local t2_len = #t2
+  for i=1, t2_len do
+    t1[t1_len + i] = t2[i]
+  end
+end
+
+-- "character-corpse" doesn't have force so must be checked seperately
 local product_entities = {"assembling-machine", "furnace", "offshore-pump", "mining-drill"}
-local inventory_entities = {"container", "logistic-container", "roboport", "character", "character-corpse", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
+local inventory_entities = {"container", "logistic-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
 local fluid_entities = {"storage-tank", "fluid-wagon"}  -- get_fluid_count(fluid_name)
 local product_and_inventory_entities = concat(product_entities, inventory_entities)
 local product_and_fluid_entities = concat(product_entities, fluid_entities)
@@ -81,8 +89,8 @@ local function add_entity(entity, surface_data)
     if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_selection_box, group.selection_box) then
       -- Add entity to group
       assigned_to_group = true
-      count = group.count
-      new_count = count + 1
+      local count = group.count
+      local new_count = count + 1
       group.avg_position = {
         x = (group.avg_position.x * count + entity_position.x) / new_count,
         y = (group.avg_position.y * count + entity_position.y) / new_count,
@@ -131,12 +139,19 @@ function find_machines(target_item, force, search_products, search_inventories)
   end
   for _, surface in pairs(filtered_surfaces()) do
     -- TODO filter surfaces to avoid 'fake' ones ('-transformer')
-    surface_data = {}
-    entities = surface.find_entities_filtered{
+    local surface_data = {}
+    local entities = surface.find_entities_filtered{
       type = entity_types(target_item.type, search_products, search_inventories),
       force = force,
       to_be_deconstructed = false,
     }
+    if search_inventories and target_item.type == "item" then
+      local corpses = surface.find_entities_filtered{
+        type = "character-corpse",
+      }
+      extend(entities, corpses)
+    end
+
     for _, entity in pairs(entities) do
       local recipe
       local entity_type = entity.type
