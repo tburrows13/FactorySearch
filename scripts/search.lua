@@ -8,19 +8,21 @@ function find_machines(target_item, force)
     -- TODO filter surfaces to avoid 'fake' ones ('-transformer')
     surface_data = {}
     entities = surface.find_entities_filtered{
-      type = "assembling-machine",
+      type = {"assembling-machine", "furnace"},
       force = force,
       to_be_deconstructed = false,
     }
     for _, entity in pairs(entities) do
       local recipe = entity.get_recipe()
+      if not recipe and entity.type == "furnace" then
+        -- If the furnace has stopped smelting, this records the last item it was smelting
+        recipe = entity.previous_recipe
+      end
       if recipe then
         local products = recipe.products
         for _, product in pairs(products) do
           local name = product.name
           if name == target_item then
-            --table.insert(surface_data, entity)
-
             -- Group entities
             -- Group contains count, avg_position, bounding_box, entity_name, entities
             local entity_name = entity.name
@@ -28,7 +30,6 @@ function find_machines(target_item, force)
             local entity_bounding_box = entity.bounding_box
             local assigned_to_group = false
             for _, group in pairs(surface_data) do
-              local distance = math2d.position.distance(entity_position, group.avg_position)
               if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_bounding_box, group.bounding_box) then
                 -- Add entity to group
                 assigned_to_group = true
