@@ -10,6 +10,8 @@ Have you ever asked yourself any of these questions?
 
 If so, then Factory Search might be the mod for you!
 
+Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where is it Made?](https://mods.factorio.com/mod/WhereIsItMade)
+
 -----
 ## Features
 
@@ -20,13 +22,14 @@ If so, then Factory Search might be the mod for you!
 - Displays results from all surfaces (e.g. all Space Exploration planets are searched)
 - Click on a result group to open it in the map
 - Opens results from other planets in the Navigation Satellite if using Space Exploration
+- Supports multiplayer
 
 -----
 ## Future Updates?
 
-- Option to search inventories (chests, cars, trains, etc)
+- Option to search inventories (chests, cars, trains, spidertrons, corpses, etc)
 - Temporary highlighting of the machines when you click to view them
-- 'Expanded' view, with inline cameras like the train overview GUI
+- 'Expanded' view, with inline cameras like the train overview GUI (not for many months…)
 
 -----
 Thank you to:
