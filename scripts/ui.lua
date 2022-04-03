@@ -270,10 +270,20 @@ event.on_gui_click(
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         local surface_name = tags.surface
+        local position = event.element.tags.FactorySearch.position
         if surface_name == player.surface.name then
-          player.zoom_to_world(event.element.tags.FactorySearch.position, 1.7)
+          player.zoom_to_world(position, 1.7)
         else
-          game.print("Different surface")
+          -- Try using Space Exploration's remote view
+          -- /c remote.call("space-exploration", "remote_view_start", {player=game.player, zone_name = "Nauvis", position={x=100,y=200}, location_name="Point of Interest", freeze_history=true})
+          if remote.interfaces["space-exploration"] then
+            if surface_name == "nauvis" then
+              surface_name = "Nauvis"
+            end
+            remote.call("space-exploration", "remote_view_start", {player=player, zone_name = surface_name, position=position})
+          else
+            game.print({"search-gui.wrong-surface"})
+          end
         end
       end
     end
