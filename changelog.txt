@@ -1,0 +1,12 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 3 April 2022
+  Features:
+    - Machines are temporarily highlighted with a green square when viewing their location in the map
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 3 April 2022
+  Features:
+    - 'Control + F' or press shortcut to open search interface
+    - Search for all machines producing a specified item or fluid
+    - Click on result group to open its location in map (or Navigation Satellite if using Space Exploration)

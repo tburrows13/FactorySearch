@@ -1,6 +1,13 @@
 local gui = require("__FactorySearch__.scripts.gui")
+local open_location = require "scripts.open_location"
 
-local ui = {}
+local function get_selection_boxes(group)
+  selection_boxes = {}
+  for i, entity in pairs(group.entities) do
+    selection_boxes[i] = entity.selection_box
+  end
+  return selection_boxes
+end
 
 local function build_surface_results(surface_name, surface_data)
   local gui_elements = {}
@@ -13,7 +20,7 @@ local function build_surface_results(surface_name, surface_data)
         tooltip = { "gui-train.open-in-map" },
         style = "slot_button",
         number = group.count,
-        tags = {position = group.avg_position, surface = surface_name},
+        tags = {position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group)},
         actions = { on_click = { gui = "search", action = "open_location_in_map" } },
       }
     )
@@ -147,8 +154,8 @@ local function build_gui(player)
                       mouse_button_filter = {"left"},
                       ref = { "item_select" },
                       style_mods = {
-                        minimal_width = 50,
-                        minimal_height = 50,
+                        minimal_width = 60,
+                        minimal_height = 60,
                       },
                       actions = {
                         on_elem_changed = { gui = "search", action = "item_selected" }
@@ -269,22 +276,7 @@ event.on_gui_click(
         close_gui(player, player_data)
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
-        local surface_name = tags.surface
-        local position = event.element.tags.FactorySearch.position
-        if surface_name == player.surface.name then
-          player.zoom_to_world(position, 1.7)
-        else
-          -- Try using Space Exploration's remote view
-          -- /c remote.call("space-exploration", "remote_view_start", {player=game.player, zone_name = "Nauvis", position={x=100,y=200}, location_name="Point of Interest", freeze_history=true})
-          if remote.interfaces["space-exploration"] then
-            if surface_name == "nauvis" then
-              surface_name = "Nauvis"
-            end
-            remote.call("space-exploration", "remote_view_start", {player=player, zone_name = surface_name, position=position})
-          else
-            game.print({"search-gui.wrong-surface"})
-          end
-        end
+        open_location(player, tags)
       end
     end
   end
