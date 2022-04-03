@@ -255,7 +255,7 @@ event.on_gui_elem_changed(
           --  local surface = game.get_surface(surface_index)
             --local recipe_data = surface_data[item]
             -- TODO
-          local data = find_machines(item.name, force.name)
+          local data = find_machines(item, force.name, true, true)
           player_data.refs.result_flow.clear()
           build_result_gui(data, player_data.refs.result_flow)
         end

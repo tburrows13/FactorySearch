@@ -23,6 +23,15 @@ local function draw_markers(player, surface, selection_boxes)
       time_to_live = 600,
       players = {player},
     }
+    --[[game.get_surface(surface).create_entity{
+      name = "highlight-box",
+      position = {0, 0},  -- Ignored by game
+      bounding_box = selection_box,
+      box_type = "copy",  -- Green
+      render_player_index = player.index,
+      time_to_live = 600,
+
+    }]]
   end
 end
 
