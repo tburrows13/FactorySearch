@@ -20,7 +20,7 @@ local function build_surface_results(surface_name, surface_data)
         type = "sprite-button",
         sprite = "entity/" .. group.entity_name,
         mouse_button_filter = { "left" },
-        tooltip = { "gui-train.open-in-map" },
+        tooltip = {  "", {"entity-name." .. group.entity_name}, "\n", {"gui-train.open-in-map"} },
         style = "slot_button",
         number = group.count,
         tags = {position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group)},
@@ -180,13 +180,21 @@ local function build_gui(player)
                       caption = "Producers",
                       tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill]"},
                       ref = { "include_machines" },
+                      actions = {
+                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                      }
+
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = "Storage",
                       tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=character-corpse][entity=car][entity=cargo-wagon][entity=spidertron]"},
-                      ref = { "include_inventories" }
+                      ref = { "include_inventories" },
+                      actions = {
+                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                      }
+
                     }
                     --[[{
                       type = "sprite-button",
@@ -263,6 +271,18 @@ local function toggle_gui(player, player_data)
   end
 end
 
+local function start_search(player, player_data)
+  local refs = player_data.refs
+  local elem_button = refs.item_select
+  local item = elem_button.elem_value
+  if item then
+    local force = player.force
+    local data = find_machines(item, force.name, refs.include_machines.state, refs.include_inventories.state)
+    player_data.refs.result_flow.clear()
+    build_result_gui(data, refs.result_flow, not (refs.include_machines.state or refs.include_inventories.state))
+  end
+end
+
 event.on_gui_elem_changed(
   function(event)
     local player = game.get_player(event.player_index)
@@ -271,19 +291,26 @@ event.on_gui_elem_changed(
     if action then
       local msg = action.action
       if msg == "item_selected" then
-        local refs = player_data.refs
-        local elem_button = refs.item_select
-        local item = elem_button.elem_value
-        if item then
-          local force = player.force
-          local data = find_machines(item, force.name, refs.include_machines.state, refs.include_inventories.state)
-          player_data.refs.result_flow.clear()
-          build_result_gui(data, refs.result_flow, not (refs.include_machines.state or refs.include_inventories.state))
-        end
+        start_search(player, player_data)
       end
     end
   end
 )
+
+event.on_gui_checked_state_changed(
+  function(event)
+    local player = game.get_player(event.player_index)
+    local player_data = global.players[event.player_index]
+    local action = gui.read_action(event)
+    if action then
+      local msg = action.action
+      if msg == "checkbox_toggled" then
+        start_search(player, player_data)
+      end
+    end
+  end
+)
+
 
 event.on_gui_click(
   function(event)
@@ -298,6 +325,8 @@ event.on_gui_click(
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         open_location(player, tags)
+      elseif msg == "checkbox_toggled" then
+        start_search(player, player_data)
       end
     end
   end
