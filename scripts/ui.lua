@@ -244,17 +244,10 @@ event.on_gui_elem_changed(
     if action then
       local msg = action.action
       if msg == "item_selected" then
-
         local elem_button = player_data.refs.item_select
         local item = elem_button.elem_value
         if item then
           local force = player.force
-          --local force_data = global.recipes[force.index]
-          -- Exception if only one surface
-          --for surface_index, surface_data in pairs(force_data) do
-          --  local surface = game.get_surface(surface_index)
-            --local recipe_data = surface_data[item]
-            -- TODO
           local data = find_machines(item, force.name, true, true)
           player_data.refs.result_flow.clear()
           build_result_gui(data, player_data.refs.result_flow)
