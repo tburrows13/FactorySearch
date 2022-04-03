@@ -23,6 +23,10 @@ end
 
 local function build_surface_name(include_surface_name, surface_name)
   if include_surface_name then
+    if surface_name == "nauvis" then
+      -- Space Exploration capitilises all other planet names, so do Nauvis for consistency
+      surface_name = "Nauvis"
+    end
     return  {
       type = "label",
       caption = surface_name,

@@ -2,9 +2,25 @@ math2d = require "__core__.lualib.math2d"
 
 local group_gap_size = 16
 
+local function filtered_surfaces()
+  local surfaces = {}
+  for _, surface in pairs(game.surfaces) do
+    local surface_name = surface.name
+    if string.sub(surface_name, -12) ~= "-transformer"  -- Power Overload
+        and string.sub(surface_name, 0, 8) ~= "starmap-"  -- Space Exploration
+        and string.sub(surface_name, 0, 6) ~= "Vault "    -- Space Exploration
+        and surface_name ~= "beltlayer"  -- Beltlayer
+        and surface_name ~= "pipelayer"  -- Pipelayer
+      then
+      table.insert(surfaces, surface)
+    end
+  end
+  return surfaces
+end
+
 function find_machines(target_item, force)
   local data = {}
-  for _, surface in pairs(game.surfaces) do
+  for _, surface in pairs(filtered_surfaces()) do
     -- TODO filter surfaces to avoid 'fake' ones ('-transformer')
     surface_data = {}
     entities = surface.find_entities_filtered{
