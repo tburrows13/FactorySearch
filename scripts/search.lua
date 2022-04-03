@@ -40,13 +40,13 @@ function find_machines(target_item, force)
           local name = product.name
           if name == target_item then
             -- Group entities
-            -- Group contains count, avg_position, bounding_box, entity_name, entities
+            -- Group contains count, avg_position, selection_box, entity_name, entities
             local entity_name = entity.name
             local entity_position = entity.position
-            local entity_bounding_box = entity.bounding_box
+            local entity_selection_box = entity.selection_box
             local assigned_to_group = false
             for _, group in pairs(surface_data) do
-              if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_bounding_box, group.bounding_box) then
+              if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_selection_box, group.selection_box) then
                 -- Add entity to group
                 assigned_to_group = true
                 count = group.count
@@ -55,14 +55,14 @@ function find_machines(target_item, force)
                   x = (group.avg_position.x * count + entity_position.x) / new_count,
                   y = (group.avg_position.y * count + entity_position.y) / new_count,
                 }
-                group.bounding_box = {
+                group.selection_box = {
                   left_top = {
-                    x = math.min(group.bounding_box.left_top.x + group_gap_size, entity_bounding_box.left_top.x) - group_gap_size,
-                    y = math.min(group.bounding_box.left_top.y + group_gap_size, entity_bounding_box.left_top.y) - group_gap_size,
+                    x = math.min(group.selection_box.left_top.x + group_gap_size, entity_selection_box.left_top.x) - group_gap_size,
+                    y = math.min(group.selection_box.left_top.y + group_gap_size, entity_selection_box.left_top.y) - group_gap_size,
                   },
                   right_bottom = {
-                    x = math.max(group.bounding_box.right_bottom.x - group_gap_size, entity_bounding_box.right_bottom.x) + group_gap_size,
-                    y = math.max(group.bounding_box.right_bottom.y - group_gap_size, entity_bounding_box.right_bottom.y) + group_gap_size,
+                    x = math.max(group.selection_box.right_bottom.x - group_gap_size, entity_selection_box.right_bottom.x) + group_gap_size,
+                    y = math.max(group.selection_box.right_bottom.y - group_gap_size, entity_selection_box.right_bottom.y) + group_gap_size,
                   },
                 }
                 group.count = new_count
@@ -75,14 +75,14 @@ function find_machines(target_item, force)
               table.insert(surface_data, {
                 count = 1,
                 avg_position = entity_position,
-                bounding_box = {
+                selection_box = {
                   left_top = {
-                    x = entity_bounding_box.left_top.x - group_gap_size,
-                    y = entity_bounding_box.left_top.y - group_gap_size,
+                    x = entity_selection_box.left_top.x - group_gap_size,
+                    y = entity_selection_box.left_top.y - group_gap_size,
                   },
                   right_bottom = {
-                    x = entity_bounding_box.right_bottom.x + group_gap_size,
-                    y = entity_bounding_box.right_bottom.y + group_gap_size,
+                    x = entity_selection_box.right_bottom.x + group_gap_size,
+                    y = entity_selection_box.right_bottom.y + group_gap_size,
                   }
                 },
                 entity_name = entity_name,
