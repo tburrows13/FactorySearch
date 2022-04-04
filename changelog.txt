@@ -1,7 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
-Date: 3 April 2022
+Date: 4 April 2022
   Features:
+    - Added option to search for specified item in all entities with inventory (containers, vehicles, etc)
+    - Added mining drills, pumpjacks, and water pumps to production entity list
     - Machines are temporarily highlighted with a green square when viewing their location in the map
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0

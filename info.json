@@ -1,9 +1,9 @@
 {
     "name": "FactorySearch",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "title": "Factory Search",
     "author": "Xorimuth",
-    "description": "Search your factory for machines producing a specific item with Control + F. Click on a result to view it in the map. Supports Space Exploration (works across all surfaces).\nSimilar to BeastFinder and Where is it Made?",
+    "description": "Search your factory with Control + F. Returns a list of buildings that produce or contain that item, then click on a result to view it in the map. Supports Space Exploration (works across all surfaces).\nSimilar to BeastFinder and Where is it Made?",
     "factorio_version": "1.1",
     "dependencies": ["base"],
     "package": {
