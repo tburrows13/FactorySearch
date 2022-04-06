@@ -252,6 +252,7 @@ local function open_gui(player, player_data)
   local refs = player_data.refs
   player.opened = refs.frame
   refs.frame.visible = true
+  refs.frame.bring_to_front()
   player.set_shortcut_toggled("search-factory", true)
 end
 
