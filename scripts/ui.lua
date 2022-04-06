@@ -18,7 +18,7 @@ local function build_surface_results(surface_name, surface_data)
           type = "sprite-button",
           sprite = "entity/" .. entity_name,
           mouse_button_filter = { "left" },
-          tooltip = {  "", {"entity-name." .. entity_name}, "\n", {"gui-train.open-in-map"} },
+          tooltip = {  "", group.localised_name, "\n", {"gui-train.open-in-map"} },
           style = "slot_button",
           number = group.count,
           tags = {position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group)},

@@ -128,6 +128,7 @@ local function add_entity(entity, surface_data)
       },
       entity_name = entity_name,
       entities = {entity},
+      localised_name = entity.localised_name,
     })
   end
   surface_data[entity_name] = entity_surface_data
