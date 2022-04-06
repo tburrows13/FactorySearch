@@ -6,6 +6,8 @@ Date: ???
     - Fixed crash when unchecking both search checkboxes
     - Fixed 'No results found' warning not appearing when the search results are empty
     - Search result GUI now uses correct styles
+  Locale:
+    - Added complete German translations (thanks Anders142536 on Crowdin!)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 4 April 2022
