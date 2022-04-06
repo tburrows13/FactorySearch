@@ -84,18 +84,18 @@ local function build_result_gui(data, frame, no_checkboxes)
       {
         type = "frame",
         direction = "vertical",
-        style = "inside_deep_frame",
+        style = "slot_button_deep_frame",
         children = {
           {
             type = "table",
             column_count = 8,
-            style = "map_view_options_table",
+            style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.producers)
           },
           {
             type = "table",
             column_count = 8,
-            style = "map_view_options_table",
+            style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.storage)
           }
         }
@@ -177,8 +177,8 @@ local function build_gui(player)
                       mouse_button_filter = {"left"},
                       ref = { "item_select" },
                       style_mods = {
-                        minimal_width = 60,
-                        minimal_height = 60,
+                        width = 80,
+                        height = 80,
                       },
                       actions = {
                         on_elem_changed = { gui = "search", action = "item_selected" }
