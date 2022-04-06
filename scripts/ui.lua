@@ -188,7 +188,7 @@ local function build_gui(player)
                       type = "checkbox",
                       state = true,
                       caption = "Producers",
-                      tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill]"},
+                      tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill][entity=pumpjack]"},
                       ref = { "include_machines" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
@@ -199,7 +199,7 @@ local function build_gui(player)
                       type = "checkbox",
                       state = false,
                       caption = "Storage",
-                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=character-corpse][entity=car][entity=cargo-wagon][entity=spidertron]"},
+                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon]"},
                       ref = { "include_inventories" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
