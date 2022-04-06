@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
-Date: ???
+Date: 6 April 2022
   Bugfixes:
     - Fixed highlight boxes not rotating with rotatable entities (e.g. cars, trains)
     - Fixed crash when unchecking both search checkboxes
