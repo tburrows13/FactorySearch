@@ -5,9 +5,6 @@ local function get_selection_boxes(group)
   selection_boxes = {}
   for i, entity in pairs(group.entities) do
     selection_boxes[i] = entity.selection_box
-    --[[if entity.supports_direction then
-      selection_boxes[i].orientation = entity.orientation
-    end]]
   end
   return selection_boxes
 end

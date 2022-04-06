@@ -1,3 +1,11 @@
+local add_vector = math2d.position.add
+local subtract_vector = math2d.position.subtract
+local rotate_vector = math2d.position.rotate_vector
+
+local LINE_COLOR = { r = 0, g = 0.9, b = 0, a = 1 }
+local LINE_WIDTH = 4
+local HALF_WIDTH = (LINE_WIDTH / 2) / 32  -- 32 pixels per tile
+
 local function draw_markers(player, surface, selection_boxes)
   -- Clear all old markers belonging to player
   if #game.players == 1 then
@@ -13,24 +21,43 @@ local function draw_markers(player, surface, selection_boxes)
 
   -- Draw new markers
   for _, selection_box in pairs(selection_boxes) do
-    --[[if selection_box.orientation then
-      rendering.draw_polygon{
-        color = { r = 0, g = 0.9, b = 0, a = 0.9 },
-        width = 4,
-        filled = false,
-        --target = game.players[1].character,
-        vertices = {{target = selection_box.left_top}, {target = {selection_box.left_top.x, selection_box.right_bottom.y}}, {target=selection_box.right_bottom}, {target={selection_box.right_bottom.x, selection_box.left_top.y}}},
-        --[[left_top = selection_box.left_top,
-        right_bottom = selection_box.right_bottom,
-        orientation = selection_box.orientation,
-        surface = surface,
-        time_to_live = 600,
-        players = {player},
+    if selection_box.orientation then
+      local angle = selection_box.orientation * 360
+
+      -- Four corners
+      local left_top = selection_box.left_top
+      local right_bottom = selection_box.right_bottom
+      local right_top = {x = right_bottom.x, y = left_top.y}
+      local left_bottom = {x = left_top.x, y = right_bottom.y}
+
+      -- Extend the end of each line by HALF_WIDTH so that corners are still right angles despite `width`
+      local lines = {
+        {from = {x = left_top.x - HALF_WIDTH, y = left_top.y}, to = {x = right_top.x + HALF_WIDTH, y = right_top.y}},  -- Top
+        {from = {x = left_bottom.x - HALF_WIDTH, y = left_bottom.y}, to = {x = right_bottom.x + HALF_WIDTH, y = right_bottom.y}},  -- Bottom
+        {from = {x = left_top.x, y = left_top.y - HALF_WIDTH}, to = {x = left_bottom.x, y = left_bottom.y + HALF_WIDTH}},  -- Left
+        {from = {x = right_top.x, y = right_top.y - HALF_WIDTH}, to = {x = right_bottom.x, y = right_bottom.y + HALF_WIDTH}},  -- Right
       }
-    else]]
+
+      local center = {x = (left_top.x + right_bottom.x) / 2, y = (left_top.y + right_bottom.y) / 2}
+      for _, line in pairs(lines) do
+        -- Translate each point to origin, rotate, then translate back
+        local rotated_from = add_vector(rotate_vector(subtract_vector(line.from, center), angle), center)
+        local rotated_to = add_vector(rotate_vector(subtract_vector(line.to, center), angle), center)
+
+        rendering.draw_line{
+          color = LINE_COLOR,
+          width = LINE_WIDTH,
+          from = rotated_from,
+          to = rotated_to,
+          surface = surface,
+          time_to_live = 600,
+          players = {player},
+        }
+      end
+    else
       rendering.draw_rectangle{
-        color = { r = 0, g = 0.9, b = 0, a = 0.9 },
-        width = 4,
+        color = LINE_COLOR,
+        width = LINE_WIDTH,
         filled = false,
         left_top = selection_box.left_top,
         right_bottom = selection_box.right_bottom,
@@ -38,7 +65,7 @@ local function draw_markers(player, surface, selection_boxes)
         time_to_live = 600,
         players = {player},
       }
-    --end
+    end
     --[[game.get_surface(surface).create_entity{
       name = "highlight-box",
       position = {0, 0},  -- Ignored by game
