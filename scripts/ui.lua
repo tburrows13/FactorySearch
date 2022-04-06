@@ -103,7 +103,7 @@ local function build_result_gui(data, frame, no_checkboxes)
     })
   end
 
-  if result_found == 0 then
+  if not result_found then
     frame.clear()
     gui.build(frame, {
       {

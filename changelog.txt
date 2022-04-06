@@ -4,6 +4,7 @@ Date: ???
   Bugfixes:
     - Fixed highlight boxes not rotating with rotatable entities (e.g. cars, trains)
     - Fixed crash when unchecking both search checkboxes
+    - Fixed 'No results found' warning not appearing when the search results are empty
     - Search result GUI now uses correct styles
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
