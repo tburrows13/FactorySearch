@@ -59,6 +59,7 @@ local function build_result_gui(data, frame, no_checkboxes)
         caption = {"search-gui.incorrect-config"}
       }
     })
+    return
   end
 
   local include_surface_name = false
