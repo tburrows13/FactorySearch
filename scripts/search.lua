@@ -137,7 +137,7 @@ end
 function find_machines(target_item, force, search_products, search_inventories)
   local data = {}
   if target_item.type == "virtual" or not (search_products or search_inventories) then
-    return {{}}
+    return {{producers = {}, storage = {}}}
   end
   for _, surface in pairs(filtered_surfaces()) do
     -- TODO filter surfaces to avoid 'fake' ones ('-transformer')
