@@ -27,7 +27,14 @@ Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where i
 -----
 ## Future Updates?
 
+- Other search modes:
+    - Requesters
+    - Items on ground
+    - Entities
+    - Ingredients?
+    - Map tags?
 - Scroll bar when too many results
+- Pin button like in [Recipe Book](https://mods.factorio.com/mod/RecipeBook) and [Task List](https://mods.factorio.com/mod/TaskList)
 - 'Expanded' view, with inline cameras like the train overview GUI (not for many months…)
 
 -----

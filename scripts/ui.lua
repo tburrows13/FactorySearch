@@ -77,7 +77,7 @@ local function build_result_gui(data, frame, no_checkboxes)
     local surface_contains_results = next(surface_data.producers) or next(surface_data.storage)
     result_found = result_found or surface_contains_results
     if not surface_contains_results then
-      break
+      goto continue
     end
     gui.build(frame, {
       build_surface_name(include_surface_name, surface_name),
@@ -101,6 +101,7 @@ local function build_result_gui(data, frame, no_checkboxes)
         }
       }
     })
+    ::continue::
   end
 
   if not result_found then

@@ -140,7 +140,6 @@ function find_machines(target_item, force, search_products, search_inventories)
     return {{producers = {}, storage = {}}}
   end
   for _, surface in pairs(filtered_surfaces()) do
-    -- TODO filter surfaces to avoid 'fake' ones ('-transformer')
     local surface_data = {producers = {}, storage = {},}
     local entities = surface.find_entities_filtered{
       type = entity_types(target_item.type, search_products, search_inventories),
@@ -148,6 +147,7 @@ function find_machines(target_item, force, search_products, search_inventories)
       to_be_deconstructed = false,
     }
     if search_inventories and target_item.type == "item" then
+      -- Corpses don't have a force
       local corpses = surface.find_entities_filtered{
         type = "character-corpse",
       }

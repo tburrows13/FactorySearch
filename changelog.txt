@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.5
+Date: 7 April 2022
+  Bugfixes:
+    - Fixed not showing results from all planets if some planets had no results
+---------------------------------------------------------------------------------------------------
 Version: 1.1.4
 Date: 7 April 2022
   Changes:
