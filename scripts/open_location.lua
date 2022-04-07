@@ -50,7 +50,7 @@ local function draw_markers(player, surface, selection_boxes)
           from = rotated_from,
           to = rotated_to,
           surface = surface,
-          time_to_live = 600,
+          time_to_live = 1200,
           players = {player},
         }
       end
@@ -62,7 +62,7 @@ local function draw_markers(player, surface, selection_boxes)
         left_top = selection_box.left_top,
         right_bottom = selection_box.right_bottom,
         surface = surface,
-        time_to_live = 600,
+        time_to_live = 1200,
         players = {player},
       }
     end
@@ -85,6 +85,7 @@ local function open_location(player, data)
     player.zoom_to_world(position, 1.7)
     draw_markers(player, surface_name, data.selection_boxes)
   else
+    draw_markers(player, surface_name, data.selection_boxes)
     -- Try using Space Exploration's remote view
     -- /c remote.call("space-exploration", "remote_view_start", {player=game.player, zone_name = "Nauvis", position={x=100,y=200}, location_name="Point of Interest", freeze_history=true})
     if remote.interfaces["space-exploration"] then
@@ -92,7 +93,6 @@ local function open_location(player, data)
         surface_name = "Nauvis"
       end
       remote.call("space-exploration", "remote_view_start", {player=player, zone_name = surface_name, position=position})
-      draw_markers(player, surface_name, data.selection_boxes)
     else
       game.print({"search-gui.wrong-surface"})
     end

@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.3
+Date: 7 April 2022
+  Changes:
+    - Increased highlight box duration from 10s to 20s
+  Bugfixes:
+    - Fixed crash when viewing a search result on Nauvis from a different planet (with Space Exploration)
+---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Date: 7 April 2022
   Bugfixes:
