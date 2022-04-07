@@ -1,6 +1,6 @@
 {
     "name": "FactorySearch",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "title": "Factory Search",
     "author": "Xorimuth",
     "description": "Search for items and fluids in your factory with Control + F. Returns a list of buildings that produce or contain that item, then click on a result to view it in the map. Supports Space Exploration (works across all surfaces).\nSimilar to BeastFinder and Where is it Made?",

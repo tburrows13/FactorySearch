@@ -62,12 +62,12 @@ local function entity_types(item_type, include_products, include_inventories)
 end
 
 local function filtered_surfaces()
+  -- Skip certain modded surfaces that won't have assemblers/chests placed on them
   local surfaces = {}
   for _, surface in pairs(game.surfaces) do
     local surface_name = surface.name
     if string.sub(surface_name, -12) ~= "-transformer"  -- Power Overload
         and string.sub(surface_name, 0, 8) ~= "starmap-"  -- Space Exploration
-        and string.sub(surface_name, 0, 6) ~= "Vault "    -- Space Exploration
         and surface_name ~= "beltlayer"  -- Beltlayer
         and surface_name ~= "pipelayer"  -- Pipelayer
       then
