@@ -15,7 +15,7 @@ Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where i
 -----
 ## Features
 
-- Press `Control + F` to open search interface
+- Press `Control + Shift + F` to open search interface (can be changed in Settings > Controls)
 - Select any item or fluid
 - Factory Search will present a list of machines that produce that item and inventories that contain that item
 - Machines are grouped by name and proximity

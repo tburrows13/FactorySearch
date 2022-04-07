@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.4
+Date: 7 April 2022
+  Changes:
+    - Changed default keybind from 'Control + F' to 'Control + Shift + F' to avoid collision with vanilla search keybind on Windows
+---------------------------------------------------------------------------------------------------
 Version: 1.1.3
 Date: 7 April 2022
   Changes:
