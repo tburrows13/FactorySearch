@@ -57,8 +57,8 @@ local entity_table = {
     }
   }
 }
-local function entity_types(item_type, include_products, include_inventories)
-  return entity_table[include_products][include_inventories][item_type]
+local function entity_types(item_type, state)
+  return entity_table[state.producers][state.storage][item_type]
 end
 
 local function filtered_surfaces()
@@ -70,6 +70,7 @@ local function filtered_surfaces()
         and string.sub(surface_name, 0, 8) ~= "starmap-"  -- Space Exploration
         and surface_name ~= "beltlayer"  -- Beltlayer
         and surface_name ~= "pipelayer"  -- Pipelayer
+        -- TODO AAI signals?
       then
       table.insert(surfaces, surface)
     end
@@ -134,61 +135,68 @@ local function add_entity(entity, surface_data)
   surface_data[entity_name] = entity_surface_data
 end
 
-function find_machines(target_item, force, search_products, search_inventories)
+function find_machines(target_item, force, state)
   local data = {}
-  if target_item.type == "virtual" or not (search_products or search_inventories) then
-    return {{producers = {}, storage = {}}}
-  end
   for _, surface in pairs(filtered_surfaces()) do
-    local surface_data = {producers = {}, storage = {},}
-    local entities = surface.find_entities_filtered{
-      type = entity_types(target_item.type, search_products, search_inventories),
-      force = force,
-      to_be_deconstructed = false,
-    }
-    if search_inventories and target_item.type == "item" then
-      -- Corpses don't have a force
-      local corpses = surface.find_entities_filtered{
-        type = "character-corpse",
+    local surface_data = {producers = {}, storage = {}, entities = {}}
+    if state.producers or state.storage then
+      local entities = surface.find_entities_filtered{
+        type = entity_types(target_item.type, state),
+        force = force,
       }
-      extend(entities, corpses)
-    end
-
-    for _, entity in pairs(entities) do
-      local recipe
-      local entity_type = entity.type
-      if entity_type == "assembling-machine" then
-        recipe = entity.get_recipe()
-      elseif entity_type == "furnace" then
-        -- Even if the furnace has stopped smelting, this records the last item it was smelting
-        recipe = entity.previous_recipe
-      elseif entity_type == "mining-drill" then
-        local mining_target = entity.mining_target
-        if mining_target and mining_target.name == target_item.name then
-          add_entity(entity, surface_data.producers)
-        end
-      elseif target_item.type == "fluid" and entity_type == "offshore-pump" then
-        if entity.get_fluid_count(target_item.name) > 0 then
-          add_entity(entity, surface_data.producers)
-        end
-      elseif target_item.type == "fluid" and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
-        if entity.get_fluid_count(target_item.name) > 0 then
-          add_entity(entity, surface_data.storage)
-        end
-      elseif target_item.type == "item" then
-        -- Entity is an inventory entity
-        if entity.get_item_count(target_item.name) > 0 then
-          add_entity(entity, surface_data.storage)
-        end
+      if state.storage and target_item.type == "item" then
+        -- Corpses don't have a force
+        local corpses = surface.find_entities_filtered{
+          type = "character-corpse",
+        }
+        extend(entities, corpses)
       end
-      if recipe then
-        local products = recipe.products
-        for _, product in pairs(products) do
-          local name = product.name
-          if name == target_item.name then
+
+      for _, entity in pairs(entities) do
+        local recipe
+        local entity_type = entity.type
+        if entity_type == "assembling-machine" then
+          recipe = entity.get_recipe()
+        elseif entity_type == "furnace" then
+          -- Even if the furnace has stopped smelting, this records the last item it was smelting
+          recipe = entity.previous_recipe
+        elseif entity_type == "mining-drill" then
+          local mining_target = entity.mining_target
+          if mining_target and mining_target.name == target_item.name then
             add_entity(entity, surface_data.producers)
           end
+        elseif target_item.type == "fluid" and entity_type == "offshore-pump" then
+          if entity.get_fluid_count(target_item.name) > 0 then
+            add_entity(entity, surface_data.producers)
+          end
+        elseif target_item.type == "fluid" and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
+          if entity.get_fluid_count(target_item.name) > 0 then
+            add_entity(entity, surface_data.storage)
+          end
+        elseif target_item.type == "item" then
+          -- Entity is an inventory entity
+          if entity.get_item_count(target_item.name) > 0 then
+            add_entity(entity, surface_data.storage)
+          end
         end
+        if recipe then
+          local products = recipe.products
+          for _, product in pairs(products) do
+            local name = product.name
+            if name == target_item.name then
+              add_entity(entity, surface_data.producers)
+            end
+          end
+        end
+      end
+    end
+    if state.entities then
+      local entities = surface.find_entities_filtered{
+        name = target_item.name,
+        force = force,
+      }
+      for _, entity in pairs(entities) do
+        add_entity(entity, surface_data.entities)
       end
     end
     data[surface.name] = surface_data
