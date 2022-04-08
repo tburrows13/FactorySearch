@@ -92,37 +92,37 @@ local function build_result_gui(data, frame, state_valid)
         children = {
           {
             type = "table",
-            column_count = 8,
+            column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.producers)
           },
           {
             type = "table",
-            column_count = 8,
+            column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.storage)
           },
           {
             type = "table",
-            column_count = 8,
+            column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.requesters)
           },
           {
             type = "table",
-            column_count = 8,
+            column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.ground_items)
           },
           {
             type = "table",
-            column_count = 8,
+            column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.entities)
           },
           {
             type = "table",
-            column_count = 8,
+            column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.signals)
           },
@@ -152,6 +152,7 @@ local function build_gui(player)
       direction = "vertical",
       visible = true,
       ref = { "frame" },
+      style_mods = { maximal_height = 800 },
       actions = {
         on_closed = { gui = "search", action = "close" },
         on_location_changed = { gui = "search", action = "update_dimmer_location" },
@@ -187,7 +188,6 @@ local function build_gui(player)
         {
           type = "frame",
           style = "inside_shallow_frame_with_padding",
-          --style_mods = { horizontal_spacing = 8 },
           direction = "horizontal",
           children = {
             {
@@ -286,13 +286,22 @@ local function build_gui(player)
                   },
                 },
                 {
-                  type = "flow",
-                  ref = { "result_flow" },
-                  direction = "vertical",
+                  type = "scroll-pane",
+                  style = "naked_scroll_pane",
+                  horizontal_scroll_policy = "never",
+                  vertical_scroll_policy = "auto-and-reserve-space",
+                  style_mods = { right_padding = -12, extra_margin_when_activated = -12, extra_padding_when_activated = 12},-- extra_top_margin_when_activated = -12, extra_bottom_margin_when_activated = -12, extra_right_margin_when_activated = -12 },
                   children = {
                     {
-                      type = "label",
-                      caption = {"search-gui.explanation"},
+                      type = "flow",
+                      ref = { "result_flow" },
+                      direction = "vertical",
+                      children = {
+                        {
+                          type = "label",
+                          caption = {"search-gui.explanation"},
+                        }
+                      }
                     }
                   }
                 }
