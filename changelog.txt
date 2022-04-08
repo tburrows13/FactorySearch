@@ -4,6 +4,7 @@ Date: ???
   Features:
     - Added 'Entities' search option to search for built entities of that item
     - Added 'Ground' search option to search for the item on the ground
+    - Added 'Signals' search option to search for entities emitting that signal (mod API is limited so doesn't support all entities)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Date: 7 April 2022

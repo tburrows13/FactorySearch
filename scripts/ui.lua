@@ -48,7 +48,7 @@ local function build_surface_name(include_surface_name, surface_name)
 
 end
 
-local function build_result_gui(data, frame, state_valid, type_valid)
+local function build_result_gui(data, frame, state_valid)
   frame.clear()
 
   if not state_valid then
@@ -62,16 +62,6 @@ local function build_result_gui(data, frame, state_valid, type_valid)
     return
   end
 
-  if not type_valid then
-    gui.build(frame, {
-      {
-        type = "label",
-        style_mods = { font_color = {1, 0, 0, 1} },
-        caption = {"search-gui.incorrect-type"}
-      }
-    })
-    return
-  end
 
   local include_surface_name = false
   local surface_count = 0
@@ -85,7 +75,10 @@ local function build_result_gui(data, frame, state_valid, type_valid)
 
   local result_found = false
   for surface_name, surface_data in pairs(data) do
-    local surface_contains_results = not not (next(surface_data.producers) or next(surface_data.storage) or next(surface_data.entities))
+    local surface_contains_results = false
+    for _, category_data in pairs(surface_data) do
+      surface_contains_results = surface_contains_results or not not next(category_data)
+    end
     result_found = result_found or surface_contains_results
     if not surface_contains_results then
       goto continue
@@ -120,6 +113,12 @@ local function build_result_gui(data, frame, state_valid, type_valid)
             column_count = 8,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.entities)
+          },
+          {
+            type = "table",
+            column_count = 8,
+            style = "logistics_slot_table",
+            children = build_surface_results(surface_name, surface_data.signals)
           },
         }
       }
@@ -249,6 +248,16 @@ local function build_gui(player)
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                       }
                     },
+                    {
+                      type = "checkbox",
+                      state = false,
+                      caption = {"search-gui.signals-name"},
+                      tooltip = {"search-gui.signals-tooltip", "[entity=decider-combinator][entity=arithmetic-combinator][entity=constant-combinator][entity=roboport][entity=train-stop][entity=rail-signal][entity=rail-chain-signal][entity=accumulator][entity=stone-wall]"},
+                      ref = { "include_signals" },
+                      actions = {
+                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                      }
+                    },
                     --[[{
                       type = "sprite-button",
                       style = "slot_sized_button",
@@ -331,6 +340,7 @@ local function generate_state(refs)
     storage = refs.include_inventories.state,
     ground_items = refs.include_ground_items.state,
     entities = refs.include_entities.state,
+    signals = refs.include_signals.state,
   }
 end
 
@@ -350,12 +360,11 @@ local function start_search(player, player_data)
     local force = player.force
     local state = generate_state(refs)
     local state_valid = is_valid_state(state)
-    local type_valid = item.type ~= "virtual"
     local data
-    if state_valid and type_valid then
+    if state_valid then
       data = find_machines(item, force.name, state)
     end
-    build_result_gui(data, refs.result_flow, state_valid, type_valid)
+    build_result_gui(data, refs.result_flow, state_valid)
   end
 end
 

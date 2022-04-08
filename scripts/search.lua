@@ -1,4 +1,5 @@
 math2d = require "__core__.lualib.math2d"
+search_signals = require "__FactorySearch__.scripts.search-signals"
 
 local group_gap_size = 16
 
@@ -79,7 +80,7 @@ local function filtered_surfaces()
 end
 
 
-local function add_entity(entity, surface_data)
+function add_entity(entity, surface_data)
   -- Group entities
   -- Group contains count, avg_position, selection_box, entity_name, entities
   local entity_name = entity.name
@@ -139,7 +140,10 @@ function find_machines(target_item, force, state)
   local data = {}
   local target_name = target_item.name
   for _, surface in pairs(filtered_surfaces()) do
-    local surface_data = { producers = {}, storage = {}, entities = {}, ground_items = {} }
+    local surface_data = { producers = {}, storage = {}, ground_items = {}, entities = {}, signals = {} }
+    if state.signals then
+      search_signals(target_item, force, surface, surface_data)
+    end
     if state.producers or state.storage then
       local entities = surface.find_entities_filtered{
         type = entity_types(target_item.type, state),
