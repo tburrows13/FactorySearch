@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: ???
+  Features:
+    - Added 'Entities' search option to search for built entities of that item
+    - Added 'Ground' search option to search for the item on the ground
+---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Date: 7 April 2022
   Bugfixes:

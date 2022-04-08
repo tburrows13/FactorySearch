@@ -137,8 +137,9 @@ end
 
 function find_machines(target_item, force, state)
   local data = {}
+  local target_name = target_item.name
   for _, surface in pairs(filtered_surfaces()) do
-    local surface_data = {producers = {}, storage = {}, entities = {}}
+    local surface_data = { producers = {}, storage = {}, entities = {}, ground_items = {} }
     if state.producers or state.storage then
       local entities = surface.find_entities_filtered{
         type = entity_types(target_item.type, state),
@@ -162,20 +163,20 @@ function find_machines(target_item, force, state)
           recipe = entity.previous_recipe
         elseif entity_type == "mining-drill" then
           local mining_target = entity.mining_target
-          if mining_target and mining_target.name == target_item.name then
+          if mining_target and mining_target.name == target_name then
             add_entity(entity, surface_data.producers)
           end
         elseif target_item.type == "fluid" and entity_type == "offshore-pump" then
-          if entity.get_fluid_count(target_item.name) > 0 then
+          if entity.get_fluid_count(target_name) > 0 then
             add_entity(entity, surface_data.producers)
           end
         elseif target_item.type == "fluid" and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
-          if entity.get_fluid_count(target_item.name) > 0 then
+          if entity.get_fluid_count(target_name) > 0 then
             add_entity(entity, surface_data.storage)
           end
         elseif target_item.type == "item" then
           -- Entity is an inventory entity
-          if entity.get_item_count(target_item.name) > 0 then
+          if entity.get_item_count(target_name) > 0 then
             add_entity(entity, surface_data.storage)
           end
         end
@@ -183,16 +184,27 @@ function find_machines(target_item, force, state)
           local products = recipe.products
           for _, product in pairs(products) do
             local name = product.name
-            if name == target_item.name then
+            if name == target_name then
               add_entity(entity, surface_data.producers)
             end
           end
         end
       end
     end
+    if state.ground_items then
+      local entities = surface.find_entities_filtered{
+        type = "item-entity",
+        name = "item-on-ground",
+      }
+      for _, entity in pairs(entities) do
+        if entity.stack.name == target_name then
+          add_entity(entity, surface_data.ground_items)
+        end
+      end
+    end
     if state.entities then
       local entities = surface.find_entities_filtered{
-        name = target_item.name,
+        name = target_name,
         force = force,
       }
       for _, entity in pairs(entities) do

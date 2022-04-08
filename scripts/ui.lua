@@ -113,6 +113,12 @@ local function build_result_gui(data, frame, state_valid, type_valid)
             type = "table",
             column_count = 8,
             style = "logistics_slot_table",
+            children = build_surface_results(surface_name, surface_data.ground_items)
+          },
+          {
+            type = "table",
+            column_count = 8,
+            style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.entities)
           },
         }
@@ -217,8 +223,18 @@ local function build_gui(player)
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.storage-name"},
-                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon]"},
+                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
                       ref = { "include_inventories" },
+                      actions = {
+                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                      }
+                    },
+                    {
+                      type = "checkbox",
+                      state = false,
+                      caption = {"search-gui.ground-items-name"},
+                      tooltip = {"search-gui.ground-items-tooltip"},
+                      ref = { "include_ground_items" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                       }
@@ -313,6 +329,7 @@ local function generate_state(refs)
   return {
     producers = refs.include_machines.state,
     storage = refs.include_inventories.state,
+    ground_items = refs.include_ground_items.state,
     entities = refs.include_entities.state,
   }
 end
@@ -381,6 +398,7 @@ event.on_gui_click(
       local msg = action.action
       if msg == "close" then
         close_gui(player, player_data)
+        destroy_gui(player, player_data)
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         open_location(player, tags)
