@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.0
+Date: 8 April 2022
+  Features:
+    - Added 'Request' search option to search for logistic containers requesting the item
+---------------------------------------------------------------------------------------------------
 Version: 1.2.0
 Date: 8 April 2022
   Features:

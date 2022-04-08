@@ -140,7 +140,7 @@ function find_machines(target_item, force, state)
   local data = {}
   local target_name = target_item.name
   for _, surface in pairs(filtered_surfaces()) do
-    local surface_data = { producers = {}, storage = {}, ground_items = {}, entities = {}, signals = {} }
+    local surface_data = { producers = {}, storage = {}, requesters = {}, ground_items = {}, entities = {}, signals = {} }
     if state.signals then
       search_signals(target_item, force, surface, surface_data)
     end
@@ -191,6 +191,41 @@ function find_machines(target_item, force, state)
             if name == target_name then
               add_entity(entity, surface_data.producers)
             end
+          end
+        end
+      end
+    end
+    if state.requesters then
+      local entities = surface.find_entities_filtered{
+        type = { "logistic-container", "character", "spider-vehicle", "item-request-proxy" } ,
+        force = force,
+      }
+      for _, entity in pairs(entities) do
+        -- Buffer and Requester chests
+        if entity.type == "logistic-container" then
+          for i=1, entity.request_slot_count do
+            local request = entity.get_request_slot(i)
+            if request and request.name == target_name then
+              add_entity(entity, surface_data.requesters)
+            end
+          end
+        elseif entity.type == "character" then
+          for i=1, entity.request_slot_count do
+            local request = entity.get_personal_logistic_slot(i)
+            if request and request.name == target_name then
+              add_entity(entity, surface_data.requesters)
+            end
+          end
+        elseif entity.type == "spider-vehicle" then
+          for i=1, entity.request_slot_count do
+            local request = entity.get_vehicle_logistic_slot(i)
+            if request and request.name == target_name then
+              add_entity(entity, surface_data.requesters)
+            end
+          end
+        else
+          if entity.item_requests[target_name] ~= nil then
+            add_entity(entity.proxy_target, surface_data.requesters)
           end
         end
       end

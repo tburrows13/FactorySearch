@@ -106,6 +106,12 @@ local function build_result_gui(data, frame, state_valid)
             type = "table",
             column_count = 8,
             style = "logistics_slot_table",
+            children = build_surface_results(surface_name, surface_data.requesters)
+          },
+          {
+            type = "table",
+            column_count = 8,
+            style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.ground_items)
           },
           {
@@ -216,7 +222,6 @@ local function build_gui(player)
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                       }
-
                     },
                     {
                       type = "checkbox",
@@ -224,6 +229,16 @@ local function build_gui(player)
                       caption = {"search-gui.storage-name"},
                       tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
                       ref = { "include_inventories" },
+                      actions = {
+                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                      }
+                    },
+                    {
+                      type = "checkbox",
+                      state = false,
+                      caption = {"search-gui.requesters-name"},
+                      tooltip = {"search-gui.requesters-tooltip", "[entity=logistic-chest-requester][entity=logistic-chest-buffer]"},
+                      ref = { "include_requesters" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                       }
@@ -338,6 +353,7 @@ local function generate_state(refs)
   return {
     producers = refs.include_machines.state,
     storage = refs.include_inventories.state,
+    requesters = refs.include_requesters.state,
     ground_items = refs.include_ground_items.state,
     entities = refs.include_entities.state,
     signals = refs.include_signals.state,
