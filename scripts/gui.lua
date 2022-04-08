@@ -1,3 +1,5 @@
+--- From flib 0.10.1 by Raiguard
+
 local mod_name = script.mod_name
 local gui_event_defines = {}
 

@@ -5,6 +5,8 @@ Date: 8 April 2022
     - 'Control + Shift + Click' on any ingame object (e.g. an item in your inventory) to open it in Factory Search
     - Added 'Request' search option to search for logistic containers requesting the item
     - Added scroll bar that appears when the search results are too long to fit on the screen
+  Changes:
+    - Changed search option names to be more consistent
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
 Date: 8 April 2022

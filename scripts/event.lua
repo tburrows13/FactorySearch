@@ -1,3 +1,5 @@
+--- From flib 0.10.1 by Raiguard
+---
 --- Syntax sugar for event manipulation.
 ---
 --- Along with the documented functions, this module dynamically generates syntax-shortcuts for all `defines.events`
