@@ -10,15 +10,22 @@ Have you ever asked yourself any of these questions?
 
 If so, then Factory Search might be the mod for you!
 
-Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where is it Made?](https://mods.factorio.com/mod/WhereIsItMade)
+Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where is it Made?](https://mods.factorio.com/mod/WhereIsItMade). This mod was made to provide an easy-to-use and clean-looking interface that can perform cross-surface searches and immediate viewing of search results in the map view (and across planets with Space Exploration).
+
+Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 
 -----
 ## Features
 
 - Press `Control + Shift + F` to open search interface (can be changed in Settings > Controls)
 - Select any item or fluid
-- Factory Search will present a list of machines that produce that item and inventories that contain that item
-- Machines are grouped by name and proximity
+- Pick any combination of the following search modes
+    - Producers: Search for machines that produce this item or fluid
+    - Storage: Search for containers that contain this item or fluid
+    - Ground: Search for this item on the ground
+    - Entities: Search for built entities of this item
+    - Signals: Search for entities that are sending this signal (due to API limitations, some types of entity can't be searched for by signal)
+- Factory Search will present a list of machines matching the selected search modes, grouped by name and proximity
 - Displays results from all surfaces (e.g. all Space Exploration planets are searched)
 - Click on a result group to open it in the map
 - Opens results from other planets in the Navigation Satellite if using Space Exploration
@@ -29,12 +36,13 @@ Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where i
 
 - Other search modes:
     - Requesters
-    - Items on ground
-    - Entities
-    - Ingredients?
     - Map tags?
+    - Ingredients?
 - Scroll bar when too many results
+- Show recipe info in tooltips
+- Control + Click on any vanilla GUI to instantly search it [more info](https://mods.factorio.com/mod/FactorySearch/discussion/624f5a283f5f6d07cadc196b)
 - Pin button like in [Recipe Book](https://mods.factorio.com/mod/RecipeBook) and [Task List](https://mods.factorio.com/mod/TaskList)
+- Options for admins to set when playing pvp around forces and being able to search for corpses and ground items in hidden chunks
 - 'Expanded' view, with inline cameras like the train overview GUI (not for many months…)
 
 -----
