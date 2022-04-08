@@ -94,7 +94,7 @@ local function open_location(player, data)
       end
       remote.call("space-exploration", "remote_view_start", {player=player, zone_name = surface_name, position=position})
     else
-      game.print({"search-gui.wrong-surface"})
+      player.print({"search-gui.wrong-surface"})
     end
   end
 end

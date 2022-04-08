@@ -423,7 +423,7 @@ event.on_gui_click(
       local msg = action.action
       if msg == "close" then
         close_gui(player, player_data)
-        destroy_gui(player, player_data)
+        --destroy_gui(player, player_data)
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         open_location(player, tags)
@@ -458,5 +458,32 @@ event.on_lua_shortcut(
   end
 )
 script.on_event("search-factory", on_shortcut_pressed)
+
+
+script.on_event("open-search-prototype",
+  function(event)
+    local player = game.get_player(event.player_index)
+    local player_data = global.players[event.player_index]
+    if event.selected_prototype then
+      local name = event.selected_prototype.name
+      local type
+      if game.item_prototypes[name] then
+        type = "item"
+      elseif game.fluid_prototypes[name] then
+        type = "fluid"
+      elseif game.virtual_signal_prototypes[name] then
+        type = "virtual"
+      else
+        player.print({ "search-gui.invalid-item" })
+        return
+      end
+      open_gui(player, player_data)
+      player_data = global.players[event.player_index]
+      local refs = player_data.refs
+      refs.item_select.elem_value = {type = type, name = name}
+      start_search(player, player_data)
+    end
+  end
+)
 
 return {destroy_gui = destroy_gui}
