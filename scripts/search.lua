@@ -139,12 +139,19 @@ end
 function find_machines(target_item, force, state)
   local data = {}
   local target_name = target_item.name
+  if target_name == nil then
+    -- 'Unknown signal selected'
+    return data
+  end
   for _, surface in pairs(filtered_surfaces()) do
     local surface_data = { producers = {}, storage = {}, requesters = {}, ground_items = {}, entities = {}, signals = {} }
     if state.signals then
       search_signals(target_item, force, surface, surface_data)
+      if target_item.type == "virtual" then
+        goto continue
+      end
     end
-    if state.producers or state.storage then
+    if (state.producers or state.storage) then
       local entities = surface.find_entities_filtered{
         type = entity_types(target_item.type, state),
         force = force,
@@ -250,6 +257,7 @@ function find_machines(target_item, force, state)
         add_entity(entity, surface_data.entities)
       end
     end
+    ::continue::
     data[surface.name] = surface_data
   end
   return data
