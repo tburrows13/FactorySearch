@@ -390,6 +390,16 @@ local function start_search(player, player_data)
       data = find_machines(item, force.name, state)
     end
     build_result_gui(data, refs.result_flow, state_valid)
+  else
+    -- Clear GUI
+    local frame = refs.result_flow
+    frame.clear()
+    gui.build(frame, {
+      {
+        type = "label",
+        caption = {"search-gui.explanation"},
+      }
+    })
   end
 end
 
