@@ -3,6 +3,8 @@ Version: 1.3.2
 Date: ???
   Features:
     - Clearing search (with right-click) now clears results
+  Bugfixes:
+    - Fixed crash when 'Signal' search mode encounters a modded constant combinator with `item_slot_count = 0` (no signal slots)
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.1
 Date: 17 April 2022

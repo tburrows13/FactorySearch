@@ -12,7 +12,8 @@ local function search_signals(target_signal, force, surface, surface_data)
     if control_behavior then
       local entity_type = entity.type
       if entity_type == "constant-combinator" then
-        for _, parameter in pairs(control_behavior.parameters) do
+        -- If prototype's `item_slot_count = 0` then .parameters will be nil
+        for _, parameter in pairs(control_behavior.parameters or {}) do
           if signal_eq(parameter.signal, target_signal) then
             add_entity(entity, surface_data.signals)
             break
