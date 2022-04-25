@@ -50,7 +50,7 @@ local function draw_markers(player, surface, selection_boxes)
           from = rotated_from,
           to = rotated_to,
           surface = surface,
-          time_to_live = 1200,
+          time_to_live = 720,
           players = {player},
         }
       end
@@ -62,7 +62,7 @@ local function draw_markers(player, surface, selection_boxes)
         left_top = selection_box.left_top,
         right_bottom = selection_box.right_bottom,
         surface = surface,
-        time_to_live = 1200,
+        time_to_live = 720,
         players = {player},
       }
     end

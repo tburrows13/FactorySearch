@@ -5,6 +5,8 @@ Date: ???
     - Added recipes used to tooltips of 'Product' results
     - Added total item/fluid count to tooltips of 'Storage' results
     - Clearing search (with right-click) now clears results
+  Changes:
+    - Decreased highlight box duration from 20s to 12s
   Bugfixes:
     - Fixed crash when 'Signal' search mode encounters a modded constant combinator with `item_slot_count = 0` (no signal slots)
 ---------------------------------------------------------------------------------------------------
