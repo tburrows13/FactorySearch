@@ -37,10 +37,10 @@ local function build_surface_results(surface_name, surface_data)
         end
       end
       if group.item_count then
-        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.item-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.item_count), true)}
+        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-item-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.item_count), true)}
       end
       if group.fluid_count then
-        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.fluid-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.fluid_count), true)}
+        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-fluid-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.fluid_count), true)}
       end
       table.insert(gui_elements,
         {

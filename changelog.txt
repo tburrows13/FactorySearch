@@ -1,9 +1,9 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.3.2
-Date: ???
+Version: 1.4.0
+Date: 25 April 2022
   Features:
-    - Added recipes used to tooltips of 'Product' results
-    - Added total item/fluid count to tooltips of 'Storage' results
+    - Added recipes used to tooltips of 'Product' result groups
+    - Added total item/fluid count to tooltips of 'Storage' result groups
     - Clearing search (with right-click) now clears results
   Changes:
     - Decreased highlight box duration from 20s to 12s
