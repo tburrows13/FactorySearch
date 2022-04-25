@@ -87,11 +87,11 @@ function add_entity(entity, surface_data)
   local entity_position = entity.position
   local entity_selection_box = entity.selection_box
   local entity_surface_data = surface_data[entity_name] or {}
-  local assigned_to_group = false
+  local assigned_group
   for _, group in pairs(entity_surface_data) do
     if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_selection_box, group.selection_box) then
       -- Add entity to group
-      assigned_to_group = true
+      assigned_group = group
       local count = group.count
       local new_count = count + 1
       group.avg_position = {
@@ -113,9 +113,9 @@ function add_entity(entity, surface_data)
       break
     end
   end
-  if not assigned_to_group then
+  if not assigned_group then
     -- Create new group
-    table.insert(entity_surface_data, {
+    assigned_group = {
       count = 1,
       avg_position = entity_position,
       selection_box = {
@@ -131,10 +131,34 @@ function add_entity(entity, surface_data)
       entity_name = entity_name,
       entities = {entity},
       localised_name = entity.localised_name,
-    })
+    }
+    table.insert(entity_surface_data, assigned_group)
   end
   surface_data[entity_name] = entity_surface_data
+  return assigned_group
 end
+
+local function add_entity_product(entity, surface_data, recipe)
+  local group = add_entity(entity, surface_data)
+  local group_recipe_list = group.recipe_list or {}
+  recipe_name_info = group_recipe_list[recipe.name] or {localised_name = recipe.localised_name, count = 0}
+  recipe_name_info.count = recipe_name_info.count + 1
+  group_recipe_list[recipe.name] = recipe_name_info
+  group.recipe_list = group_recipe_list
+end
+
+local function add_entity_storage(entity, surface_data, item_count)
+  local group = add_entity(entity, surface_data)
+  local group_item_count = group.item_count or 0
+  group.item_count = group_item_count + item_count
+end
+
+local function add_entity_storage_fluid(entity, surface_data, fluid_count)
+  local group = add_entity(entity, surface_data)
+  local group_fluid_count = group.fluid_count or 0
+  group.fluid_count = group_fluid_count + fluid_count
+end
+
 
 function find_machines(target_item, force, state)
   local data = {}
@@ -182,13 +206,15 @@ function find_machines(target_item, force, state)
             add_entity(entity, surface_data.producers)
           end
         elseif target_item.type == "fluid" and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
-          if entity.get_fluid_count(target_name) > 0 then
-            add_entity(entity, surface_data.storage)
+          local fluid_count = entity.get_fluid_count(target_name)
+          if fluid_count > 0 then
+            add_entity_storage_fluid(entity, surface_data.storage, fluid_count)
           end
         elseif target_item.type == "item" then
           -- Entity is an inventory entity
-          if entity.get_item_count(target_name) > 0 then
-            add_entity(entity, surface_data.storage)
+          local item_count = entity.get_item_count(target_name)
+          if item_count > 0 then
+            add_entity_storage(entity, surface_data.storage, item_count)
           end
         end
         if recipe then
@@ -196,7 +222,7 @@ function find_machines(target_item, force, state)
           for _, product in pairs(products) do
             local name = product.name
             if name == target_name then
-              add_entity(entity, surface_data.producers)
+              add_entity_product(entity, surface_data.producers, recipe)
             end
           end
         end

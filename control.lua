@@ -1,3 +1,4 @@
+util = require "__core__.lualib.util"
 event = require "scripts.event"
 search = require "scripts.search"
 local ui = require "scripts.ui"

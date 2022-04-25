@@ -13,12 +13,41 @@ local function build_surface_results(surface_name, surface_data)
   local gui_elements = {}
   for entity_name, entity_surface_data in pairs(surface_data) do
     for _, group in pairs(entity_surface_data) do
+      local extra_info = ""
+      if group.recipe_list then
+        extra_info = {""}
+        local multiple_recipes = false
+        local number_of_recipes = 0
+        for _ in pairs(group.recipe_list) do number_of_recipes = number_of_recipes + 1 end
+
+        if number_of_recipes > 1 then
+          multiple_recipes = true
+        end
+        if number_of_recipes <= 20 then
+          -- Localised strings must not have more than 20 parameters
+          for name, recipe_info in pairs(group.recipe_list) do
+            local string = "\n"
+            if multiple_recipes then
+              string = string .. "x" .. recipe_info.count .. " "
+            end
+            string = string .. "[recipe=" .. name .. "] "
+            table.insert(extra_info, string)
+            table.insert(extra_info, recipe_info.localised_name)
+          end
+        end
+      end
+      if group.item_count then
+        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.item-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.item_count), true)}
+      end
+      if group.fluid_count then
+        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.fluid-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.fluid_count), true)}
+      end
       table.insert(gui_elements,
         {
           type = "sprite-button",
           sprite = "entity/" .. entity_name,
           mouse_button_filter = { "left" },
-          tooltip = {  "", group.localised_name, "\n", {"gui-train.open-in-map"} },
+          tooltip = {  "", "[font=default-bold]", group.localised_name, "[/font]", extra_info, "\n", {"gui-train.open-in-map"} },
           style = "slot_button",
           number = group.count,
           tags = {position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group)},
