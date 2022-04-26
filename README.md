@@ -37,10 +37,13 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 ## Future Updates?
 
 - Other search modes:
+    - Modules?
+    - Items being transported? (belts, pipes, inserters)
     - Ingredients?
     - Map tags?
-- Show recipe info in tooltips
+- Refresh button
 - Pin button like in [Recipe Book](https://mods.factorio.com/mod/RecipeBook) and [Task List](https://mods.factorio.com/mod/TaskList)
+- More streamlined item selection workflow
 - Options for admins to set when playing pvp around forces and being able to search for corpses and ground items in hidden chunks
 - 'Expanded' view, with inline cameras like the train overview GUI (not for many months…)
 
