@@ -159,6 +159,18 @@ local function add_entity_storage_fluid(entity, surface_data, fluid_count)
   group.fluid_count = group_fluid_count + fluid_count
 end
 
+local function add_entity_request(entity, surface_data, request_count)
+  local group = add_entity(entity, surface_data)
+  local group_request_count = group.request_count or 0
+  group.request_count = group_request_count + request_count
+end
+
+function add_entity_signal(entity, surface_data, signal_count)
+  local group = add_entity(entity, surface_data)
+  local group_signal_count = group.signal_count or 0
+  group.signal_count = group_signal_count + signal_count
+end
+
 
 function find_machines(target_item, force, state)
   local data = {}
@@ -242,26 +254,36 @@ function find_machines(target_item, force, state)
           for i=1, entity.request_slot_count do
             local request = entity.get_request_slot(i)
             if request and request.name == target_name then
-              add_entity(entity, surface_data.requesters)
+              local count = request.count
+              if count then
+                add_entity_request(entity, surface_data.requesters, count)
+              end
             end
           end
         elseif entity.type == "character" then
           for i=1, entity.request_slot_count do
             local request = entity.get_personal_logistic_slot(i)
             if request and request.name == target_name then
-              add_entity(entity, surface_data.requesters)
+              local count = request.min
+              if count and count > 0 then
+                add_entity_request(entity, surface_data.requesters, request.min)
+              end
             end
           end
         elseif entity.type == "spider-vehicle" then
           for i=1, entity.request_slot_count do
             local request = entity.get_vehicle_logistic_slot(i)
             if request and request.name == target_name then
-              add_entity(entity, surface_data.requesters)
+              local count = request.min
+              if count and count > 0 then
+                add_entity_request(entity, surface_data.requesters, request.min)
+              end
             end
           end
         else
-          if entity.item_requests[target_name] ~= nil then
-            add_entity(entity.proxy_target, surface_data.requesters)
+          local request_count = entity.item_requests[target_name]
+          if request_count ~= nil then
+            add_entity_request(entity.proxy_target, surface_data.requesters, request_count)
           end
         end
       end

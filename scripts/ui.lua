@@ -42,6 +42,12 @@ local function build_surface_results(surface_name, surface_data)
       if group.fluid_count then
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-fluid-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.fluid_count), true)}
       end
+      if group.request_count then
+        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.request-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.request_count), true)}
+      end
+      if group.signal_count then
+        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
+      end
       table.insert(gui_elements,
         {
           type = "sprite-button",
