@@ -16,7 +16,6 @@ local function search_signals(target_signal, force, surface, surface_data)
         for _, parameter in pairs(control_behavior.parameters or {}) do
           if signal_eq(parameter.signal, target_signal) then
             add_entity_signal(entity, surface_data.signals, parameter.count)
-            break
           end
         end
       elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" then
