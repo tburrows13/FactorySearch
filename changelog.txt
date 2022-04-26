@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.4.2
+Date: 26 April 2022
+  Bugfixes:
+    - Fixed crash when 'Signal' search mode encounters a train stop, accumulator, or wall with a blank signal output
+---------------------------------------------------------------------------------------------------
 Version: 1.4.1
 Date: 26 April 2022
   Features:

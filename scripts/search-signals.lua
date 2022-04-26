@@ -1,5 +1,5 @@
 local function signal_eq(sig1, sig2)
-  return sig1.type == sig2.type and sig1.name == sig2.name
+  return sig1 and sig2 and sig1.type == sig2.type and sig1.name == sig2.name
 end
 
 local function search_signals(target_signal, force, surface, surface_data)
