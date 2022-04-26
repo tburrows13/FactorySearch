@@ -6,7 +6,6 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Publish Mod
-      uses: Xorimuth/factorio-mod-portal-publish@vversion
+      uses: Penguin-Spy/factorio-mod-portal-publish@master
       env:
-        FACTORIO_PASSWORD: ${{ secrets.FACTORIO_PASSWORD }}
-        FACTORIO_USER: ${{ secrets.FACTORIO_USER }}
+        FACTORIO_MOD_API_KEY: ${{ secrets.FACTORIO_MOD_API_KEY }}
