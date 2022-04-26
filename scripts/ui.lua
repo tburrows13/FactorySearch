@@ -141,7 +141,7 @@ local function build_result_gui(data, frame, state_valid)
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.requesters)
+            children = build_surface_results(surface_name, surface_data.entities)
           },
           {
             type = "table",
@@ -153,7 +153,7 @@ local function build_result_gui(data, frame, state_valid)
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.entities)
+            children = build_surface_results(surface_name, surface_data.requesters)
           },
           {
             type = "table",
@@ -271,9 +271,9 @@ local function build_gui(player)
                     {
                       type = "checkbox",
                       state = false,
-                      caption = {"search-gui.requesters-name"},
-                      tooltip = {"search-gui.requesters-tooltip", "[entity=logistic-chest-requester][entity=logistic-chest-buffer]"},
-                      ref = { "include_requesters" },
+                      caption = {"search-gui.entities-name"},
+                      tooltip = {"search-gui.entities-tooltip"},
+                      ref = { "include_entities" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                       }
@@ -291,9 +291,9 @@ local function build_gui(player)
                     {
                       type = "checkbox",
                       state = false,
-                      caption = {"search-gui.entities-name"},
-                      tooltip = {"search-gui.entities-tooltip"},
-                      ref = { "include_entities" },
+                      caption = {"search-gui.requesters-name"},
+                      tooltip = {"search-gui.requesters-tooltip", "[entity=logistic-chest-requester][entity=logistic-chest-buffer]"},
+                      ref = { "include_requesters" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                       }

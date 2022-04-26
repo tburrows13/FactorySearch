@@ -4,6 +4,8 @@ Date: ???
   Features:
     - Added total request count to tooltips of 'Request' result groups
     - Added total signal value to tooltips of 'Signal' result groups
+  Changes:
+    - Reordered search mode selection list
   Bugfixes:
     - Fixed some furnaces not being found in 'Product' searches
 ---------------------------------------------------------------------------------------------------
