@@ -194,8 +194,11 @@ function find_machines(target_item, force, state)
         if entity_type == "assembling-machine" then
           recipe = entity.get_recipe()
         elseif entity_type == "furnace" then
-          -- Even if the furnace has stopped smelting, this records the last item it was smelting
-          recipe = entity.previous_recipe
+          recipe = entity.get_recipe()
+          if recipe == nil then
+            -- Even if the furnace has stopped smelting, this records the last item it was smelting
+            recipe = entity.previous_recipe
+          end
         elseif entity_type == "mining-drill" then
           local mining_target = entity.mining_target
           if mining_target and mining_target.name == target_name then
