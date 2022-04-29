@@ -6,7 +6,8 @@ Date: ???
     - Added 'Logistics' search option to search for logistics entities transporting the item
     - 'Storage' search now searches linked-containers (used by some mods)
     - Add item name to interface sub-heading
-    - Now attempts to work out the correct item when using 'Control + Shift + Click' on recipes or entities that do not match their item names
+    - Attempts to work out the correct item when using 'Control + Shift + Click' on recipes or entities that do not match their item names
+    - Improved 'Entity' search for (modded) entities whose names do not match their item names
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.2
 Date: 26 April 2022

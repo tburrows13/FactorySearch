@@ -346,9 +346,15 @@ function find_machines(target_item, force, state)
       end
     end
 
+    -- Entities
     if target_is_item and state.entities then
+      local item_prototype = game.item_prototypes[target_name]
+      local target_entity_name = target_name
+      if item_prototype.place_result then
+        target_entity_name = item_prototype.place_result.name
+      end
       local entities = surface.find_entities_filtered{
-        name = target_name,
+        name = target_entity_name,
         force = force,
       }
       for _, entity in pairs(entities) do
