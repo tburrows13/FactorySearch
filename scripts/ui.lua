@@ -216,11 +216,25 @@ local function build_gui(player)
             { type = "empty-widget", style = "fs_flib_titlebar_drag_handle", ignored_by_interaction = true },
             {
               type = "sprite-button",
+              style = "frame_action_button",
+              sprite = "fs_flib_pin_white",
+              hovered_sprite = "fs_flib_pin_black",
+              clicked_sprite = "fs_flib_pin_black",
+              mouse_button_filter = { "left" },
+              tooltip = { "search-gui.keep-open" },
+              ref = { "pin_button" },
+              actions = {
+                on_click = action,
+              }
+            },
+            {
+              type = "sprite-button",
               style = "close_button",
               sprite = "utility/close_white",
               hovered_sprite = "utility/close_black",
               clicked_sprite = "utility/close_black",
               mouse_button_filter = { "left" },
+              tooltip = { "gui.close-instruction" },
               actions = {
                 on_click = { gui = "search", action = "close" },
               },
