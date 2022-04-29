@@ -29,11 +29,9 @@ end
 -- "character-corpse" doesn't have force so must be checked seperately
 local product_entities = {"assembling-machine", "furnace", "offshore-pump", "mining-drill"}
 local inventory_entities = {"container", "logistic-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
-local fluid_entities = {"storage-tank", "fluid-wagon"}  -- get_fluid_count(fluid_name)
+local fluid_entities = {"storage-tank", "fluid-wagon"}
 local product_and_inventory_entities = concat(product_entities, inventory_entities)
 local product_and_fluid_entities = concat(product_entities, fluid_entities)
-
--- mining? entity.mining_target.name == "copper-ore", "crude-oil"
 
 -- lookup tree in order: include_products, include_inventories, item_type
 local entity_table = {
@@ -175,25 +173,33 @@ end
 function find_machines(target_item, force, state)
   local data = {}
   local target_name = target_item.name
-  local target_type = target_item.type
   if target_name == nil then
     -- 'Unknown signal selected'
     return data
   end
+  local target_type = target_item.type
+  local target_is_item = target_type == "item"
+  local target_is_fluid = target_type == "fluid"
+  local target_is_virtual = target_type == "virtual"
+
   for _, surface in pairs(filtered_surfaces()) do
     local surface_data = { producers = {}, storage = {}, logistics = {}, requesters = {}, ground_items = {}, entities = {}, signals = {} }
+
+    -- Signals
     if state.signals then
       search_signals(target_item, force, surface, surface_data)
-      if target_item.type == "virtual" then
+      if target_is_virtual then
         goto continue
       end
     end
+
+    -- Producers and Storage
     if (state.producers or state.storage) then
       local entities = surface.find_entities_filtered{
         type = entity_types(target_item.type, state),
         force = force,
       }
-      if state.storage and target_item.type == "item" then
+      if state.storage and target_is_item then
         -- Corpses don't have a force
         local corpses = surface.find_entities_filtered{
           type = "character-corpse",
@@ -217,16 +223,16 @@ function find_machines(target_item, force, state)
           if mining_target and mining_target.name == target_name then
             add_entity(entity, surface_data.producers)
           end
-        elseif target_item.type == "fluid" and entity_type == "offshore-pump" then
+        elseif target_is_fluid and entity_type == "offshore-pump" then
           if entity.get_fluid_count(target_name) > 0 then
             add_entity(entity, surface_data.producers)
           end
-        elseif target_item.type == "fluid" and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
+        elseif target_is_fluid and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
           local fluid_count = entity.get_fluid_count(target_name)
           if fluid_count > 0 then
             add_entity_storage_fluid(entity, surface_data.storage, fluid_count)
           end
-        elseif target_item.type == "item" then
+        elseif target_is_item then
           -- Entity is an inventory entity
           local item_count = entity.get_item_count(target_name)
           if item_count > 0 then
@@ -244,7 +250,9 @@ function find_machines(target_item, force, state)
         end
       end
     end
-    if state.requesters then
+
+    -- Requesters
+    if target_is_item and state.requesters then
       local entities = surface.find_entities_filtered{
         type = { "logistic-container", "character", "spider-vehicle", "item-request-proxy" } ,
         force = force,
@@ -289,7 +297,9 @@ function find_machines(target_item, force, state)
         end
       end
     end
-    if state.ground_items then
+
+    -- Ground
+    if target_is_item and state.ground_items then
       local entities = surface.find_entities_filtered{
         type = "item-entity",
         name = "item-on-ground",
@@ -300,8 +310,10 @@ function find_machines(target_item, force, state)
         end
       end
     end
+
+    -- Logistics
     if state.logistics then
-      if target_type == "item" then
+      if target_is_item then
         local entities = surface.find_entities_filtered{
           type = { "transport-belt", "splitter", "underground-belt", "inserter", "logistic-robot", "construction-robot" },
           force = force,
@@ -319,7 +331,8 @@ function find_machines(target_item, force, state)
             end
           end
         end
-      elseif target_type == "fluid" then
+      else
+        -- So target.type == "fluid"
         local entities = surface.find_entities_filtered{
           type = { "pipe", "pipe-to-ground", "pump" },
           force = force,
@@ -332,7 +345,8 @@ function find_machines(target_item, force, state)
         end
       end
     end
-    if state.entities then
+
+    if target_is_item and state.entities then
       local entities = surface.find_entities_filtered{
         name = target_name,
         force = force,
