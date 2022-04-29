@@ -220,6 +220,7 @@ local function build_gui(player)
               sprite = "utility/close_white",
               hovered_sprite = "utility/close_black",
               clicked_sprite = "utility/close_black",
+              mouse_button_filter = { "left" },
               actions = {
                 on_click = { gui = "search", action = "close" },
               },
@@ -228,137 +229,169 @@ local function build_gui(player)
         },
         {
           type = "frame",
-          style = "inside_shallow_frame_with_padding",
-          direction = "horizontal",
+          style = "inside_shallow_frame",
+          direction = "vertical",
           children = {
             {
-              type = "flow",
+              type = "frame",
+              style = "subheader_frame",
               direction = "horizontal",
-              style_mods = { horizontal_spacing = 12 },
               children = {
                 {
                   type = "flow",
-                  direction = "vertical",
+                  style = "horizontal_flow",
+                  style_mods = { vertical_align = "center", horizontally_stretchable = true },
                   children = {
+                    { type = "empty-widget", style = "sp_stretchable_empty_widget" },
                     {
-                      type = "choose-elem-button",
-                      style = "slot_button_in_shallow_frame",
-                      elem_type = "signal",
-                      mouse_button_filter = {"left"},
-                      ref = { "item_select" },
-                      style_mods = {
-                        width = 80,
-                        height = 80,
-                      },
-                      actions = {
-                        on_elem_changed = { gui = "search", action = "item_selected" }
-                      }
-                    },
-                    {
-                      type = "checkbox",
-                      state = true,
-                      caption = {"search-gui.producers-name"},
-                      tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill][entity=pumpjack]"},
-                      ref = { "include_machines" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
-                    },
-                    {
-                      type = "checkbox",
-                      state = false,
-                      caption = {"search-gui.storage-name"},
-                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
-                      ref = { "include_inventories" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
-                    },
-                    {
-                      type = "checkbox",
-                      state = false,
-                      caption = {"search-gui.logistics-name"},
-                      tooltip = {"search-gui.logistics-tooltip", "[entity=fast-transport-belt][entity=fast-underground-belt][entity=fast-splitter][entity=pipe][entity=fast-inserter][entity=logistic-robot]"},
-                      ref = { "include_logistics" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
-                    },
-                    {
-                      type = "checkbox",
-                      state = false,
-                      caption = {"search-gui.entities-name"},
-                      tooltip = {"search-gui.entities-tooltip"},
-                      ref = { "include_entities" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
-                    },
-                    {
-                      type = "checkbox",
-                      state = false,
-                      caption = {"search-gui.ground-items-name"},
-                      tooltip = {"search-gui.ground-items-tooltip"},
-                      ref = { "include_ground_items" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
-                    },
-                    {
-                      type = "checkbox",
-                      state = false,
-                      caption = {"search-gui.requesters-name"},
-                      tooltip = {"search-gui.requesters-tooltip", "[entity=logistic-chest-requester][entity=logistic-chest-buffer]"},
-                      ref = { "include_requesters" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
-                    },
-                    {
-                      type = "checkbox",
-                      state = false,
-                      caption = {"search-gui.signals-name"},
-                      tooltip = {"search-gui.signals-tooltip", "[entity=decider-combinator][entity=arithmetic-combinator][entity=constant-combinator][entity=roboport][entity=train-stop][entity=rail-signal][entity=rail-chain-signal][entity=accumulator][entity=stone-wall]"},
-                      ref = { "include_signals" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
-                    },
-                    --[[{
                       type = "sprite-button",
-                      style = "slot_sized_button",
-                      sprite = "utility/search_icon",
-                      mouse_button_filter = {"left"},
-                      ref = { "search" },
+                      style = "tool_button",
+                      sprite = "utility/refresh",
+                      tooltip = { "gui.refresh" },
+                      mouse_button_filter = { "left" },
                       actions = {
-                        on_click = { gui = "search", action = "search" }
-                      }
-                    },]]
-                  },
-                },
+                        on_click = { gui = "search", action = "refresh" },
+                      },
+                    },
+                  }
+                }
+              }
+            },
+            {
+              type = "flow",
+              direction = "vertical",
+              style = "vertical_flow_under_subheader",
+              children = {
                 {
-                  type = "scroll-pane",
-                  style = "naked_scroll_pane",
-                  horizontal_scroll_policy = "never",
-                  vertical_scroll_policy = "auto-and-reserve-space",
-                  style_mods = { right_padding = -12, extra_margin_when_activated = -12, extra_padding_when_activated = 12},-- extra_top_margin_when_activated = -12, extra_bottom_margin_when_activated = -12, extra_right_margin_when_activated = -12 },
+                  type = "flow",
+                  direction = "horizontal",
+                  style_mods = { horizontal_spacing = 12},
                   children = {
                     {
                       type = "flow",
-                      ref = { "result_flow" },
                       direction = "vertical",
                       children = {
                         {
-                          type = "label",
-                          caption = {"search-gui.explanation"},
+                          type = "choose-elem-button",
+                          style = "slot_button_in_shallow_frame",
+                          elem_type = "signal",
+                          mouse_button_filter = {"left"},
+                          ref = { "item_select" },
+                          style_mods = {
+                            width = 80,
+                            height = 80,
+                          },
+                          actions = {
+                            on_elem_changed = { gui = "search", action = "item_selected" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = true,
+                          caption = {"search-gui.producers-name"},
+                          tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill][entity=pumpjack]"},
+                          ref = { "include_machines" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = false,
+                          caption = {"search-gui.storage-name"},
+                          tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
+                          ref = { "include_inventories" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = false,
+                          caption = {"search-gui.logistics-name"},
+                          tooltip = {"search-gui.logistics-tooltip", "[entity=fast-transport-belt][entity=fast-underground-belt][entity=fast-splitter][entity=pipe][entity=fast-inserter][entity=logistic-robot]"},
+                          ref = { "include_logistics" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = false,
+                          caption = {"search-gui.entities-name"},
+                          tooltip = {"search-gui.entities-tooltip"},
+                          ref = { "include_entities" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = false,
+                          caption = {"search-gui.ground-items-name"},
+                          tooltip = {"search-gui.ground-items-tooltip"},
+                          ref = { "include_ground_items" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = false,
+                          caption = {"search-gui.requesters-name"},
+                          tooltip = {"search-gui.requesters-tooltip", "[entity=logistic-chest-requester][entity=logistic-chest-buffer]"},
+                          ref = { "include_requesters" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = false,
+                          caption = {"search-gui.signals-name"},
+                          tooltip = {"search-gui.signals-tooltip", "[entity=decider-combinator][entity=arithmetic-combinator][entity=constant-combinator][entity=roboport][entity=train-stop][entity=rail-signal][entity=rail-chain-signal][entity=accumulator][entity=stone-wall]"},
+                          ref = { "include_signals" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        --[[{
+                          type = "sprite-button",
+                          style = "slot_sized_button",
+                          sprite = "utility/search_icon",
+                          mouse_button_filter = {"left"},
+                          ref = { "search" },
+                          actions = {
+                            on_click = { gui = "search", action = "search" }
+                          }
+                        },]]
+                      },
+                    },
+                    {
+                      type = "scroll-pane",
+                      style = "naked_scroll_pane",
+                      horizontal_scroll_policy = "never",
+                      vertical_scroll_policy = "auto-and-reserve-space",
+                      style_mods = { right_padding = -12, extra_margin_when_activated = -12, extra_padding_when_activated = 12},-- extra_top_margin_when_activated = -12, extra_bottom_margin_when_activated = -12, extra_right_margin_when_activated = -12 },
+                      children = {
+                        {
+                          type = "flow",
+                          ref = { "result_flow" },
+                          direction = "vertical",
+                          children = {
+                            {
+                              type = "label",
+                              caption = {"search-gui.explanation"},
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
               }
-            }
-          },
+            },
+          }
         },
       }
     }
@@ -498,6 +531,8 @@ event.on_gui_click(
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         open_location(player, tags)
+      elseif msg == "refresh" then
+        start_search(player, player_data)
       elseif msg == "checkbox_toggled" then
         start_search(player, player_data)
       end
