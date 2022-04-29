@@ -1,6 +1,17 @@
 local gui = require("__FactorySearch__.scripts.gui")
 local open_location = require "scripts.open_location"
 
+local function toggle_fab(elem, sprite, state)
+  if state then
+    elem.style = "flib_selected_frame_action_button"
+    elem.sprite = sprite .. "_black"
+  else
+    elem.style = "frame_action_button"
+    elem.sprite = sprite .. "_white"
+  end
+end
+
+
 local function get_selection_boxes(group)
   selection_boxes = {}
   for i, entity in pairs(group.entities) do
@@ -224,7 +235,7 @@ local function build_gui(player)
               tooltip = { "search-gui.keep-open" },
               ref = { "pin_button" },
               actions = {
-                on_click = action,
+                on_click = { gui = "search", action = "toggle_pin"},
               }
             },
             {
@@ -235,6 +246,7 @@ local function build_gui(player)
               clicked_sprite = "utility/close_black",
               mouse_button_filter = { "left" },
               tooltip = { "gui.close-instruction" },
+              ref = { "close_button" },
               actions = {
                 on_click = { gui = "search", action = "close" },
               },
@@ -424,7 +436,9 @@ local function open_gui(player, player_data)
     player_data = build_gui(player)
   end
   local refs = player_data.refs
-  player.opened = refs.frame
+  if not player_data.pinned then
+    player.opened = refs.frame
+  end
   refs.frame.visible = true
   refs.frame.bring_to_front()
   player.set_shortcut_toggled("search-factory", true)
@@ -440,11 +454,17 @@ local function destroy_gui(player, player_data)
 end
 
 local function close_gui(player, player_data)
-  local refs = player_data.refs
-  refs.frame.visible = false
-  player.set_shortcut_toggled("search-factory", false)
-  if player.opened == refs.frame then
-    player.opened = nil
+  if player_data.ignore_close then
+    -- Set when the pin button is pressed just before changing player.opened
+    player_data.ignore_close = false
+  else
+    local refs = player_data.refs
+    refs.frame.visible = false
+    player.set_shortcut_toggled("search-factory", false)
+    if player.opened == refs.frame then
+      player.opened = nil
+    end
+    --destroy_gui(player, player_data)
   end
 end
 
@@ -542,6 +562,18 @@ event.on_gui_click(
       if msg == "close" then
         close_gui(player, player_data)
         --destroy_gui(player, player_data)
+      elseif msg == "toggle_pin" then
+        player_data.pinned = not player_data.pinned
+        toggle_fab(player_data.refs.pin_button, "fs_flib_pin", player_data.pinned)
+        if player_data.pinned then
+          player_data.ignore_close = true
+          player.opened = nil
+          player_data.refs.close_button.tooltip = { "gui.close" }
+        else
+          player.opened = player_data.refs.frame
+          player_data.refs.frame.force_auto_center()
+          player_data.refs.close_button.tooltip = { "gui.close-instruction" }
+        end
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
         open_location(player, tags)
