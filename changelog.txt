@@ -3,6 +3,7 @@ Version: 1.5.0
 Date: ???
   Features:
     - Added 'Logistics' search option to search for logistics entities transporting the item
+    - 'Storage' search now searches linked-containers (used by some mods)
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.2
 Date: 26 April 2022

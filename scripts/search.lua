@@ -28,7 +28,7 @@ end
 
 -- "character-corpse" doesn't have force so must be checked seperately
 local product_entities = {"assembling-machine", "furnace", "offshore-pump", "mining-drill"}
-local inventory_entities = {"container", "logistic-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
+local inventory_entities = {"container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
 local fluid_entities = {"storage-tank", "fluid-wagon"}
 local product_and_inventory_entities = concat(product_entities, inventory_entities)
 local product_and_fluid_entities = concat(product_entities, fluid_entities)
