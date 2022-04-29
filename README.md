@@ -22,9 +22,10 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 - Pick any combination of the following search modes
     - Product: Search for machines that produce this item or fluid
     - Storage: Search for containers that contain this item or fluid
-    - Request: Search for logistic containers that are requesting this item
-    - Ground: Search for this item on the ground
+    - Logistics: Search for logistics entities that are transporting this item
     - Entity: Search for built entities of this item
+    - Ground: Search for this item on the ground
+    - Request: Search for logistic containers that are requesting this item
     - Signal: Search for entities that are sending this signal (due to API limitations, some types of entity can't be searched for by signal)
 - Factory Search will present a list of machines matching the selected search modes, grouped by name and proximity
 - Displays results from all surfaces (e.g. all Space Exploration planets are searched)
@@ -38,11 +39,8 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 
 - Other search modes:
     - Modules?
-    - Items being transported? (belts, pipes, inserters)
     - Ingredients?
     - Map tags?
-- Refresh button
-- Pin button like in [Recipe Book](https://mods.factorio.com/mod/RecipeBook) and [Task List](https://mods.factorio.com/mod/TaskList)
 - More streamlined item selection workflow
 - Options for admins to set when playing pvp around forces and being able to search for corpses and ground items in hidden chunks
 - 'Expanded' view, with inline cameras like the train overview GUI (not for many months…)

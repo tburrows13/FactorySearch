@@ -1,13 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.0
-Date: ???
+Date: 29 April 2022
   Features:
-    - Added refresh button
+    - Added pin button to keep the interface open behind other GUIs
+    - Added refresh button to rerun search
     - Added 'Logistics' search option to search for logistics entities transporting the item
-    - 'Storage' search now searches linked-containers (used by some mods)
-    - Add item name to interface sub-heading
     - Attempts to work out the correct item when using 'Control + Shift + Click' on recipes or entities that do not match their item names
     - Improved 'Entity' search for (modded) entities whose names do not match their item names
+    - 'Storage' search now searches linked-containers (used by some mods)
   Bugfixes:
     - Fixed highlight boxes not being removed when clearing search (with right-click)
 ---------------------------------------------------------------------------------------------------

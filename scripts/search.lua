@@ -321,7 +321,7 @@ function find_machines(target_item, force, state)
         for _, entity in pairs(entities) do
           if entity.type == "inserter" then
             local held_stack = entity.held_stack
-            if held_stack and held_stack.name == target_name then
+            if held_stack and held_stack.valid_for_read and held_stack.name == target_name then
               add_entity_storage(entity, surface_data.logistics, held_stack.count)
             end
           else
