@@ -642,7 +642,26 @@ script.on_event("open-search-prototype",
         type = "fluid"
       elseif game.virtual_signal_prototypes[name] then
         type = "virtual"
-      else
+      elseif game.recipe_prototypes[name] then
+        local recipe = game.recipe_prototypes[name]
+        local main_product = recipe.main_product
+        if main_product then
+          name = main_product.name
+          type = main_product.type
+        elseif #recipe.products == 1 then
+          local product = recipe.products[1]
+          name = product.name
+          type = product.type
+        end
+      elseif game.entity_prototypes[name] then
+        local entity = game.entity_prototypes[name]
+        local items_to_place_this = entity.items_to_place_this
+        if items_to_place_this and items_to_place_this[1] then
+          name = items_to_place_this[1].name
+          type = "item"
+        end
+      end
+      if not type then
         player.print({ "search-gui.invalid-item" })
         return
       end
