@@ -141,6 +141,12 @@ local function build_result_gui(data, frame, state_valid)
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
+            children = build_surface_results(surface_name, surface_data.logistics)
+          },
+          {
+            type = "table",
+            column_count = 10,
+            style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.entities)
           },
           {
@@ -264,6 +270,16 @@ local function build_gui(player)
                       caption = {"search-gui.storage-name"},
                       tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
                       ref = { "include_inventories" },
+                      actions = {
+                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                      }
+                    },
+                    {
+                      type = "checkbox",
+                      state = false,
+                      caption = {"search-gui.logistics-name"},
+                      tooltip = {"search-gui.logistics-tooltip", "[entity=fast-transport-belt][entity=pipe][entity=fast-inserter][entity=logistic-robot]"},
+                      ref = { "include_logistics" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                       }
@@ -397,6 +413,7 @@ local function generate_state(refs)
   return {
     producers = refs.include_machines.state,
     storage = refs.include_inventories.state,
+    logistics = refs.include_logistics.state,
     requesters = refs.include_requesters.state,
     ground_items = refs.include_ground_items.state,
     entities = refs.include_entities.state,
