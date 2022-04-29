@@ -175,12 +175,13 @@ end
 function find_machines(target_item, force, state)
   local data = {}
   local target_name = target_item.name
+  local target_type = target_item.type
   if target_name == nil then
     -- 'Unknown signal selected'
     return data
   end
   for _, surface in pairs(filtered_surfaces()) do
-    local surface_data = { producers = {}, storage = {}, requesters = {}, ground_items = {}, entities = {}, signals = {} }
+    local surface_data = { producers = {}, storage = {}, logistics = {}, requesters = {}, ground_items = {}, entities = {}, signals = {} }
     if state.signals then
       search_signals(target_item, force, surface, surface_data)
       if target_item.type == "virtual" then
@@ -296,6 +297,38 @@ function find_machines(target_item, force, state)
       for _, entity in pairs(entities) do
         if entity.stack.name == target_name then
           add_entity(entity, surface_data.ground_items)
+        end
+      end
+    end
+    if state.logistics then
+      if target_type == "item" then
+        local entities = surface.find_entities_filtered{
+          type = { "transport-belt", "splitter", "underground-belt", "inserter", "logistic-robot", "construction-robot" },
+          force = force,
+        }
+        for _, entity in pairs(entities) do
+          if entity.type == "inserter" then
+            local held_stack = entity.held_stack
+            if held_stack and held_stack.name == target_name then
+              add_entity_storage(entity, surface_data.logistics, held_stack.count)
+            end
+          else
+            local item_count = entity.get_item_count(target_name)
+            if item_count > 0 then
+              add_entity_storage(entity, surface_data.logistics, item_count)
+            end
+          end
+        end
+      elseif target_type == "fluid" then
+        local entities = surface.find_entities_filtered{
+          type = { "pipe", "pipe-to-ground", "pump" },
+          force = force,
+        }
+        for _, entity in pairs(entities) do
+          local fluid_count = entity.get_fluid_count(target_name)
+          if fluid_count > 0 then
+            add_entity_storage_fluid(entity, surface_data.logistics, fluid_count)
+          end
         end
       end
     end

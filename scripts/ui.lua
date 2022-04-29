@@ -278,7 +278,7 @@ local function build_gui(player)
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.logistics-name"},
-                      tooltip = {"search-gui.logistics-tooltip", "[entity=fast-transport-belt][entity=pipe][entity=fast-inserter][entity=logistic-robot]"},
+                      tooltip = {"search-gui.logistics-tooltip", "[entity=fast-transport-belt][entity=fast-underground-belt][entity=fast-splitter][entity=pipe][entity=fast-inserter][entity=logistic-robot]"},
                       ref = { "include_logistics" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }

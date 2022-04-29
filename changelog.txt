@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.0
+Date: ???
+  Features:
+    - Added 'Logistics' search option to search for logistics entities transporting the item
+---------------------------------------------------------------------------------------------------
 Version: 1.4.2
 Date: 26 April 2022
   Bugfixes:
