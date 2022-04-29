@@ -1,5 +1,5 @@
 local gui = require("__FactorySearch__.scripts.gui")
-local open_location = require "scripts.open_location"
+require "scripts.open_location"
 
 local function toggle_fab(elem, sprite, state)
   if state then
@@ -536,6 +536,8 @@ local function start_search(player, player_data)
         caption = {"search-gui.explanation"},
       }
     })
+    refs.subheader_title.caption = ""
+    clear_markers(player)
   end
 end
 

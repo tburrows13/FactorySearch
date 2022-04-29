@@ -6,7 +6,7 @@ local LINE_COLOR = { r = 0, g = 0.9, b = 0, a = 1 }
 local LINE_WIDTH = 4
 local HALF_WIDTH = (LINE_WIDTH / 2) / 32  -- 32 pixels per tile
 
-local function draw_markers(player, surface, selection_boxes)
+function clear_markers(player)
   -- Clear all old markers belonging to player
   if #game.players == 1 then
     rendering.clear("FactorySearch")
@@ -18,6 +18,10 @@ local function draw_markers(player, surface, selection_boxes)
       end
     end
   end
+end
+
+local function draw_markers(player, surface, selection_boxes)
+  clear_markers(player)
 
   -- Draw new markers
   for _, selection_box in pairs(selection_boxes) do
@@ -78,7 +82,7 @@ local function draw_markers(player, surface, selection_boxes)
   end
 end
 
-local function open_location(player, data)
+function open_location(player, data)
   local surface_name = data.surface
   local position = data.position
   if surface_name == player.surface.name then
@@ -98,5 +102,3 @@ local function open_location(player, data)
     end
   end
 end
-
-return open_location
