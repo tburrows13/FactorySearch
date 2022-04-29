@@ -5,6 +5,7 @@ Date: ???
     - Added refresh button
     - Added 'Logistics' search option to search for logistics entities transporting the item
     - 'Storage' search now searches linked-containers (used by some mods)
+    - Add item name to interface sub-heading
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.2
 Date: 26 April 2022

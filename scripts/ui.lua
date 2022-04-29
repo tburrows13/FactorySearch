@@ -11,6 +11,17 @@ local function toggle_fab(elem, sprite, state)
   end
 end
 
+local function get_signal_name(signal)
+  if signal.name then
+    if signal.type == "item" then
+      return game.item_prototypes[signal.name].localised_name
+    elseif signal.type == "fluid" then
+      return game.fluid_prototypes[signal.name].localised_name
+    elseif signal.type == "virtual" then
+      return game.virtual_signal_prototypes[signal.name].localised_name
+    end
+  end
+end
 
 local function get_selection_boxes(group)
   selection_boxes = {}
@@ -268,6 +279,11 @@ local function build_gui(player)
                   style = "horizontal_flow",
                   style_mods = { vertical_align = "center", horizontally_stretchable = true },
                   children = {
+                    {
+                      type = "label",
+                      style = "subheader_caption_label",
+                      ref = { "subheader_title" },
+                    },
                     { type = "empty-widget", style = "sp_stretchable_empty_widget" },
                     {
                       type = "sprite-button",
@@ -509,6 +525,7 @@ local function start_search(player, player_data)
       data = find_machines(item, force.name, state)
     end
     build_result_gui(data, refs.result_flow, state_valid)
+    refs.subheader_title.caption = get_signal_name(item) or ""
   else
     -- Clear GUI
     local frame = refs.result_flow
