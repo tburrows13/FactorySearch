@@ -67,9 +67,7 @@ local function filtered_surfaces()
     local surface_name = surface.name
     if string.sub(surface_name, -12) ~= "-transformer"  -- Power Overload
         and string.sub(surface_name, 0, 8) ~= "starmap-"  -- Space Exploration
-        and surface_name ~= "beltlayer"  -- Beltlayer
-        and surface_name ~= "pipelayer"  -- Pipelayer
-        -- TODO AAI signals?
+        and surface_name ~= "aai-signals"  -- AAI Signals
       then
       table.insert(surfaces, surface)
     end
