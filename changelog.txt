@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.1
-Date: ???
+Date: 30 April 2022
   Features:
     - Option to search only the surface (planet) that the player is on
   Bugfixes:
