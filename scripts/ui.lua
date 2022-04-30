@@ -277,7 +277,7 @@ local function build_gui(player)
                 {
                   type = "flow",
                   style = "horizontal_flow",
-                  style_mods = { vertical_align = "center", horizontally_stretchable = true },
+                  style_mods = { vertical_align = "center", horizontally_stretchable = true, horizontal_spacing = 12 },
                   children = {
                     {
                       type = "label",
@@ -285,6 +285,16 @@ local function build_gui(player)
                       ref = { "subheader_title" },
                     },
                     { type = "empty-widget", style = "sp_stretchable_empty_widget" },
+                    {
+                      type = "checkbox",
+                      state = true,
+                      caption = { "search-gui.all-surfaces" },
+                      --tooltip = {"search-gui.storage-tooltip"},
+                      ref = { "all_surfaces" },
+                      actions = {
+                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                      }
+                    },
                     {
                       type = "sprite-button",
                       style = "tool_button",
@@ -522,7 +532,11 @@ local function start_search(player, player_data)
     local state_valid = is_valid_state(state)
     local data
     if state_valid then
-      data = find_machines(item, force.name, state)
+      local surface
+      if not refs.all_surfaces.state then
+        surface = player.surface
+      end
+      data = find_machines(item, force.name, state, surface)
     end
     build_result_gui(data, refs.result_flow, state_valid)
     refs.subheader_title.caption = get_signal_name(item) or ""

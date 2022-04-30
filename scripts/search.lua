@@ -60,7 +60,11 @@ local function entity_types(item_type, state)
   return entity_table[state.producers][state.storage][item_type]
 end
 
-local function filtered_surfaces()
+local function filtered_surfaces(override_surface)
+  if override_surface then
+    return {override_surface}
+  end
+
   -- Skip certain modded surfaces that won't have assemblers/chests placed on them
   local surfaces = {}
   for _, surface in pairs(game.surfaces) do
@@ -168,7 +172,7 @@ function add_entity_signal(entity, surface_data, signal_count)
 end
 
 
-function find_machines(target_item, force, state)
+function find_machines(target_item, force, state, override_surface)
   local data = {}
   local target_name = target_item.name
   if target_name == nil then
@@ -180,7 +184,7 @@ function find_machines(target_item, force, state)
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
 
-  for _, surface in pairs(filtered_surfaces()) do
+  for _, surface in pairs(filtered_surfaces(override_surface)) do
     local surface_data = { producers = {}, storage = {}, logistics = {}, requesters = {}, ground_items = {}, entities = {}, signals = {} }
 
     -- Signals
