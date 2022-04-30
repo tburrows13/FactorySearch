@@ -98,7 +98,7 @@ function open_location(player, data)
       end
       remote.call("space-exploration", "remote_view_start", {player=player, zone_name = surface_name, position=position})
     else
-      player.print({"search-gui.wrong-surface"})
+      player.create_local_flying_text{text = {"search-gui.wrong-surface"}, create_at_cursor = true}
     end
   end
 end
