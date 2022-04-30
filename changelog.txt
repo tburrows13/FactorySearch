@@ -3,6 +3,8 @@ Version: 1.5.1
 Date: ???
   Features:
     - Option to search only the surface (planet) that the player is on
+  Bugfixes:
+    - Fixed crash when opening the search interface when Spidertron Patrols is not installed
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.0
 Date: 29 April 2022

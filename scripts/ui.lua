@@ -284,7 +284,10 @@ local function build_gui(player)
                       style = "subheader_caption_label",
                       ref = { "subheader_title" },
                     },
-                    { type = "empty-widget", style = "sp_stretchable_empty_widget" },
+                    {
+                      type = "empty-widget",
+                      style_mods = { horizontally_stretchable = true, horizontally_squashable = true }
+                    },
                     {
                       type = "checkbox",
                       state = true,
