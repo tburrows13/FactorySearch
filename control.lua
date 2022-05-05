@@ -11,10 +11,15 @@ script.on_init(
 )
 
 script.on_configuration_changed(
-  function(data)
+  function()
     -- Destroy all GUIs
     for player_index, player_data in pairs(global.players) do
-      ui.destroy_gui(game.get_player(player_index), player_data)
+      local player = game.get_player(player_index)
+      if player then
+        ui.destroy_gui(player, player_data)
+      else
+        global.players[player_index] = nil
+      end
     end
   end
 )
