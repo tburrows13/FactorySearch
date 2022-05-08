@@ -70,15 +70,28 @@ local function build_surface_results(surface_name, surface_data)
       if group.signal_count then
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
       end
+      local sprite = "entity/" .. entity_name
+      if not game.is_valid_sprite_path(sprite) then
+        sprite = "item/" .. entity_name
+        if not game.is_valid_sprite_path(sprite) then
+          sprite = "fluid/" .. entity_name
+          if not game.is_valid_sprite_path(sprite) then
+            sprite = "recipe/" .. entity_name
+            if not game.is_valid_sprite_path(sprite) then
+              sprite = "utility/questionmark"
+            end
+          end
+        end
+      end
       table.insert(gui_elements,
         {
           type = "sprite-button",
-          sprite = "entity/" .. entity_name,
+          sprite = sprite,
           mouse_button_filter = { "left" },
           tooltip = {  "", "[font=default-bold]", group.localised_name, "[/font]", extra_info, "\n", {"gui-train.open-in-map"} },
           style = "slot_button",
           number = group.count,
-          tags = {position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group)},
+          tags = { position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group) },
           actions = { on_click = { gui = "search", action = "open_location_in_map" } },
         }
       )
