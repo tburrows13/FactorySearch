@@ -26,6 +26,22 @@ local function extend(t1, t2)
   end
 end
 
+-- Some entities are secretly swapped around by their mod. This allows all entities associated
+-- with an item to be found by 'Entity' search
+local mod_placeholder_entities = {
+  ['sp-spidertron-dock'] =  -- SpidertronPatrols
+    {'sp-spidertron-dock-0', 'sp-spidertron-dock-30', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
+
+  ['offshore-pump-0'] = 'offshore-pump-0',  -- P-U-M-P-S
+  ['offshore-pump-1'] = 'offshore-pump-1',
+  ['offshore-pump-2'] = 'offshore-pump-2',
+  ['offshore-pump-3'] = 'offshore-pump-3',
+  ['offshore-pump-4'] = 'offshore-pump-4',
+
+  ['burner-offshore-pump'] = 'burner-offshore-pump',  -- BurnerOffshorePump
+  ['electric-offshore-pump'] = 'electric-offshore-pump',
+}
+
 -- "character-corpse" doesn't have force so must be checked seperately
 local product_entities = {"assembling-machine", "furnace", "offshore-pump", "mining-drill"}
 local inventory_entities = {"container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
@@ -351,11 +367,16 @@ function find_machines(target_item, force, state, override_surface)
 
     -- Entities
     if target_is_item and state.entities then
-      local item_prototype = game.item_prototypes[target_name]
-      local target_entity_name = target_name
-      if item_prototype.place_result then
-        target_entity_name = item_prototype.place_result.name
+      local target_entity_name = mod_placeholder_entities[target_name]
+
+      if not target_entity_name then
+        local item_prototype = game.item_prototypes[target_name]
+        target_entity_name = target_name
+        if item_prototype.place_result then
+          target_entity_name = item_prototype.place_result.name
+        end
       end
+
       local entities = surface.find_entities_filtered{
         name = target_entity_name,
         force = force,

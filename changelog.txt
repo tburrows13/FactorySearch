@@ -2,7 +2,8 @@
 Version: 1.5.4
 Date: 8 May 2022
   Bugfixes:
-    - Fixed crash when searching for a virtual signal when 'Logistics' in enabled and 'Signal' is not
+    - Fixed crash when searching for a virtual signal when 'Logistics' is enabled and 'Signal' is not
+    - Fixed 'Entity' search not finding certain modded entities (e.g. electric offshore pumps, spidertron docks)
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.3
 Date: 8 May 2022
