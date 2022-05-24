@@ -70,15 +70,18 @@ local function build_surface_results(surface_name, surface_data)
       if group.signal_count then
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
       end
-      local sprite = "entity/" .. entity_name
+      local sprite = "item/" .. entity_name
       if not game.is_valid_sprite_path(sprite) then
-        sprite = "item/" .. entity_name
+        sprite = "fluid/" .. entity_name
         if not game.is_valid_sprite_path(sprite) then
-          sprite = "fluid/" .. entity_name
+          sprite = "entity/" .. entity_name
           if not game.is_valid_sprite_path(sprite) then
             sprite = "recipe/" .. entity_name
             if not game.is_valid_sprite_path(sprite) then
-              sprite = "utility/questionmark"
+              sprite = "virtual-signal/" .. entity_name
+              if not game.is_valid_sprite_path(sprite) then
+                sprite = "utility/questionmark"
+              end
             end
           end
         end
@@ -201,6 +204,12 @@ local function build_result_gui(data, frame, state_valid)
             column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.signals)
+          },
+          {
+            type = "table",
+            column_count = 10,
+            style = "logistics_slot_table",
+            children = build_surface_results(surface_name, surface_data.map_tags)
           },
         }
       }
@@ -423,6 +432,16 @@ local function build_gui(player)
                             on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
                           }
                         },
+                        {
+                          type = "checkbox",
+                          state = false,
+                          caption = {"search-gui.map-tags-name"},
+                          tooltip = {"search-gui.map-tags-tooltip"},
+                          ref = { "include_map_tags" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
                         --[[{
                           type = "sprite-button",
                           style = "slot_sized_button",
@@ -527,6 +546,7 @@ local function generate_state(refs)
     ground_items = refs.include_ground_items.state,
     entities = refs.include_entities.state,
     signals = refs.include_signals.state,
+    map_tags = refs.include_map_tags.state
   }
 end
 
@@ -552,7 +572,7 @@ local function start_search(player, player_data)
       if not refs.all_surfaces.state then
         surface = player.surface
       end
-      data = find_machines(item, force.name, state, surface)
+      data = find_machines(item, force, state, surface)
     end
     build_result_gui(data, refs.result_flow, state_valid)
     refs.subheader_title.caption = get_signal_name(item) or ""

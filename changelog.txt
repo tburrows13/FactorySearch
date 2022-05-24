@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.4
 Date: 8 May 2022
+  Features:
+    - Added 'Tag' search option to search for map tags
   Bugfixes:
     - Fixed crash when searching for a virtual signal when 'Logistics' is enabled and 'Signal' is not
     - Fixed 'Entity' search not finding certain modded entities (e.g. electric offshore pumps, spidertron docks)

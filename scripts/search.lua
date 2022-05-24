@@ -187,6 +187,41 @@ function add_entity_signal(entity, surface_data, signal_count)
   group.signal_count = group_signal_count + signal_count
 end
 
+function add_tag(tag, surface_data)
+  -- An alternative to add_entity*, for map tags
+  local icon_name = tag.icon.name
+  local tag_surface_data = surface_data[icon_name] or {}
+
+  -- Tag groups always have size 1
+  local tag_position = tag.position
+  local tag_box_size = 8
+  local selection_box = {
+    left_top = {
+      x = tag_position.x - tag_box_size,
+      y = tag_position.y - tag_box_size,
+    },
+    right_bottom = {
+      x = tag_position.x + tag_box_size,
+      y = tag_position.y + tag_box_size,
+    }
+  }
+
+  local localised_name = tag.text
+  if localised_name == "" then localised_name = { "search-gui.default-map-tag-name" } end
+
+  local group = {
+    count = 1,
+    avg_position = tag_position,
+    entity_name = tag.icon.name,
+    entities = {{  -- Mock LuaEntity object, which only has its selection box attribute accessed by ui.lua
+      selection_box = selection_box
+    }},
+    localised_name = localised_name,
+  }
+  table.insert(tag_surface_data, group)
+
+  surface_data[icon_name] = tag_surface_data
+end
 
 function find_machines(target_item, force, state, override_surface)
   local data = {}
@@ -201,12 +236,27 @@ function find_machines(target_item, force, state, override_surface)
   local target_is_virtual = target_type == "virtual"
 
   for _, surface in pairs(filtered_surfaces(override_surface)) do
-    local surface_data = { producers = {}, storage = {}, logistics = {}, requesters = {}, ground_items = {}, entities = {}, signals = {} }
+    local surface_data = { producers = {}, storage = {}, logistics = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
 
     -- Signals
     if state.signals then
-      search_signals(target_item, force, surface, surface_data)
+      search_signals(target_item, force.name, surface, surface_data)
     end
+
+    -- Map tags
+    if state.map_tags then
+      local tags = force.find_chart_tags(surface.name)
+      for _, tag in pairs(tags) do
+        local tag_icon = tag.icon
+        if tag_icon and tag_icon.type == target_type and tag_icon.name == target_name then
+          add_tag(tag, surface_data.map_tags)
+        end
+      end
+    end
+
+    -- No point passing around the LuaForce object when we don't need it anymore
+    force = force.name
+
     if target_is_virtual then
       -- We've done all processing that there is to be done on virtual signals
       goto continue

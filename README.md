@@ -4,7 +4,7 @@ Have you ever asked yourself any of these questions?
 
 "Where are the repair packs being made?"
 
-"How many green belt machines do I have?"
+"How many green circuit machines do I have?"
 
 "Which planet did I build my iron smelters on?"
 
@@ -27,6 +27,7 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
     - Ground: Search for this item on the ground
     - Request: Search for logistic containers that are requesting this item
     - Signal: Search for entities that are sending this signal (due to API limitations, some types of entity can't be searched for by signal)
+    - Tag: Search for tags on the map that have this icon
 - Factory Search will present a list of machines matching the selected search modes, grouped by name and proximity
 - Displays results from all surfaces (e.g. all Space Exploration planets are searched)
 - Click on a result group to open it in the map
