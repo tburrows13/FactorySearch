@@ -190,9 +190,10 @@ function find_machines(target_item, force, state, override_surface)
     -- Signals
     if state.signals then
       search_signals(target_item, force, surface, surface_data)
-      if target_is_virtual then
-        goto continue
-      end
+    end
+    if target_is_virtual then
+      -- We've done all processing that there is to be done on virtual signals
+      goto continue
     end
 
     -- Producers and Storage

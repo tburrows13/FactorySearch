@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.5.4
+Date: 8 May 2022
+  Bugfixes:
+    - Fixed crash when searching for a virtual signal when 'Logistics' in enabled and 'Signal' is not
+---------------------------------------------------------------------------------------------------
 Version: 1.5.3
 Date: 8 May 2022
   Bugfixes:
