@@ -5,8 +5,7 @@ local search_shortcut = {
   associated_control_input = "search-factory",
   toggleable = true,
   order = "a",
-  icon =
-  {
+  icon = {
     filename = "__core__/graphics/icons/search-black.png",
     size = 32,
     flags = {"gui-icon"}

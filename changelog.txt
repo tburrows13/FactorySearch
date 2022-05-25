@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.5.4
-Date: 8 May 2022
+Version: 1.6.0
+Date: 25 May 2022
   Features:
     - Added 'Tag' search option to search for map tags
   Changes:

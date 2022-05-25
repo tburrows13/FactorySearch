@@ -41,8 +41,9 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 - Other search modes:
     - Modules?
     - Ingredients?
-    - Map tags?
+- Arrows from player position to search results
 - More streamlined item selection workflow
+- Integration with [Recipe Book](https://mods.factorio.com/mod/RecipeBook) and [Quick Item Search](https://mods.factorio.com/mod/QuickItemSearch)
 - Options for admins to set when playing pvp around forces and being able to search for corpses and ground items in hidden chunks
 - 'Expanded' view, with inline cameras like the train overview GUI (not for many months…)
 
