@@ -254,9 +254,6 @@ function find_machines(target_item, force, state, override_surface)
       end
     end
 
-    -- No point passing around the LuaForce object when we don't need it anymore
-    force = force.name
-
     if target_is_virtual then
       -- We've done all processing that there is to be done on virtual signals
       goto continue
