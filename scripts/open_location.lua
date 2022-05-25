@@ -85,18 +85,19 @@ end
 function open_location(player, data)
   local surface_name = data.surface
   local position = data.position
-  if surface_name == player.surface.name then
-    player.zoom_to_world(position, 1.7)
-    draw_markers(player, surface_name, data.selection_boxes)
+
+  draw_markers(player, surface_name, data.selection_boxes)
+
+  if remote.interfaces["space-exploration"] and
+    remote.call("space-exploration", "remote_view_is_unlocked", { player = player }) then
+    -- If Space Exploration's remote view is an option, then always use it
+    if surface_name == "nauvis" then
+      surface_name = "Nauvis"
+    end
+    remote.call("space-exploration", "remote_view_start", {player = player, zone_name = surface_name, position = position})
   else
-    draw_markers(player, surface_name, data.selection_boxes)
-    -- Try using Space Exploration's remote view
-    -- /c remote.call("space-exploration", "remote_view_start", {player=game.player, zone_name = "Nauvis", position={x=100,y=200}, location_name="Point of Interest", freeze_history=true})
-    if remote.interfaces["space-exploration"] then
-      if surface_name == "nauvis" then
-        surface_name = "Nauvis"
-      end
-      remote.call("space-exploration", "remote_view_start", {player=player, zone_name = surface_name, position=position})
+    if surface_name == player.surface.name then
+      player.zoom_to_world(position, 1.7)
     else
       player.create_local_flying_text{text = {"search-gui.wrong-surface"}, create_at_cursor = true}
     end
