@@ -3,7 +3,7 @@ require "scripts.open_location"
 
 local function toggle_fab(elem, sprite, state)
   if state then
-    elem.style = "flib_selected_frame_action_button"
+    elem.style = "fs_flib_selected_frame_action_button"
     elem.sprite = sprite .. "_black"
   else
     elem.style = "frame_action_button"

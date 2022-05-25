@@ -6,6 +6,7 @@ Date: 8 May 2022
   Changes:
     - Search results on the same surface also open in Navigation Satellite once it is unlocked (when using Space Exploration)
   Bugfixes:
+    - Fixed crash when pinning interface if Factorio Library (flib) is not installed
     - Fixed crash when searching for a virtual signal when 'Logistics' is enabled and 'Signal' is not
     - Fixed 'Entity' search not finding certain modded entities (e.g. electric offshore pumps, spidertron docks)
 ---------------------------------------------------------------------------------------------------
@@ -24,7 +25,7 @@ Date: 30 April 2022
   Features:
     - Option to search only the surface (planet) that the player is on
   Bugfixes:
-    - Fixed crash when opening the search interface when Spidertron Patrols is not installed
+    - Fixed crash when opening the search interface if Spidertron Patrols is not installed
 ---------------------------------------------------------------------------------------------------
 Version: 1.5.0
 Date: 29 April 2022
