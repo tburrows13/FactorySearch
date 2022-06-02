@@ -2,6 +2,7 @@
 Version: 1.7.0
 Date: ???
   Features:
+    - Added 'Module' search option to search for modules in machines
     - Added arrow pointing from player to highlighted results
     - Optimised search time by ≈20% when many search modes are enabled
   Bugfixes:

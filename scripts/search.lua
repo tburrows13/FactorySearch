@@ -32,6 +32,7 @@ local list_to_map = util.list_to_map
 local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }
 local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
 local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
+local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
 local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "item-request-proxy" }
 local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "inserter", "logistic-robot", "construction-robot" }
 local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
@@ -153,6 +154,12 @@ local function add_entity_storage_fluid(entity, surface_data, fluid_count)
   group.fluid_count = group_fluid_count + fluid_count
 end
 
+local function add_entity_module(entity, surface_data, module_count)
+  local group = add_entity(entity, surface_data)
+  local group_module_count = group.module_count or 0
+  group.module_count = group_module_count + module_count
+end
+
 local function add_entity_request(entity, surface_data, request_count)
   local group = add_entity(entity, surface_data)
   local group_request_count = group.request_count or 0
@@ -214,7 +221,7 @@ function find_machines(target_item, force, state, override_surface)
   local target_is_virtual = target_type == "virtual"
 
   for _, surface in pairs(filtered_surfaces(override_surface)) do
-    local surface_data = { producers = {}, storage = {}, logistics = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
+    local surface_data = { producers = {}, storage = {}, logistics = {}, modules = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
 
     local entity_types = {}
     if (target_is_item or target_is_fluid) and state.producers then
@@ -315,6 +322,27 @@ function find_machines(target_item, force, state, override_surface)
           local item_count = entity.get_item_count(target_name)
           if item_count > 0 then
             add_entity_storage(entity, surface_data.storage, item_count)
+          end
+        end
+      end
+
+      if state.modules then
+        if target_is_item and modules_entities[entity_type] then
+          local inventory
+          if entity_type == "beacon" then
+            inventory = entity.get_inventory(defines.inventory.beacon_modules)
+          elseif entity_type == "lab" then
+            inventory = entity.get_inventory(defines.inventory.lab_modules)
+          elseif entity_type == "mining-drill" then
+            inventory = entity.get_inventory(defines.inventory.mining_drill_modules)
+          elseif entity_type == "assembling-machine" or entity_type == "furnace" or entity_type == "rocket-silo" then
+            inventory = entity.get_inventory(defines.inventory.assembling_machine_modules)
+          end
+          if inventory then
+            local item_count = inventory.get_item_count(target_name)
+            if item_count > 0 then
+              add_entity_module(entity, surface_data.modules, item_count)
+            end
           end
         end
       end

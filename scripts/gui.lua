@@ -64,6 +64,9 @@ local function build_surface_results(surface_name, surface_data)
       if group.fluid_count then
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-fluid-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.fluid_count), true)}
       end
+      if group.module_count then
+        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.module-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.module_count), true)}
+      end
       if group.request_count then
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.request-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.request_count), true)}
       end
@@ -179,6 +182,11 @@ local function build_result_gui(data, frame, state_valid)
             column_count = 10,
             style = "logistics_slot_table",
             children = build_surface_results(surface_name, surface_data.logistics)
+          },          {
+            type = "table",
+            column_count = 10,
+            style = "logistics_slot_table",
+            children = build_surface_results(surface_name, surface_data.modules)
           },
           {
             type = "table",
@@ -394,6 +402,16 @@ local function build_gui(player)
                         {
                           type = "checkbox",
                           state = false,
+                          caption = {"search-gui.modules-name"},
+                          tooltip = {"search-gui.modules-tooltip", "[entity=assembling-machine-2][entity=steel-furnace][entity=electric-mining-drill][entity=beacon][entity=lab][entity=rocket-silo]"},
+                          ref = { "include_modules" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = false,
                           caption = {"search-gui.entities-name"},
                           tooltip = {"search-gui.entities-tooltip"},
                           ref = { "include_entities" },
@@ -541,6 +559,7 @@ local function generate_state(refs)
     producers = refs.include_machines.state,
     storage = refs.include_inventories.state,
     logistics = refs.include_logistics.state,
+    modules = refs.include_modules.state,
     requesters = refs.include_requesters.state,
     ground_items = refs.include_ground_items.state,
     entities = refs.include_entities.state,
