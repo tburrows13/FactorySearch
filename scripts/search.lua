@@ -55,25 +55,6 @@ local function map_to_list(map)
   return list
 end
 
-local function filtered_surfaces(override_surface)
-  if override_surface then
-    return {override_surface}
-  end
-
-  -- Skip certain modded surfaces that won't have assemblers/chests placed on them
-  local surfaces = {}
-  for _, surface in pairs(game.surfaces) do
-    local surface_name = surface.name
-    if string.sub(surface_name, -12) ~= "-transformer"  -- Power Overload
-        and string.sub(surface_name, 0, 8) ~= "starmap-"  -- Space Exploration
-        and surface_name ~= "aai-signals"  -- AAI Signals
-      then
-      table.insert(surfaces, surface)
-    end
-  end
-  return surfaces
-end
-
 
 function add_entity(entity, surface_data)
   -- Group entities

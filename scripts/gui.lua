@@ -321,7 +321,7 @@ local function build_gui(player)
                       type = "checkbox",
                       state = true,
                       caption = { "search-gui.all-surfaces" },
-                      --tooltip = {"search-gui.storage-tooltip"},
+                      visible = global.multiple_surfaces,
                       ref = { "all_surfaces" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
