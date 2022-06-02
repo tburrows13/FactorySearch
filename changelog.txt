@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.7.0
-Date: ???
+Date: 2 June 2022
   Features:
     - Added 'Module' search option to search for modules in machines
     - Added arrow pointing from player to highlighted results

@@ -18,11 +18,11 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 ## Features
 
 - Press `Control + Shift + F` to open search interface (can be changed in Settings > Controls)
-- Select any item or fluid
 - Pick any combination of the following search modes
     - Product: Search for machines that produce this item or fluid
     - Storage: Search for containers that contain this item or fluid
     - Logistics: Search for logistics entities that are transporting this item
+    - Module: Search for machines that are using this module
     - Entity: Search for built entities of this item
     - Ground: Search for this item on the ground
     - Request: Search for logistic containers that are requesting this item
@@ -33,18 +33,15 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 - Click on a result group to open it in the map
 - Opens results from other planets in the Navigation Satellite if using Space Exploration
 - `Control + Shift + Click` on any game object (e.g. built entity, inventory item, recipe) to open the search interface with that item selected
-- Supports multiplayer
+- Supports multiplayer and compatible with any mod
 
 -----
 ## Future Updates?
 
-- Other search modes:
-    - Modules?
-    - Ingredients?
-- Arrows from player position to search results
+- Better categorisation of search modes
 - More streamlined item selection workflow
 - Integration with [Recipe Book](https://mods.factorio.com/mod/RecipeBook) and [Quick Item Search](https://mods.factorio.com/mod/QuickItemSearch)
-- Options for admins to set when playing pvp around forces and being able to search for corpses and ground items in hidden chunks
+- Better support for PvP so that corpses and ground items aren't shown in hidden chunks
 - 'Expanded' view, with inline cameras like the train overview GUI (not for many months…)
 
 -----
@@ -57,3 +54,4 @@ Thank you to:
 
 - [raiguard](https://mods.factorio.com/user/raiguard) for [flib](https://mods.factorio.com/mod/flib) (GUI library) and [Quick Item Search](https://mods.factorio.com/mod/QuickItemSearch) (provided initial framework)
 - [justarandomgeek](https://mods.factorio.com/user/justarandomgeek) for his excellent [mod debugger](https://github.com/justarandomgeek/vscode-factoriomod-debug)
+- [Earendel](https://mods.factorio.com/user/Earendel) for the character corpse icon
