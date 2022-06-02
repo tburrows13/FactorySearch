@@ -3,6 +3,7 @@ Version: 1.7.0
 Date: ???
   Features:
     - Added arrow pointing from player to highlighted results
+    - Optimised search time by ≈20% when many search modes are enabled
   Bugfixes:
     - Fixed results not opening when viewing the map whilst in Navigation Satellite
     - Fixed interface not responding to E (close) after opening results in Navigation Satellite (waiting for SE to fix this properly)

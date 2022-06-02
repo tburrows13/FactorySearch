@@ -42,12 +42,34 @@ local mod_placeholder_entities = {
   ['electric-offshore-pump'] = 'electric-offshore-pump',
 }
 
+local list_to_map = util.list_to_map
 -- "character-corpse" doesn't have force so must be checked seperately
-local product_entities = {"assembling-machine", "furnace", "offshore-pump", "mining-drill"}
-local inventory_entities = {"container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle"}  -- get_item_count
-local fluid_entities = {"storage-tank", "fluid-wagon"}
-local product_and_inventory_entities = concat(product_entities, inventory_entities)
-local product_and_fluid_entities = concat(product_entities, fluid_entities)
+local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }
+local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
+local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
+local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "item-request-proxy" }
+local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "inserter", "logistic-robot", "construction-robot" }
+local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
+local ground_entities = list_to_map{ "item-entity" }
+local signal_entities = list_to_map{ "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall" }
+--local product_and_inventory_entities = concat(product_entities, inventory_entities)
+--local product_and_fluid_entities = concat(product_entities, fluid_entities)
+
+local function add_entity_type(type_list, to_add_list)
+  for name, _ in pairs(to_add_list) do
+    type_list[name] = true
+  end
+end
+
+local function map_to_list(map)
+  local i = 1
+  local list = {}
+  for name, _ in pairs(map) do
+    list[i] = name
+    i = i + 1
+  end
+  return list
+end
 
 -- lookup tree in order: include_products, include_inventories, item_type
 local entity_table = {
@@ -72,9 +94,9 @@ local entity_table = {
     }
   }
 }
-local function entity_types(item_type, state)
+--[[local function entity_types(item_type, state)
   return entity_table[state.producers][state.storage][item_type]
-end
+end]]
 
 local function filtered_surfaces(override_surface)
   if override_surface then
@@ -238,44 +260,64 @@ function find_machines(target_item, force, state, override_surface)
   for _, surface in pairs(filtered_surfaces(override_surface)) do
     local surface_data = { producers = {}, storage = {}, logistics = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
 
-    -- Signals
+    local entity_types = {}
+    if (target_is_item or target_is_fluid) and state.producers then
+      add_entity_type(entity_types, product_entities)
+    end
+    if target_is_item and state.storage then
+      add_entity_type(entity_types, item_storage_entities)
+    end
+    if target_is_fluid and state.storage then
+      add_entity_type(entity_types, fluid_storage_entities)
+    end
+    if target_is_item and state.requesters then
+      add_entity_type(entity_types, request_entities)
+    end
+    if target_is_item and state.logistics then
+      add_entity_type(entity_types, item_logistic_entities)
+    end
+    if target_is_fluid and state.logistics then
+      add_entity_type(entity_types, fluid_logistic_entities)
+    end
+    if target_is_item and state.ground_items then
+      add_entity_type(entity_types, ground_entities)
+    end
     if state.signals then
-      search_signals(target_item, force.name, surface, surface_data)
+      add_entity_type(entity_types, signal_entities)
     end
 
-    -- Map tags
-    if state.map_tags then
-      local tags = force.find_chart_tags(surface.name)
-      for _, tag in pairs(tags) do
-        local tag_icon = tag.icon
-        if tag_icon and tag_icon.type == target_type and tag_icon.name == target_name then
-          add_tag(tag, surface_data.map_tags)
+    local type_list = map_to_list(entity_types)
+    local entities = surface.find_entities_filtered{
+      type = type_list,
+      force = force,
+    }
+
+    -- Corpses don't have a force: find seperately
+    if state.storage and target_is_item then
+      local corpses = surface.find_entities_filtered{
+        type = "character-corpse",
+      }
+      extend(entities, corpses)
+    end
+
+    for _, entity in pairs(entities) do
+      local entity_type = entity.type
+
+      -- Signals
+      if state.signals then
+        if signal_entities[entity_type] then
+          search_signals(entity, target_item, surface_data)
         end
       end
-    end
-
-    if target_is_virtual then
-      -- We've done all processing that there is to be done on virtual signals
-      goto continue
-    end
-
-    -- Producers and Storage
-    if (state.producers or state.storage) then
-      local entities = surface.find_entities_filtered{
-        type = entity_types(target_item.type, state),
-        force = force,
-      }
-      if state.storage and target_is_item then
-        -- Corpses don't have a force
-        local corpses = surface.find_entities_filtered{
-          type = "character-corpse",
-        }
-        extend(entities, corpses)
+      if target_is_virtual then
+        -- We've done all processing that there is to be done on virtual signals
+        goto continue
       end
 
-      for _, entity in pairs(entities) do
+
+      -- Producers
+      if state.producers then
         local recipe
-        local entity_type = entity.type
         if entity_type == "assembling-machine" then
           recipe = entity.get_recipe()
         elseif entity_type == "furnace" then
@@ -293,17 +335,6 @@ function find_machines(target_item, force, state, override_surface)
           if entity.get_fluid_count(target_name) > 0 then
             add_entity(entity, surface_data.producers)
           end
-        elseif target_is_fluid and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
-          local fluid_count = entity.get_fluid_count(target_name)
-          if fluid_count > 0 then
-            add_entity_storage_fluid(entity, surface_data.storage, fluid_count)
-          end
-        elseif target_is_item then
-          -- Entity is an inventory entity
-          local item_count = entity.get_item_count(target_name)
-          if item_count > 0 then
-            add_entity_storage(entity, surface_data.storage, item_count)
-          end
         end
         if recipe then
           local products = recipe.products
@@ -315,17 +346,27 @@ function find_machines(target_item, force, state, override_surface)
           end
         end
       end
-    end
 
-    -- Requesters
-    if target_is_item and state.requesters then
-      local entities = surface.find_entities_filtered{
-        type = { "logistic-container", "character", "spider-vehicle", "item-request-proxy" } ,
-        force = force,
-      }
-      for _, entity in pairs(entities) do
+      -- Storage
+      if state.storage then
+        if target_is_fluid and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
+          local fluid_count = entity.get_fluid_count(target_name)
+          if fluid_count > 0 then
+            add_entity_storage_fluid(entity, surface_data.storage, fluid_count)
+          end
+        elseif entity_type == "character-corpse" or item_storage_entities[entity_type] then
+          -- Entity is an inventory entity
+          local item_count = entity.get_item_count(target_name)
+          if item_count > 0 then
+            add_entity_storage(entity, surface_data.storage, item_count)
+          end
+        end
+      end
+
+      -- Requesters
+      if target_is_item and state.requesters then
         -- Buffer and Requester chests
-        if entity.type == "logistic-container" then
+        if entity_type == "logistic-container" then
           for i=1, entity.request_slot_count do
             local request = entity.get_request_slot(i)
             if request and request.name == target_name then
@@ -335,7 +376,7 @@ function find_machines(target_item, force, state, override_surface)
               end
             end
           end
-        elseif entity.type == "character" then
+        elseif entity_type == "character" then
           for i=1, entity.request_slot_count do
             local request = entity.get_personal_logistic_slot(i)
             if request and request.name == target_name then
@@ -345,7 +386,7 @@ function find_machines(target_item, force, state, override_surface)
               end
             end
           end
-        elseif entity.type == "spider-vehicle" then
+        elseif entity_type == "spider-vehicle" then
           for i=1, entity.request_slot_count do
             local request = entity.get_vehicle_logistic_slot(i)
             if request and request.name == target_name then
@@ -355,37 +396,27 @@ function find_machines(target_item, force, state, override_surface)
               end
             end
           end
-        else
+        elseif entity_type == "item-request-proxy" then
           local request_count = entity.item_requests[target_name]
           if request_count ~= nil then
             add_entity_request(entity.proxy_target, surface_data.requesters, request_count)
           end
         end
       end
-    end
 
-    -- Ground
-    if target_is_item and state.ground_items then
-      local entities = surface.find_entities_filtered{
-        type = "item-entity",
-        name = "item-on-ground",
-      }
-      for _, entity in pairs(entities) do
-        if entity.stack.name == target_name then
-          add_entity(entity, surface_data.ground_items)
+      -- Ground
+      if target_is_item and state.ground_items then
+        if entity_type == "item-entity" and entity.name == "item-on-ground" then
+          if entity.stack.name == target_name then
+            add_entity(entity, surface_data.ground_items)
+          end
         end
       end
-    end
 
-    -- Logistics
-    if state.logistics then
-      if target_is_item then
-        local entities = surface.find_entities_filtered{
-          type = { "transport-belt", "splitter", "underground-belt", "inserter", "logistic-robot", "construction-robot" },
-          force = force,
-        }
-        for _, entity in pairs(entities) do
-          if entity.type == "inserter" then
+      -- Logistics
+      if state.logistics then
+        if item_logistic_entities[entity_type] then
+          if entity_type == "inserter" then
             local held_stack = entity.held_stack
             if held_stack and held_stack.valid_for_read and held_stack.name == target_name then
               add_entity_storage(entity, surface_data.logistics, held_stack.count)
@@ -396,18 +427,24 @@ function find_machines(target_item, force, state, override_surface)
               add_entity_storage(entity, surface_data.logistics, item_count)
             end
           end
-        end
-      else
-        -- So target.type == "fluid"
-        local entities = surface.find_entities_filtered{
-          type = { "pipe", "pipe-to-ground", "pump" },
-          force = force,
-        }
-        for _, entity in pairs(entities) do
+        elseif fluid_logistic_entities[entity_type] then
+          -- So target.type == "fluid"
           local fluid_count = entity.get_fluid_count(target_name)
           if fluid_count > 0 then
             add_entity_storage_fluid(entity, surface_data.logistics, fluid_count)
           end
+        end
+      end
+      ::continue::
+    end
+
+    -- Map tags
+    if state.map_tags then
+      local tags = force.find_chart_tags(surface.name)
+      for _, tag in pairs(tags) do
+        local tag_icon = tag.icon
+        if tag_icon and tag_icon.type == target_type and tag_icon.name == target_name then
+          add_tag(tag, surface_data.map_tags)
         end
       end
     end
@@ -424,7 +461,7 @@ function find_machines(target_item, force, state, override_surface)
         end
       end
 
-      local entities = surface.find_entities_filtered{
+      entities = surface.find_entities_filtered{
         name = target_entity_name,
         force = force,
       }
@@ -432,7 +469,6 @@ function find_machines(target_item, force, state, override_surface)
         add_entity(entity, surface_data.entities)
       end
     end
-    ::continue::
     data[surface.name] = surface_data
   end
   return data
