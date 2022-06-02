@@ -21,8 +21,6 @@ function clear_markers(player)
 end
 
 local function draw_markers(player, surface, selection_boxes)
-  clear_markers(player)
-
   -- Draw new markers
   for _, selection_box in pairs(selection_boxes) do
     if selection_box.orientation then
@@ -125,7 +123,13 @@ function open_location(player, data)
     if surface_name == "nauvis" then
       surface_name = "Nauvis"
     end
+    local gui = player.opened
     remote.call("space-exploration", "remote_view_start", {player = player, zone_name = surface_name, position = position})
+    player.opened = gui
+    if remote.call("space-exploration", "remote_view_is_active", { player = player }) then
+      -- remote_view_start worked
+      player.close_map()
+    end
   else
     if surface_name == player.surface.name then
       player.zoom_to_world(position, 1.7)

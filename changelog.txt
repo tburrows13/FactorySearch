@@ -3,6 +3,9 @@ Version: 1.7.0
 Date: ???
   Features:
     - Added arrow pointing from player to highlighted results
+  Bugfixes:
+    - Fixed results not opening when viewing the map whilst in Navigation Satellite
+    - Fixed interface not responding to E (close) after opening results in Navigation Satellite (waiting for SE to fix this properly)
 ---------------------------------------------------------------------------------------------------
 Version: 1.6.1
 Date: 25 May 2022
