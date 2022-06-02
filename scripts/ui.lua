@@ -1,4 +1,4 @@
-local gui = require("__FactorySearch__.scripts.gui")
+local gui = require("__FactorySearch__.scripts.flib-gui")
 require "scripts.open_location"
 
 local function toggle_fab(elem, sprite, state)
