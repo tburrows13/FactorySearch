@@ -3,21 +3,6 @@ search_signals = require "__FactorySearch__.scripts.search-signals"
 
 local group_gap_size = 16
 
-
-local function concat(t1,t2)
-  local new_table = {}
-  local t1_len = #t1
-  local t2_len = #t2
-
-  for i=1, t1_len do
-      new_table[i] = t1[i]
-  end
-  for i=1, t2_len do
-    new_table[t1_len + i] = t2[i]
-  end
-  return new_table
-end
-
 local function extend(t1, t2)
   local t1_len = #t1
   local t2_len = #t2
@@ -52,8 +37,6 @@ local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "under
 local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
 local ground_entities = list_to_map{ "item-entity" }
 local signal_entities = list_to_map{ "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall" }
---local product_and_inventory_entities = concat(product_entities, inventory_entities)
---local product_and_fluid_entities = concat(product_entities, fluid_entities)
 
 local function add_entity_type(type_list, to_add_list)
   for name, _ in pairs(to_add_list) do
@@ -70,33 +53,6 @@ local function map_to_list(map)
   end
   return list
 end
-
--- lookup tree in order: include_products, include_inventories, item_type
-local entity_table = {
-  [true] = {
-    [true] = {
-      item = product_and_inventory_entities,
-      fluid = product_and_fluid_entities,
-    },
-    [false] = {
-      item = product_entities,
-      fluid = product_entities,
-    }
-  },
-  [false] = {
-    [true] = {
-      item = inventory_entities,
-      fluid = fluid_entities,
-    },
-    [false] = {
-      item = {},
-      fluid = {},
-    }
-  }
-}
---[[local function entity_types(item_type, state)
-  return entity_table[state.producers][state.storage][item_type]
-end]]
 
 local function filtered_surfaces(override_surface)
   if override_surface then
