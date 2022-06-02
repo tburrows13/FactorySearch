@@ -90,8 +90,7 @@ local function build_surface_results(surface_name, surface_data)
         {
           type = "sprite-button",
           sprite = sprite,
-          mouse_button_filter = { "left" },
-          tooltip = {  "", "[font=default-bold]", group.localised_name, "[/font]", extra_info, "\n", {"gui-train.open-in-map"} },
+          tooltip = {  "", "[font=default-bold]", group.localised_name, "[/font]", extra_info, "\n", {"search-gui.result-tooltip"} },
           style = "slot_button",
           number = group.count,
           tags = { position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group) },
@@ -645,7 +644,11 @@ event.on_gui_click(
         end
       elseif msg == "open_location_in_map" then
         local tags = event.element.tags.FactorySearch
-        open_location(player, tags)
+        if event.button == defines.mouse_button_type.left then
+          open_location(player, tags)
+        elseif event.button == defines.mouse_button_type.right then
+          highlight_location(player, tags)
+        end
       elseif msg == "refresh" then
         start_search(player, player_data)
       elseif msg == "checkbox_toggled" then

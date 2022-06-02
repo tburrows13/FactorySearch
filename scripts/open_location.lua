@@ -82,11 +82,42 @@ local function draw_markers(player, surface, selection_boxes)
   end
 end
 
+function draw_arrows(player, surface, position)
+  local character = player.character
+  if (not character) and remote.interfaces["space-exploration"] then
+    character = remote.call("space-exploration", "get_player_character", { player = player })
+  end
+  if character and character.surface.name == surface and not (character.position.x == position.x and character.position.y == position.y) then
+    -- Skip arrow if positions are identical (i.e. target is character)
+    rendering.draw_sprite{
+      sprite = "utility/alert_arrow",
+      x_scale = 4,
+      y_scale = 4,
+      target = character,
+      target_offset = {0, -0.75},
+      orientation_target = position,
+      oriented_offset = {0, -4},
+      surface = surface,
+      time_to_live = 720,
+      players = {player},
+    }
+  end
+end
+
+function highlight_location(player, data)
+  local surface_name = data.surface
+
+  clear_markers(player)
+  draw_markers(player, surface_name, data.selection_boxes)
+  draw_arrows(player, surface_name, data.position)
+
+end
+
 function open_location(player, data)
   local surface_name = data.surface
   local position = data.position
 
-  draw_markers(player, surface_name, data.selection_boxes)
+  highlight_location(player, data)
 
   if remote.interfaces["space-exploration"] and
     remote.call("space-exploration", "remote_view_is_unlocked", { player = player }) then

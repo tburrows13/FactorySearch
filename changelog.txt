@@ -1,8 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.7.0
+Date: ???
+  Features:
+    - Added arrow pointing from player to highlighted results
+---------------------------------------------------------------------------------------------------
 Version: 1.6.1
 Date: 25 May 2022
   Bugfixes:
-    - Possibly fixed crash
+    - Fixed crash when searching multiple surfaces
 ---------------------------------------------------------------------------------------------------
 Version: 1.6.0
 Date: 25 May 2022
