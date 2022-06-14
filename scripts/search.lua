@@ -298,7 +298,7 @@ function find_machines(target_item, force, state, override_surface)
           if fluid_count > 0 then
             add_entity_storage_fluid(entity, surface_data.storage, fluid_count)
           end
-        elseif entity_type == "character-corpse" or item_storage_entities[entity_type] then
+        elseif target_is_item and (entity_type == "character-corpse" or item_storage_entities[entity_type]) then
           -- Entity is an inventory entity
           local item_count = entity.get_item_count(target_name)
           if item_count > 0 then
