@@ -114,6 +114,7 @@ end
 function open_location(player, data)
   local surface_name = data.surface
   local position = data.position
+  local zoom_level = player.mod_settings["fs-initial-zoom"].value
 
   highlight_location(player, data)
 
@@ -129,10 +130,11 @@ function open_location(player, data)
     if remote.call("space-exploration", "remote_view_is_active", { player = player }) then
       -- remote_view_start worked
       player.close_map()
+      player.zoom = zoom_level
     end
   else
     if surface_name == player.surface.name then
-      player.zoom_to_world(position, 1.7)
+      player.zoom_to_world(position, zoom_level)
     else
       player.create_local_flying_text{text = {"search-gui.wrong-surface"}, create_at_cursor = true}
     end

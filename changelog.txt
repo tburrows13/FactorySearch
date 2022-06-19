@@ -1,6 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.7.2
 Date: ???
+  Features:
+    - Added 'Zoom level' setting to control initial zoom when viewing results
+  Changes:
+    - Default zoom level is now much less zoomed in
   Compatability:
     - Fixed arrow disappearing when activating jetpack
 ---------------------------------------------------------------------------------------------------
