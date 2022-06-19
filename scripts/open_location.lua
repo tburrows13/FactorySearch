@@ -21,6 +21,7 @@ function clear_markers(player)
 end
 
 local function draw_markers(player, surface, selection_boxes)
+  local time_to_live = player.mod_settings["fs-highlight-duration"].value * 60
   -- Draw new markers
   for _, selection_box in pairs(selection_boxes) do
     if selection_box.orientation then
@@ -52,7 +53,7 @@ local function draw_markers(player, surface, selection_boxes)
           from = rotated_from,
           to = rotated_to,
           surface = surface,
-          time_to_live = 720,
+          time_to_live = time_to_live,
           players = {player},
         }
       end
@@ -64,7 +65,7 @@ local function draw_markers(player, surface, selection_boxes)
         left_top = selection_box.left_top,
         right_bottom = selection_box.right_bottom,
         surface = surface,
-        time_to_live = 720,
+        time_to_live = time_to_live,
         players = {player},
       }
     end
@@ -96,7 +97,7 @@ function draw_arrows(player, surface, position)
       orientation_target = position,
       oriented_offset = {0, -4},
       surface = surface,
-      time_to_live = 720,
+      time_to_live = player.mod_settings["fs-highlight-duration"].value * 60,
       players = {player},
     }
   end
@@ -108,7 +109,6 @@ function highlight_location(player, data)
   clear_markers(player)
   draw_markers(player, surface_name, data.selection_boxes)
   draw_arrows(player, surface_name, data.position)
-
 end
 
 function open_location(player, data)

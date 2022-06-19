@@ -50,7 +50,7 @@ local function build_surface_results(surface_name, surface_data)
           for name, recipe_info in pairs(group.recipe_list) do
             local string = "\n"
             if multiple_recipes then
-              string = string .. "x" .. recipe_info.count .. " "
+              string = string .. "×" .. recipe_info.count .. " "
             end
             string = string .. "[recipe=" .. name .. "] "
             table.insert(extra_info, string)
@@ -522,13 +522,20 @@ local function open_gui(player, player_data)
   player.set_shortcut_toggled("search-factory", true)
 end
 
+local function after_gui_closed(player)
+  player.set_shortcut_toggled("search-factory", false)
+  if player.mod_settings["fs-clear-highlights-with-gui"].value then
+    clear_markers(player)
+  end
+end
+
 local function destroy_gui(player, player_data)
   local main_frame = player_data.refs.frame
   if main_frame then
     main_frame.destroy()
   end
-  player.set_shortcut_toggled("search-factory", false)
   global.players[player.index] = nil
+  after_gui_closed(player)
 end
 
 local function close_gui(player, player_data)
@@ -538,11 +545,11 @@ local function close_gui(player, player_data)
   else
     local refs = player_data.refs
     refs.frame.visible = false
-    player.set_shortcut_toggled("search-factory", false)
     if player.opened == refs.frame then
       player.opened = nil
     end
     --destroy_gui(player, player_data)
+    after_gui_closed(player)
   end
 end
 
