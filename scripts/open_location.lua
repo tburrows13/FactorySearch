@@ -138,3 +138,15 @@ function open_location(player, data)
     end
   end
 end
+
+-- Move arrow to new character when jetpack is activated
+local function on_character_swapped_event(data)
+  local ids = rendering.get_all_ids("FactorySearch")
+  for _, id in pairs(ids) do
+    local target = rendering.get_target(id)
+    if target and target.entity and target.entity.unit_number == data.old_unit_number then
+      rendering.set_target(id, data.new_character, {0, -0.75})
+    end
+  end
+end
+remote.add_interface("FactorySearch", {on_character_swapped = on_character_swapped_event})
