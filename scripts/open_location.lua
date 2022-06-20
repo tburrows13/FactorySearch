@@ -89,9 +89,9 @@ function draw_arrows(player, surface, position)
   if character and character.surface.name == surface and not (character.position.x == position.x and character.position.y == position.y) then
     -- Skip arrow if positions are identical (i.e. target is character)
     rendering.draw_sprite{
-      sprite = "utility/alert_arrow",
-      x_scale = 4,
-      y_scale = 4,
+      sprite = "fs_arrow",
+      x_scale = 1,
+      y_scale = 1,
       target = character,
       target_offset = {0, -0.75},
       orientation_target = position,

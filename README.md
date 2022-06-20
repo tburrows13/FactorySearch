@@ -52,6 +52,6 @@ You can help by translating this mod into your language using [CrowdIn](https://
 -----
 Thank you to:
 
-- [raiguard](https://mods.factorio.com/user/raiguard) for [flib](https://mods.factorio.com/mod/flib) (GUI library) and [Quick Item Search](https://mods.factorio.com/mod/QuickItemSearch) (provided initial framework)
+- [raiguard](https://mods.factorio.com/user/raiguard) for [flib](https://mods.factorio.com/mod/flib) (GUI library), [Quick Item Search](https://mods.factorio.com/mod/QuickItemSearch) (provided initial framework), and [Better Alert Arrows](https://mods.factorio.com/mod/BetterAlertArrows) (arrow sprite)
 - [justarandomgeek](https://mods.factorio.com/user/justarandomgeek) for his excellent [mod debugger](https://github.com/justarandomgeek/vscode-factoriomod-debug)
 - [Earendel](https://mods.factorio.com/user/Earendel) for the character corpse icon

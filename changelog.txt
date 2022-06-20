@@ -2,6 +2,7 @@
 Version: 1.7.2
 Date: ???
   Features:
+    - Changed arrow sprite to one from Better Alert Arrows (let me know if you have a better suggestion for an arrow sprite)
     - Added 'Clear highlights when closing interface' setting to control whether the highlight boxes and arrow are removed when the interface is closed
     - Added 'Highlight duration' setting to control the length of time that the highlight boxes and arrow exist for
     - Added 'Zoom level' setting to control initial zoom when viewing results
