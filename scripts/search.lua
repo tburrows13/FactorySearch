@@ -189,7 +189,18 @@ function add_tag(tag, surface_data)
   surface_data[icon_name] = tag_surface_data
 end
 
-function find_machines(target_item, force, state, override_surface)
+local function generate_distance_data(surface_data, player_position)
+  local distance = math2d.position.distance
+  for _, entity_groups in pairs(surface_data) do
+    for _, groups in pairs(entity_groups) do
+      for _, group in pairs(groups) do
+        group.distance = distance(group.avg_position, player_position)
+      end
+    end
+  end
+end
+
+function find_machines(target_item, force, state, player_position, player_surface, override_surface)
   local data = {}
   local target_name = target_item.name
   if target_name == nil then
@@ -201,7 +212,7 @@ function find_machines(target_item, force, state, override_surface)
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
 
-  for _, surface in pairs(filtered_surfaces(override_surface)) do
+  for _, surface in pairs(filtered_surfaces(override_surface, player_surface)) do
     local surface_data = { producers = {}, storage = {}, logistics = {}, modules = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
 
     local entity_types = {}
@@ -433,6 +444,9 @@ function find_machines(target_item, force, state, override_surface)
       for _, entity in pairs(entities) do
         add_entity(entity, surface_data.entities)
       end
+    end
+    if surface == player_surface then
+      generate_distance_data(surface_data, player_position)
     end
     data[surface.name] = surface_data
   end

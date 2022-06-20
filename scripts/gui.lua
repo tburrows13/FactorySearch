@@ -35,6 +35,10 @@ local function build_surface_results(surface_name, surface_data)
   local gui_elements = {}
   for entity_name, entity_surface_data in pairs(surface_data) do
     for _, group in pairs(entity_surface_data) do
+      local distance_info = ""
+      if group.distance then
+        distance_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.distance-tooltip"}, ":[/color][/font] ", util.format_number(math.ceil(group.distance), true), "m"}
+      end
       local extra_info = ""
       if group.recipe_list then
         extra_info = {""}
@@ -93,7 +97,7 @@ local function build_surface_results(surface_name, surface_data)
         {
           type = "sprite-button",
           sprite = sprite,
-          tooltip = {  "", "[font=default-bold]", group.localised_name, "[/font]", extra_info, "\n", {"search-gui.result-tooltip"} },
+          tooltip = { "", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"} },
           style = "slot_button",
           number = group.count,
           tags = { position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group) },
@@ -593,11 +597,7 @@ local function start_search(player, player_data)
     local state_valid = is_valid_state(state)
     local data
     if state_valid then
-      local surface
-      if not refs.all_surfaces.state then
-        surface = player.surface
-      end
-      data = find_machines(item, force, state, surface)
+      data = find_machines(item, force, state, player.position, player.surface, not refs.all_surfaces.state)
     end
     build_result_gui(data, refs.result_flow, state_valid)
     refs.subheader_title.caption = get_signal_name(item) or ""

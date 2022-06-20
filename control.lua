@@ -3,9 +3,9 @@ event = require "scripts.event"
 search = require "scripts.search"
 local gui = require "scripts.gui"
 
-function filtered_surfaces(override_surface)
+function filtered_surfaces(override_surface, player_surface)
   if override_surface then
-    return {override_surface}
+    return {player_surface}
   end
 
   -- Skip certain modded surfaces that won't have assemblers/chests placed on them
