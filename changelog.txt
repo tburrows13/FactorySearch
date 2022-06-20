@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.7.2
-Date: ???
+Version: 1.8.0
+Date: 20 June 2022
   Features:
-    - Added distance from player to the tooltip of all results on the player's current surface
+    - Added distance from player to all result tooltips that are on the player's current surface
     - Changed arrow sprite to one from Better Alert Arrows (let me know if you have a better suggestion for an arrow sprite)
     - Added 'Clear highlights when closing interface' setting to control whether the highlight boxes and arrow are removed when the interface is closed
     - Added 'Highlight duration' setting to control the length of time that the highlight boxes and arrow exist for
