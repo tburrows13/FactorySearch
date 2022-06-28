@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.8.1
+Date: ???
+  Features:
+    - 'Entity' search now finds resources (including Space Exploration's core seams)
+---------------------------------------------------------------------------------------------------
 Version: 1.8.0
 Date: 20 June 2022
   Features:

@@ -25,6 +25,19 @@ local mod_placeholder_entities = {
 
   ['burner-offshore-pump'] = 'burner-offshore-pump',  -- BurnerOffshorePump
   ['electric-offshore-pump'] = 'electric-offshore-pump',
+  ['se-core-fragment-omni'] = {'se-core-fragment-omni', 'se-core-fragment-omni-sealed'},
+  ['se-core-fragment-iron-ore'] = {'se-core-fragment-iron-ore', 'se-core-fragment-iron-ore-sealed'},
+  ['se-core-fragment-copper-ore'] = {'se-core-fragment-copper-ore', 'se-core-fragment-copper-ore-sealed'},
+  ['se-core-fragment-coal'] = {'se-core-fragment-coal', 'se-core-fragment-coal-sealed'},
+  ['se-core-fragment-stone'] = {'se-core-fragment-stone', 'se-core-fragment-stone-sealed'},
+  ['se-core-fragment-uranium-ore'] = {'se-core-fragment-uranium-ore', 'se-core-fragment-uranium-ore-sealed'},
+  ['se-core-fragment-crude-oil'] = {'se-core-fragment-crude-oil', 'se-core-fragment-crude-oil-sealed'},
+  ['se-core-fragment-se-beryllium-ore'] = {'se-core-fragment-beryllium-ore', 'se-core-fragment-beryllium-ore-sealed'},
+  ['se-core-fragment-se-cryonite'] = {'se-core-fragment-se-cryonite', 'se-core-fragment-se-cryonite-sealed'},
+  ['se-core-fragment-se-holmium-ore'] = {'se-core-fragment-se-holmium-ore', 'se-core-fragment-se-holmium-ore-sealed'},
+  ['se-core-fragment-se-iridium-ore'] = {'se-core-fragment-se-iridium-ore', 'se-core-fragment-se-iridium-ore-sealed'},
+  ['se-core-fragment-se-vulcanite'] = {'se-core-fragment-se-vulcanite', 'se-core-fragment-se-vulcanite-sealed'},
+  ['se-core-fragment-se-vitemelange'] = {'se-core-fragment-se-vitemelange', 'se-core-fragment-se-vitemelange-sealed'},
 }
 
 local list_to_map = util.list_to_map
@@ -439,7 +452,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
 
       entities = surface.find_entities_filtered{
         name = target_entity_name,
-        force = force,
+        force = { force, "neutral" },
       }
       for _, entity in pairs(entities) do
         add_entity(entity, surface_data.entities)
