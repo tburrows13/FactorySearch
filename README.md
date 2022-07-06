@@ -19,6 +19,7 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 
 - Press `Control + Shift + F` to open search interface (can be changed in Settings > Controls)
 - Pick any combination of the following search modes
+    - Ingredient: Search for machines that consume this item (either as  ingredient or fuel)
     - Product: Search for machines that produce this item or fluid
     - Storage: Search for containers that contain this item or fluid
     - Logistics: Search for logistics entities that are transporting this item
@@ -33,7 +34,7 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 - Click on a result group to open it in the map
 - Opens results from other planets in the Navigation Satellite if using Space Exploration
 - `Control + Shift + Click` on any game object (e.g. built entity, inventory item, recipe) to open the search interface with that item selected
-- Supports multiplayer and compatible with any mod
+- Supports multiplayer and compatible with any mod. No UPS impact when not in use, but searching may freeze the game for a couple of seconds on larger maps.
 
 -----
 ## Future Updates?

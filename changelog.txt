@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.8.1
-Date: ???
+Version: 1.9.0
+Date: 6 July 2022
   Features:
+    - Added 'Ingredient' search option to search for machines that consume a particular item
     - 'Entity' search now finds resources (including Space Exploration's core seams)
 ---------------------------------------------------------------------------------------------------
 Version: 1.8.0
