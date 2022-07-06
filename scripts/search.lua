@@ -42,7 +42,8 @@ local mod_placeholder_entities = {
 
 local list_to_map = util.list_to_map
 -- "character-corpse" doesn't have force so must be checked seperately
-local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }
+local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive" }
+local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }  -- TODO add rocket-silo
 local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
 local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
 local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
@@ -226,9 +227,12 @@ function find_machines(target_item, force, state, player_position, player_surfac
   local target_is_virtual = target_type == "virtual"
 
   for _, surface in pairs(filtered_surfaces(override_surface, player_surface)) do
-    local surface_data = { producers = {}, storage = {}, logistics = {}, modules = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
+    local surface_data = { consumers = {}, producers = {}, storage = {}, logistics = {}, modules = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
 
     local entity_types = {}
+    if (target_is_item or target_is_fluid) and state.consumers then
+      add_entity_type(entity_types, ingredient_entities)
+    end
     if (target_is_item or target_is_fluid) and state.producers then
       add_entity_type(entity_types, product_entities)
     end
@@ -282,6 +286,48 @@ function find_machines(target_item, force, state, player_position, player_surfac
         goto continue
       end
 
+      if state.consumers then
+        local recipe
+        if entity_type == "assembling-machine" then
+          recipe = entity.get_recipe()
+        elseif entity_type == "furnace" then
+          recipe = entity.get_recipe()
+          if recipe == nil then
+            -- Even if the furnace has stopped smelting, this records the last item it was smelting
+            recipe = entity.previous_recipe
+          end
+        end
+        if recipe then
+          local ingredients = recipe.ingredients
+          for _, ingredient in pairs(ingredients) do
+            local name = ingredient.name
+            if name == target_name then
+              add_entity_product(entity, surface_data.consumers, recipe)
+            end
+          end
+        end
+        if target_is_item and entity_type == "lab" then
+          local item_count = entity.get_item_count(target_name)
+          if item_count > 0 then
+            add_entity(entity, surface_data.consumers)
+          end
+        end
+        if target_is_fluid and entity_type == "generator" then
+          local fluid_count = entity.get_fluid_count(target_name)
+          if fluid_count > 0 then
+            add_entity(entity, surface_data.consumers)
+          end
+        end
+        local burner = entity.burner
+        if burner then
+          local currently_burning = burner.currently_burning
+          if currently_burning then
+            if currently_burning.name == target_name then
+              add_entity(entity, surface_data.consumers)
+            end
+          end
+        end
+      end
 
       -- Producers
       if state.producers then

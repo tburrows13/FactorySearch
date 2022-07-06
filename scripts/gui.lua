@@ -49,7 +49,7 @@ local function build_surface_results(surface_name, surface_data)
         if number_of_recipes > 1 then
           multiple_recipes = true
         end
-        if number_of_recipes <= 20 then
+        if number_of_recipes <= 10 then
           -- Localised strings must not have more than 20 parameters
           for name, recipe_info in pairs(group.recipe_list) do
             local string = "\n"
@@ -169,6 +169,12 @@ local function build_result_gui(data, frame, state_valid)
         direction = "vertical",
         style = "slot_button_deep_frame",
         children = {
+          {
+            type = "table",
+            column_count = 10,
+            style = "logistics_slot_table",
+            children = build_surface_results(surface_name, surface_data.consumers)
+          },
           {
             type = "table",
             column_count = 10,
@@ -376,6 +382,16 @@ local function build_gui(player)
                         {
                           type = "checkbox",
                           state = true,
+                          caption = {"search-gui.consumers-name"},
+                          tooltip = {"search-gui.consumers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=burner-mining-drill][entity=boiler]"},
+                          ref = { "include_consumers" },
+                          actions = {
+                            on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
+                          }
+                        },
+                        {
+                          type = "checkbox",
+                          state = true,
                           caption = {"search-gui.producers-name"},
                           tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill][entity=pumpjack]"},
                           ref = { "include_machines" },
@@ -567,6 +583,7 @@ end
 
 local function generate_state(refs)
   return {
+    consumers = refs.include_consumers.state,
     producers = refs.include_machines.state,
     storage = refs.include_inventories.state,
     logistics = refs.include_logistics.state,
