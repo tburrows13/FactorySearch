@@ -116,29 +116,43 @@ function open_location(player, data)
   local position = data.position
   local zoom_level = player.mod_settings["fs-initial-zoom"].value
 
-  highlight_location(player, data)
-
+  -- If using factorissimo-2-notnotmelon, take the player to the outer position of the factory
+  if surface_name ~= player.surface.name and surface_name:sub(1, 14) == "factory-floor-" and remote.interfaces["factorissimo"] then
+    local factory
+    while surface_name:sub(1, 14) == "factory-floor-" do
+      factory = remote.call("factorissimo", "find_surrounding_factory", {name = surface_name}, position)
+      surface_name = factory.outside_surface.name
+      position = {x = factory.outside_x, y = factory.outside_y}
+    end
+    data.surface = surface_name
+    data.position = position
+    data.selection_boxes = {[1] = factory.building.selection_box}
+  end
+  local remote_view_used = false
   if remote.interfaces["space-exploration"] and
     remote.call("space-exploration", "remote_view_is_unlocked", { player = player }) then
     -- If Space Exploration's remote view is an option, then always use it
     if surface_name == "nauvis" then
       surface_name = "Nauvis"
     end
-    local gui = player.opened
-    remote.call("space-exploration", "remote_view_start", {player = player, zone_name = surface_name, position = position})
-    player.opened = gui
-    if remote.call("space-exploration", "remote_view_is_active", { player = player }) then
-      -- remote_view_start worked
-      player.close_map()
-      player.zoom = zoom_level
+    --if remote.call("space-exploration", "get_zone_from_name", {zone_name = surface_name}) then
+      remote.call("space-exploration", "remote_view_start", {player = player, zone_name = surface_name, position = position})
+      if remote.call("space-exploration", "remote_view_is_active", { player = player }) then
+        -- remote_view_start worked
+        remote_view_used = true
+        player.close_map()
+        player.zoom = zoom_level
+      end
     end
-  else
+  if not remote_view_used then
     if surface_name == player.surface.name then
       player.zoom_to_world(position, zoom_level)
     else
       player.create_local_flying_text{text = {"search-gui.wrong-surface"}, create_at_cursor = true}
     end
   end
+
+  highlight_location(player, data)
 end
 
 -- Move arrow to new character when jetpack is activated
