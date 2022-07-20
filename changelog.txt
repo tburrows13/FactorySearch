@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.9.1
-Date: ???
+Date: 20 July 2022
   Features:
     - Added integration with Factorissimo2 - notnotmelon fork so that viewing results will take you to the factory that contains the result location
   Bugfixes:
