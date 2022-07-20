@@ -3,6 +3,8 @@ Version: 1.9.1
 Date: ???
   Features:
     - Added integration with Factorissimo2 - notnotmelon fork so that viewing results will take you to the factory that contains the result location
+  Bugfixes:
+    - Fixed crash when another mod destroys the Factory Search interface
 ---------------------------------------------------------------------------------------------------
 Version: 1.9.0
 Date: 6 July 2022

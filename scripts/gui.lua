@@ -530,7 +530,7 @@ local function build_gui(player)
 end
 
 local function open_gui(player, player_data)
-  if not player_data then
+  if not player_data or not player_data.refs.frame.valid then
     player_data = build_gui(player)
   end
   local refs = player_data.refs
@@ -574,7 +574,7 @@ local function close_gui(player, player_data)
 end
 
 local function toggle_gui(player, player_data)
-  if player_data and player_data.refs.frame.visible then
+  if player_data and player_data.refs.frame.valid and player_data.refs.frame.visible then
     close_gui(player, player_data)
   else
     open_gui(player, player_data)
