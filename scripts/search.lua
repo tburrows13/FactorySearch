@@ -45,6 +45,7 @@ local list_to_map = util.list_to_map
 local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive" }
 local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }  -- TODO add rocket-silo
 local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
+local neutral_item_storage_entities = list_to_map{ "character-corpse" }
 local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
 local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
 local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "item-request-proxy" }
@@ -230,6 +231,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
     local surface_data = { consumers = {}, producers = {}, storage = {}, logistics = {}, modules = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
 
     local entity_types = {}
+    local neutral_entity_types = {}
     if (target_is_item or target_is_fluid) and state.consumers then
       add_entity_type(entity_types, ingredient_entities)
     end
@@ -238,6 +240,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
     end
     if target_is_item and state.storage then
       add_entity_type(entity_types, item_storage_entities)
+      add_entity_type(neutral_entity_types, neutral_item_storage_entities)
     end
     if target_is_fluid and state.storage then
       add_entity_type(entity_types, fluid_storage_entities)
@@ -252,7 +255,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
       add_entity_type(entity_types, fluid_logistic_entities)
     end
     if target_is_item and state.ground_items then
-      add_entity_type(entity_types, ground_entities)
+      add_entity_type(neutral_entity_types, ground_entities)
     end
     if state.signals then
       add_entity_type(entity_types, signal_entities)
@@ -264,12 +267,13 @@ function find_machines(target_item, force, state, player_position, player_surfac
       force = force,
     }
 
-    -- Corpses don't have a force: find seperately
-    if state.storage and target_is_item then
-      local corpses = surface.find_entities_filtered{
-        type = "character-corpse",
+    -- Corpses and items on ground don't have a force: find seperately
+    if next(neutral_entity_types) then
+      local neutral_type_list = map_to_list(neutral_entity_types)
+      local neutral_entities = surface.find_entities_filtered{
+        type = neutral_type_list,
       }
-      extend(entities, corpses)
+      extend(entities, neutral_entities)
     end
 
     for _, entity in pairs(entities) do
