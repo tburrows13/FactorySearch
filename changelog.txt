@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.9.2
 Date: ???
+  Features:
+    - Added yellow highlight to mark the most recently selected result button
   Bugfixes:
     - Fixed 'Ground' search option not working
 ---------------------------------------------------------------------------------------------------

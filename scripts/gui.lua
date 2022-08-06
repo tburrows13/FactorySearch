@@ -35,11 +35,11 @@ local function build_surface_results(surface_name, surface_data)
   local gui_elements = {}
   for entity_name, entity_surface_data in pairs(surface_data) do
     for _, group in pairs(entity_surface_data) do
-      local distance_info = ""
+      local distance_info = {""}
       if group.distance then
         distance_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.distance-tooltip"}, ":[/color][/font] ", util.format_number(math.ceil(group.distance), true), "m"}
       end
-      local extra_info = ""
+      local extra_info = {""}
       if group.recipe_list then
         extra_info = {""}
         local multiple_recipes = false
@@ -686,12 +686,21 @@ event.on_gui_click(
           player_data.refs.close_button.tooltip = { "gui.close-instruction" }
         end
       elseif msg == "open_location_in_map" then
-        local tags = event.element.tags.FactorySearch
-        if event.button == defines.mouse_button_type.left then
+        local button = event.element
+        local tags = button.tags.FactorySearch
+        local mouse_button = event.button
+        if mouse_button == defines.mouse_button_type.left then
           open_location(player, tags)
-        elseif event.button == defines.mouse_button_type.right then
+        elseif mouse_button == defines.mouse_button_type.right then
           highlight_location(player, tags)
         end
+
+        local highlighted_button = player_data.refs.highlighted_button
+        if highlighted_button and highlighted_button.valid then
+          highlighted_button.style = "slot_button"
+        end
+        button.style = "yellow_slot_button"
+        player_data.refs.highlighted_button = button
       elseif msg == "refresh" then
         start_search(player, player_data)
       elseif msg == "checkbox_toggled" then
