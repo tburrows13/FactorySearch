@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.9.3
+Date: ???
+  Bugfixes:
+    - Fixed crash when viewing a result that is inside a Factorissimo2 building when the building has been mined or destroyed
+---------------------------------------------------------------------------------------------------
 Version: 1.9.2
 Date: 5 August 2022
   Features:

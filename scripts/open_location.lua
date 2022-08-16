@@ -124,9 +124,11 @@ function open_location(player, data)
       surface_name = factory.outside_surface.name
       position = {x = factory.outside_x, y = factory.outside_y}
     end
-    data.surface = surface_name
-    data.position = position
-    data.selection_boxes = {[1] = factory.building.selection_box}
+    if factory.building then  -- May not exist if building was mined or destroyed
+      data.surface = surface_name
+      data.position = position
+      data.selection_boxes = {[1] = factory.building.selection_box}
+    end
   end
   local remote_view_used = false
   if remote.interfaces["space-exploration"] and
