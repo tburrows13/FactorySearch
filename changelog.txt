@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.9.4
 Date: ???
+  Features:
+    - 'Logistics' search option now finds items inside loaders
   Changes:
     - Changed default keybind from 'Control + Shift + F' 'Shift + F' to avoid collision with vanilla prototype explorer
   Locale:
