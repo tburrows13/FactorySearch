@@ -17,7 +17,7 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 -----
 ## Features
 
-- Press `Control + Shift + F` to open search interface (can be changed in Settings > Controls)
+- Press `Shift + F` to open search interface (can be changed in Settings > Controls)
 - Pick any combination of the following search modes
     - Ingredient: Search for machines that consume this item (either as  ingredient or fuel)
     - Product: Search for machines that produce this item or fluid

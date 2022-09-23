@@ -30,7 +30,7 @@ local search_shortcut = {
 local search_input = {
 	type = "custom-input",
 	name = "search-factory",
-	key_sequence = "CONTROL + SHIFT + F",
+	key_sequence = "SHIFT + F",
   consuming = "none",
   order = "a"
 }

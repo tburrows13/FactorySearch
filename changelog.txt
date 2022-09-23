@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.9.4
 Date: ???
+  Changes:
+    - Changed default keybind from 'Control + Shift + F' 'Shift + F' to avoid collision with vanilla prototype explorer
   Locale:
     - Added complete German translations (thanks knniDE on Crowdin!)
     - Added complete Brazilian Portuguese translations (thanks Henrique Pimenta on Crowdin!)
