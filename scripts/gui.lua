@@ -743,6 +743,14 @@ script.on_event("open-search-prototype",
     if event.selected_prototype then
       local name = event.selected_prototype.name
       local type
+
+      if name == "entity-ghost" or name == "tile-ghost" then
+        -- selected_prototype doesn't specify which ghost it is
+        local ghost = player.selected
+        if ghost and (ghost.name == "entity-ghost" or ghost.name == "tile-ghost") then
+          name = ghost.ghost_name
+        end
+      end
       if game.item_prototypes[name] then
         type = "item"
       elseif game.fluid_prototypes[name] then
@@ -763,6 +771,13 @@ script.on_event("open-search-prototype",
       elseif game.entity_prototypes[name] then
         local entity = game.entity_prototypes[name]
         local items_to_place_this = entity.items_to_place_this
+        if items_to_place_this and items_to_place_this[1] then
+          name = items_to_place_this[1].name
+          type = "item"
+        end
+      elseif game.tile_prototypes[name] then
+        local tile = game.tile_prototypes[name]
+        local items_to_place_this = tile.items_to_place_this
         if items_to_place_this and items_to_place_this[1] then
           name = items_to_place_this[1].name
           type = "item"

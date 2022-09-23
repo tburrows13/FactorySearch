@@ -2,6 +2,7 @@
 Version: 1.9.4
 Date: ???
   Features:
+    - 'Control + Shift + Click' now works on entity and tile ghosts to search for the corresponding item
     - 'Logistics' search option now finds items inside loaders
   Changes:
     - Changed default keybind from 'Control + Shift + F' 'Shift + F' to avoid collision with vanilla prototype explorer
