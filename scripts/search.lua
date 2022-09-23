@@ -1,7 +1,7 @@
 math2d = require "__core__.lualib.math2d"
 search_signals = require "__FactorySearch__.scripts.search-signals"
 
-local group_gap_size = 16
+local Search = {}
 
 local function extend(t1, t2)
   local t1_len = #t1
@@ -9,6 +9,10 @@ local function extend(t1, t2)
   for i=1, t2_len do
     t1[t1_len + i] = t2[i]
   end
+end
+
+local function signal_eq(sig1, sig2)
+  return sig1 and sig2 and sig1.type == sig2.type and sig1.name == sig2.name
 end
 
 -- Some entities are secretly swapped around by their mod. This allows all entities associated
@@ -41,17 +45,16 @@ local mod_placeholder_entities = {
 }
 
 local list_to_map = util.list_to_map
--- "character-corpse" doesn't have force so must be checked seperately
 local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive" }
 local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }  -- TODO add rocket-silo
 local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
-local neutral_item_storage_entities = list_to_map{ "character-corpse" }
+local neutral_item_storage_entities = list_to_map{ "character-corpse" }  -- force = "neutral"
 local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
 local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
 local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "item-request-proxy" }
 local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "loader", "loader-1x1", "inserter", "logistic-robot", "construction-robot" }
 local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
-local ground_entities = list_to_map{ "item-entity" }
+local ground_entities = list_to_map{ "item-entity" }  -- force = "neutral"
 local signal_entities = list_to_map{ "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall" }
 
 local function add_entity_type(type_list, to_add_list)
@@ -70,140 +73,6 @@ local function map_to_list(map)
   return list
 end
 
-
-function add_entity(entity, surface_data)
-  -- Group entities
-  -- Group contains count, avg_position, selection_box, entity_name, entities
-  local entity_name = entity.name
-  local entity_position = entity.position
-  local entity_selection_box = entity.selection_box
-  local entity_surface_data = surface_data[entity_name] or {}
-  local assigned_group
-  for _, group in pairs(entity_surface_data) do
-    if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_selection_box, group.selection_box) then
-      -- Add entity to group
-      assigned_group = group
-      local count = group.count
-      local new_count = count + 1
-      group.avg_position = {
-        x = (group.avg_position.x * count + entity_position.x) / new_count,
-        y = (group.avg_position.y * count + entity_position.y) / new_count,
-      }
-      group.selection_box = {
-        left_top = {
-          x = math.min(group.selection_box.left_top.x + group_gap_size, entity_selection_box.left_top.x) - group_gap_size,
-          y = math.min(group.selection_box.left_top.y + group_gap_size, entity_selection_box.left_top.y) - group_gap_size,
-        },
-        right_bottom = {
-          x = math.max(group.selection_box.right_bottom.x - group_gap_size, entity_selection_box.right_bottom.x) + group_gap_size,
-          y = math.max(group.selection_box.right_bottom.y - group_gap_size, entity_selection_box.right_bottom.y) + group_gap_size,
-        },
-      }
-      group.count = new_count
-      table.insert(group.entities, entity)
-      break
-    end
-  end
-  if not assigned_group then
-    -- Create new group
-    assigned_group = {
-      count = 1,
-      avg_position = entity_position,
-      selection_box = {
-        left_top = {
-          x = entity_selection_box.left_top.x - group_gap_size,
-          y = entity_selection_box.left_top.y - group_gap_size,
-        },
-        right_bottom = {
-          x = entity_selection_box.right_bottom.x + group_gap_size,
-          y = entity_selection_box.right_bottom.y + group_gap_size,
-        }
-      },
-      entity_name = entity_name,
-      entities = {entity},
-      localised_name = entity.localised_name,
-    }
-    table.insert(entity_surface_data, assigned_group)
-  end
-  surface_data[entity_name] = entity_surface_data
-  return assigned_group
-end
-
-local function add_entity_product(entity, surface_data, recipe)
-  local group = add_entity(entity, surface_data)
-  local group_recipe_list = group.recipe_list or {}
-  recipe_name_info = group_recipe_list[recipe.name] or {localised_name = recipe.localised_name, count = 0}
-  recipe_name_info.count = recipe_name_info.count + 1
-  group_recipe_list[recipe.name] = recipe_name_info
-  group.recipe_list = group_recipe_list
-end
-
-local function add_entity_storage(entity, surface_data, item_count)
-  local group = add_entity(entity, surface_data)
-  local group_item_count = group.item_count or 0
-  group.item_count = group_item_count + item_count
-end
-
-local function add_entity_storage_fluid(entity, surface_data, fluid_count)
-  local group = add_entity(entity, surface_data)
-  local group_fluid_count = group.fluid_count or 0
-  group.fluid_count = group_fluid_count + fluid_count
-end
-
-local function add_entity_module(entity, surface_data, module_count)
-  local group = add_entity(entity, surface_data)
-  local group_module_count = group.module_count or 0
-  group.module_count = group_module_count + module_count
-end
-
-local function add_entity_request(entity, surface_data, request_count)
-  local group = add_entity(entity, surface_data)
-  local group_request_count = group.request_count or 0
-  group.request_count = group_request_count + request_count
-end
-
-function add_entity_signal(entity, surface_data, signal_count)
-  local group = add_entity(entity, surface_data)
-  local group_signal_count = group.signal_count or 0
-  group.signal_count = group_signal_count + signal_count
-end
-
-function add_tag(tag, surface_data)
-  -- An alternative to add_entity*, for map tags
-  local icon_name = tag.icon.name
-  local tag_surface_data = surface_data[icon_name] or {}
-
-  -- Tag groups always have size 1
-  local tag_position = tag.position
-  local tag_box_size = 8
-  local selection_box = {
-    left_top = {
-      x = tag_position.x - tag_box_size,
-      y = tag_position.y - tag_box_size,
-    },
-    right_bottom = {
-      x = tag_position.x + tag_box_size,
-      y = tag_position.y + tag_box_size,
-    }
-  }
-
-  local localised_name = tag.text
-  if localised_name == "" then localised_name = { "search-gui.default-map-tag-name" } end
-
-  local group = {
-    count = 1,
-    avg_position = tag_position,
-    entity_name = tag.icon.name,
-    entities = {{  -- Mock LuaEntity object, which only has its selection box attribute accessed by ui.lua
-      selection_box = selection_box
-    }},
-    localised_name = localised_name,
-  }
-  table.insert(tag_surface_data, group)
-
-  surface_data[icon_name] = tag_surface_data
-end
-
 local function generate_distance_data(surface_data, player_position)
   local distance = math2d.position.distance
   for _, entity_groups in pairs(surface_data) do
@@ -215,7 +84,7 @@ local function generate_distance_data(surface_data, player_position)
   end
 end
 
-function find_machines(target_item, force, state, player_position, player_surface, override_surface)
+function Search.find_machines(target_item, force, state, player_position, player_surface, override_surface)
   local data = {}
   local target_name = target_item.name
   if target_name == nil then
@@ -227,41 +96,42 @@ function find_machines(target_item, force, state, player_position, player_surfac
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
 
+  local entity_types = {}
+  local neutral_entity_types = {}
+  if (target_is_item or target_is_fluid) and state.consumers then
+    add_entity_type(entity_types, ingredient_entities)
+  end
+  if (target_is_item or target_is_fluid) and state.producers then
+    add_entity_type(entity_types, product_entities)
+  end
+  if target_is_item and state.storage then
+    add_entity_type(entity_types, item_storage_entities)
+    add_entity_type(neutral_entity_types, neutral_item_storage_entities)
+  end
+  if target_is_fluid and state.storage then
+    add_entity_type(entity_types, fluid_storage_entities)
+  end
+  if target_is_item and state.requesters then
+    add_entity_type(entity_types, request_entities)
+  end
+  if target_is_item and state.logistics then
+    add_entity_type(entity_types, item_logistic_entities)
+  end
+  if target_is_fluid and state.logistics then
+    add_entity_type(entity_types, fluid_logistic_entities)
+  end
+  if target_is_item and state.ground_items then
+    add_entity_type(neutral_entity_types, ground_entities)
+  end
+  if state.signals then
+    add_entity_type(entity_types, signal_entities)
+  end
+  local type_list = map_to_list(entity_types)
+  local neutral_type_list = map_to_list(neutral_entity_types)
+
   for _, surface in pairs(filtered_surfaces(override_surface, player_surface)) do
     local surface_data = { consumers = {}, producers = {}, storage = {}, logistics = {}, modules = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {} }
 
-    local entity_types = {}
-    local neutral_entity_types = {}
-    if (target_is_item or target_is_fluid) and state.consumers then
-      add_entity_type(entity_types, ingredient_entities)
-    end
-    if (target_is_item or target_is_fluid) and state.producers then
-      add_entity_type(entity_types, product_entities)
-    end
-    if target_is_item and state.storage then
-      add_entity_type(entity_types, item_storage_entities)
-      add_entity_type(neutral_entity_types, neutral_item_storage_entities)
-    end
-    if target_is_fluid and state.storage then
-      add_entity_type(entity_types, fluid_storage_entities)
-    end
-    if target_is_item and state.requesters then
-      add_entity_type(entity_types, request_entities)
-    end
-    if target_is_item and state.logistics then
-      add_entity_type(entity_types, item_logistic_entities)
-    end
-    if target_is_fluid and state.logistics then
-      add_entity_type(entity_types, fluid_logistic_entities)
-    end
-    if target_is_item and state.ground_items then
-      add_entity_type(neutral_entity_types, ground_entities)
-    end
-    if state.signals then
-      add_entity_type(entity_types, signal_entities)
-    end
-
-    local type_list = map_to_list(entity_types)
     local entities = surface.find_entities_filtered{
       type = type_list,
       force = force,
@@ -269,7 +139,6 @@ function find_machines(target_item, force, state, player_position, player_surfac
 
     -- Corpses and items on ground don't have a force: find seperately
     if next(neutral_entity_types) then
-      local neutral_type_list = map_to_list(neutral_entity_types)
       local neutral_entities = surface.find_entities_filtered{
         type = neutral_type_list,
       }
@@ -282,7 +151,51 @@ function find_machines(target_item, force, state, player_position, player_surfac
       -- Signals
       if state.signals then
         if signal_entities[entity_type] then
-          search_signals(entity, target_item, surface_data)
+          local control_behavior = entity.get_control_behavior()
+          if control_behavior then
+            if entity_type == "constant-combinator" then
+              -- If prototype's `item_slot_count = 0` then .parameters will be nil
+              for _, parameter in pairs(control_behavior.parameters or {}) do
+                if signal_eq(parameter.signal, target_item) then
+                  SearchResults.add_entity_signal(entity, surface_data.signals, parameter.count)
+                end
+              end
+            elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" then
+              local signal_count = control_behavior.get_signal_last_tick(target_item)
+              if signal_count ~= nil then
+                SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
+              end
+            elseif entity_type == "roboport" then
+              for _, signal in pairs({ control_behavior.available_logistic_output_signal, control_behavior.total_logistic_output_signal, control_behavior.available_construction_output_signal, control_behavior.total_construction_output_signal }) do
+                if signal_eq(signal, target_item) then
+                  SearchResults.add_entity(entity, surface_data.signals)
+                  break
+                end
+              end
+            elseif entity_type == "train-stop" then
+              if signal_eq(control_behavior.stopped_train_signal, target_item) or signal_eq(control_behavior.trains_count_signal, target_item) then
+                SearchResults.add_entity(entity, surface_data.signals)
+              end
+            elseif entity_type == "accumulator" or entity_type == "wall" then
+              if signal_eq(control_behavior.output_signal, target_item) then
+                SearchResults.add_entity(entity, surface_data.signals)
+              end
+            elseif entity_type == "rail-signal" then
+              for _, signal in pairs({ control_behavior.red_signal, control_behavior.orange_signal, control_behavior.green_signal }) do
+                if signal_eq(signal, target_item) then
+                  SearchResults.add_entity(entity, surface_data.signals)
+                  break
+                end
+              end
+            elseif entity_type == "rail-chain-signal" then
+              for _, signal in pairs({ control_behavior.red_signal, control_behavior.orange_signal, control_behavior.green_signal, control_behavior.blue_signal }) do
+                if signal_eq(signal, target_item) then
+                  SearchResults.add_entity(entity, surface_data.signals)
+                  break
+                end
+              end
+            end
+          end
         end
       end
       if target_is_virtual then
@@ -306,20 +219,20 @@ function find_machines(target_item, force, state, player_position, player_surfac
           for _, ingredient in pairs(ingredients) do
             local name = ingredient.name
             if name == target_name then
-              add_entity_product(entity, surface_data.consumers, recipe)
+              SearchResults.add_entity_product(entity, surface_data.consumers, recipe)
             end
           end
         end
         if target_is_item and entity_type == "lab" then
           local item_count = entity.get_item_count(target_name)
           if item_count > 0 then
-            add_entity(entity, surface_data.consumers)
+            SearchResults.add_entity(entity, surface_data.consumers)
           end
         end
         if target_is_fluid and entity_type == "generator" then
           local fluid_count = entity.get_fluid_count(target_name)
           if fluid_count > 0 then
-            add_entity(entity, surface_data.consumers)
+            SearchResults.add_entity(entity, surface_data.consumers)
           end
         end
         local burner = entity.burner
@@ -327,7 +240,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
           local currently_burning = burner.currently_burning
           if currently_burning then
             if currently_burning.name == target_name then
-              add_entity(entity, surface_data.consumers)
+              SearchResults.add_entity(entity, surface_data.consumers)
             end
           end
         end
@@ -347,11 +260,11 @@ function find_machines(target_item, force, state, player_position, player_surfac
         elseif entity_type == "mining-drill" then
           local mining_target = entity.mining_target
           if mining_target and mining_target.name == target_name then
-            add_entity(entity, surface_data.producers)
+            SearchResults.add_entity(entity, surface_data.producers)
           end
         elseif target_is_fluid and entity_type == "offshore-pump" then
           if entity.get_fluid_count(target_name) > 0 then
-            add_entity(entity, surface_data.producers)
+            SearchResults.add_entity(entity, surface_data.producers)
           end
         end
         if recipe then
@@ -359,7 +272,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
           for _, product in pairs(products) do
             local name = product.name
             if name == target_name then
-              add_entity_product(entity, surface_data.producers, recipe)
+              SearchResults.add_entity_product(entity, surface_data.producers, recipe)
             end
           end
         end
@@ -370,13 +283,13 @@ function find_machines(target_item, force, state, player_position, player_surfac
         if target_is_fluid and (entity_type == "storage-tank" or entity_type == "fluid-wagon") then
           local fluid_count = entity.get_fluid_count(target_name)
           if fluid_count > 0 then
-            add_entity_storage_fluid(entity, surface_data.storage, fluid_count)
+            SearchResults.add_entity_storage_fluid(entity, surface_data.storage, fluid_count)
           end
         elseif target_is_item and (entity_type == "character-corpse" or item_storage_entities[entity_type]) then
           -- Entity is an inventory entity
           local item_count = entity.get_item_count(target_name)
           if item_count > 0 then
-            add_entity_storage(entity, surface_data.storage, item_count)
+            SearchResults.add_entity_storage(entity, surface_data.storage, item_count)
           end
         end
       end
@@ -396,7 +309,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
           if inventory then
             local item_count = inventory.get_item_count(target_name)
             if item_count > 0 then
-              add_entity_module(entity, surface_data.modules, item_count)
+              SearchResults.add_entity_module(entity, surface_data.modules, item_count)
             end
           end
         end
@@ -411,7 +324,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
             if request and request.name == target_name then
               local count = request.count
               if count then
-                add_entity_request(entity, surface_data.requesters, count)
+                SearchResults.add_entity_request(entity, surface_data.requesters, count)
               end
             end
           end
@@ -421,7 +334,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
             if request and request.name == target_name then
               local count = request.min
               if count and count > 0 then
-                add_entity_request(entity, surface_data.requesters, request.min)
+                SearchResults.add_entity_request(entity, surface_data.requesters, request.min)
               end
             end
           end
@@ -431,14 +344,14 @@ function find_machines(target_item, force, state, player_position, player_surfac
             if request and request.name == target_name then
               local count = request.min
               if count and count > 0 then
-                add_entity_request(entity, surface_data.requesters, request.min)
+                SearchResults.add_entity_request(entity, surface_data.requesters, request.min)
               end
             end
           end
         elseif entity_type == "item-request-proxy" then
           local request_count = entity.item_requests[target_name]
           if request_count ~= nil then
-            add_entity_request(entity.proxy_target, surface_data.requesters, request_count)
+            SearchResults.add_entity_request(entity.proxy_target, surface_data.requesters, request_count)
           end
         end
       end
@@ -447,7 +360,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
       if target_is_item and state.ground_items then
         if entity_type == "item-entity" and entity.name == "item-on-ground" then
           if entity.stack.name == target_name then
-            add_entity(entity, surface_data.ground_items)
+            SearchResults.add_entity(entity, surface_data.ground_items)
           end
         end
       end
@@ -458,19 +371,19 @@ function find_machines(target_item, force, state, player_position, player_surfac
           if entity_type == "inserter" then
             local held_stack = entity.held_stack
             if held_stack and held_stack.valid_for_read and held_stack.name == target_name then
-              add_entity_storage(entity, surface_data.logistics, held_stack.count)
+              SearchResults.add_entity_storage(entity, surface_data.logistics, held_stack.count)
             end
           else
             local item_count = entity.get_item_count(target_name)
             if item_count > 0 then
-              add_entity_storage(entity, surface_data.logistics, item_count)
+              SearchResults.add_entity_storage(entity, surface_data.logistics, item_count)
             end
           end
         elseif fluid_logistic_entities[entity_type] then
           -- So target.type == "fluid"
           local fluid_count = entity.get_fluid_count(target_name)
           if fluid_count > 0 then
-            add_entity_storage_fluid(entity, surface_data.logistics, fluid_count)
+            SearchResults.add_entity_storage_fluid(entity, surface_data.logistics, fluid_count)
           end
         end
       end
@@ -483,7 +396,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
       for _, tag in pairs(tags) do
         local tag_icon = tag.icon
         if tag_icon and tag_icon.type == target_type and tag_icon.name == target_name then
-          add_tag(tag, surface_data.map_tags)
+          SearchResults.add_tag(tag, surface_data.map_tags)
         end
       end
     end
@@ -505,7 +418,7 @@ function find_machines(target_item, force, state, player_position, player_surfac
         force = { force, "neutral" },
       }
       for _, entity in pairs(entities) do
-        add_entity(entity, surface_data.entities)
+        SearchResults.add_entity(entity, surface_data.entities)
       end
     end
     if surface == player_surface then
@@ -515,3 +428,5 @@ function find_machines(target_item, force, state, player_position, player_surfac
   end
   return data
 end
+
+return Search

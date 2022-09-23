@@ -1,7 +1,9 @@
 util = require "__core__.lualib.util"
 event = require "scripts.event"
-search = require "scripts.search"
-local gui = require "scripts.gui"
+Search = require "scripts.search"
+SearchResults = require "scripts.search-results"
+ResultLocation = require "scripts.result-location"
+Gui = require "scripts.gui"
 
 function filtered_surfaces(override_surface, player_surface)
   if override_surface then
@@ -27,7 +29,7 @@ local function update_surface_count()
   local multiple_surfaces = #filtered_surfaces() > 1
 
   if multiple_surfaces ~= global.multiple_surfaces then
-    for player_index, player_data in pairs(global.players) do
+    for _, player_data in pairs(global.players) do
       local all_surfaces = player_data.refs.all_surfaces
       all_surfaces.visible = multiple_surfaces
     end
@@ -52,7 +54,7 @@ script.on_configuration_changed(
     for player_index, player_data in pairs(global.players) do
       local player = game.get_player(player_index)
       if player then
-        gui.destroy_gui(player, player_data)
+        Gui.destroy(player, player_data)
       else
         global.players[player_index] = nil
       end

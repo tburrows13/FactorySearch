@@ -5,8 +5,12 @@ local rotate_vector = math2d.position.rotate_vector
 local LINE_COLOR = { r = 0, g = 0.9, b = 0, a = 1 }
 local LINE_WIDTH = 4
 local HALF_WIDTH = (LINE_WIDTH / 2) / 32  -- 32 pixels per tile
+local ARROW_TARGET_OFFSET = { 0, -0.75 }
+local ARROW_ORIENTATED_OFFSET = { 0, -4 }
 
-function clear_markers(player)
+local ResultLocation = {}
+
+function ResultLocation.clear_markers(player)
   -- Clear all old markers belonging to player
   if #game.players == 1 then
     rendering.clear("FactorySearch")
@@ -20,7 +24,7 @@ function clear_markers(player)
   end
 end
 
-local function draw_markers(player, surface, selection_boxes)
+function ResultLocation.draw_markers(player, surface, selection_boxes)
   local time_to_live = player.mod_settings["fs-highlight-duration"].value * 60
   -- Draw new markers
   for _, selection_box in pairs(selection_boxes) do
@@ -81,7 +85,7 @@ local function draw_markers(player, surface, selection_boxes)
   end
 end
 
-function draw_arrows(player, surface, position)
+function ResultLocation.draw_arrows(player, surface, position)
   local character = player.character
   if (not character) and remote.interfaces["space-exploration"] then
     character = remote.call("space-exploration", "get_player_character", { player = player })
@@ -93,9 +97,9 @@ function draw_arrows(player, surface, position)
       x_scale = 1,
       y_scale = 1,
       target = character,
-      target_offset = {0, -0.75},
+      target_offset = ARROW_TARGET_OFFSET,
       orientation_target = position,
-      oriented_offset = {0, -4},
+      oriented_offset = ARROW_ORIENTATED_OFFSET,
       surface = surface,
       time_to_live = player.mod_settings["fs-highlight-duration"].value * 60,
       players = {player},
@@ -103,15 +107,15 @@ function draw_arrows(player, surface, position)
   end
 end
 
-function highlight_location(player, data)
+function ResultLocation.highlight(player, data)
   local surface_name = data.surface
 
-  clear_markers(player)
-  draw_markers(player, surface_name, data.selection_boxes)
-  draw_arrows(player, surface_name, data.position)
+  ResultLocation.clear_markers(player)
+  ResultLocation.draw_markers(player, surface_name, data.selection_boxes)
+  ResultLocation.draw_arrows(player, surface_name, data.position)
 end
 
-function open_location(player, data)
+function ResultLocation.open(player, data)
   local surface_name = data.surface
   local position = data.position
   local zoom_level = player.mod_settings["fs-initial-zoom"].value
@@ -154,7 +158,7 @@ function open_location(player, data)
     end
   end
 
-  highlight_location(player, data)
+  ResultLocation.highlight(player, data)
 end
 
 -- Move arrow to new character when jetpack is activated
@@ -163,8 +167,10 @@ local function on_character_swapped_event(data)
   for _, id in pairs(ids) do
     local target = rendering.get_target(id)
     if target and target.entity and target.entity.unit_number == data.old_unit_number then
-      rendering.set_target(id, data.new_character, {0, -0.75})
+      rendering.set_target(id, data.new_character, ARROW_TARGET_OFFSET)
     end
   end
 end
 remote.add_interface("FactorySearch", {on_character_swapped = on_character_swapped_event})
+
+return ResultLocation

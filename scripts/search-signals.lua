@@ -10,40 +10,40 @@ local function search_signals(entity, target_signal, surface_data)
       -- If prototype's `item_slot_count = 0` then .parameters will be nil
       for _, parameter in pairs(control_behavior.parameters or {}) do
         if signal_eq(parameter.signal, target_signal) then
-          add_entity_signal(entity, surface_data.signals, parameter.count)
+          SearchResults.add_entity_signal(entity, surface_data.signals, parameter.count)
         end
       end
     elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" then
       local signal_count = control_behavior.get_signal_last_tick(target_signal)
       if signal_count ~= nil then
-        add_entity_signal(entity, surface_data.signals, signal_count)
+        SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
       end
     elseif entity_type == "roboport" then
       for _, signal in pairs({ control_behavior.available_logistic_output_signal, control_behavior.total_logistic_output_signal, control_behavior.available_construction_output_signal, control_behavior.total_construction_output_signal }) do
         if signal_eq(signal, target_signal) then
-          add_entity(entity, surface_data.signals)
+          SearchResults.add_entity(entity, surface_data.signals)
           break
         end
       end
     elseif entity_type == "train-stop" then
       if signal_eq(control_behavior.stopped_train_signal, target_signal) or signal_eq(control_behavior.trains_count_signal, target_signal) then
-        add_entity(entity, surface_data.signals)
+        SearchResults.add_entity(entity, surface_data.signals)
       end
     elseif entity_type == "accumulator" or entity_type == "wall" then
       if signal_eq(control_behavior.output_signal, target_signal) then
-        add_entity(entity, surface_data.signals)
+        SearchResults.add_entity(entity, surface_data.signals)
       end
     elseif entity_type == "rail-signal" then
       for _, signal in pairs({ control_behavior.red_signal, control_behavior.orange_signal, control_behavior.green_signal }) do
         if signal_eq(signal, target_signal) then
-          add_entity(entity, surface_data.signals)
+          SearchResults.add_entity(entity, surface_data.signals)
           break
         end
       end
     elseif entity_type == "rail-chain-signal" then
       for _, signal in pairs({ control_behavior.red_signal, control_behavior.orange_signal, control_behavior.green_signal, control_behavior.blue_signal }) do
         if signal_eq(signal, target_signal) then
-          add_entity(entity, surface_data.signals)
+          SearchResults.add_entity(entity, surface_data.signals)
           break
         end
       end

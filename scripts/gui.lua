@@ -1,5 +1,6 @@
 local gui = require("__FactorySearch__.scripts.flib-gui")
-require "scripts.open_location"
+
+local Gui = {}
 
 local function toggle_fab(elem, sprite, state)
   if state then
@@ -31,7 +32,7 @@ local function get_selection_boxes(group)
   return selection_boxes
 end
 
-local function build_surface_results(surface_name, surface_data)
+function Gui.build_surface_results(surface_name, surface_data)
   local gui_elements = {}
   for entity_name, entity_surface_data in pairs(surface_data) do
     for _, group in pairs(entity_surface_data) do
@@ -109,7 +110,7 @@ local function build_surface_results(surface_name, surface_data)
   return gui_elements
 end
 
-local function build_surface_name(include_surface_name, surface_name)
+function Gui.build_surface_name(include_surface_name, surface_name)
   if include_surface_name then
     if surface_name == "nauvis" then
       -- Space Exploration capitilises all other planet names, so do Nauvis for consistency
@@ -127,7 +128,7 @@ local function build_surface_name(include_surface_name, surface_name)
 
 end
 
-local function build_result_gui(data, frame, state_valid)
+function Gui.build_results(data, frame, state_valid)
   frame.clear()
 
   if not state_valid then
@@ -163,7 +164,7 @@ local function build_result_gui(data, frame, state_valid)
       goto continue
     end
     gui.build(frame, {
-      build_surface_name(include_surface_name, surface_name),
+      Gui.build_surface_name(include_surface_name, surface_name),
       {
         type = "frame",
         direction = "vertical",
@@ -173,60 +174,60 @@ local function build_result_gui(data, frame, state_valid)
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.consumers)
+            children = Gui.build_surface_results(surface_name, surface_data.consumers)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.producers)
+            children = Gui.build_surface_results(surface_name, surface_data.producers)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.storage)
+            children = Gui.build_surface_results(surface_name, surface_data.storage)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.logistics)
+            children = Gui.build_surface_results(surface_name, surface_data.logistics)
           },          {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.modules)
+            children = Gui.build_surface_results(surface_name, surface_data.modules)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.entities)
+            children = Gui.build_surface_results(surface_name, surface_data.entities)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.ground_items)
+            children = Gui.build_surface_results(surface_name, surface_data.ground_items)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.requesters)
+            children = Gui.build_surface_results(surface_name, surface_data.requesters)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.signals)
+            children = Gui.build_surface_results(surface_name, surface_data.signals)
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = build_surface_results(surface_name, surface_data.map_tags)
+            children = Gui.build_surface_results(surface_name, surface_data.map_tags)
           },
         }
       }
@@ -246,7 +247,7 @@ local function build_result_gui(data, frame, state_valid)
   end
 end
 
-local function build_gui(player)
+function Gui.build(player)
   local refs = gui.build(player.gui.screen, {
     {
       type = "frame",
@@ -529,9 +530,9 @@ local function build_gui(player)
   return player_data
 end
 
-local function open_gui(player, player_data)
+function Gui.open(player, player_data)
   if not player_data or not player_data.refs.frame.valid then
-    player_data = build_gui(player)
+    player_data = Gui.build(player)
   end
   local refs = player_data.refs
   if not player_data.pinned then
@@ -542,23 +543,16 @@ local function open_gui(player, player_data)
   player.set_shortcut_toggled("search-factory", true)
 end
 
-local function after_gui_closed(player)
-  player.set_shortcut_toggled("search-factory", false)
-  if player.mod_settings["fs-clear-highlights-with-gui"].value then
-    clear_markers(player)
-  end
-end
-
-local function destroy_gui(player, player_data)
+function Gui.destroy(player, player_data)
   local main_frame = player_data.refs.frame
   if main_frame then
     main_frame.destroy()
   end
   global.players[player.index] = nil
-  after_gui_closed(player)
+  Gui.after_close(player)
 end
 
-local function close_gui(player, player_data)
+function Gui.close(player, player_data)
   if player_data.ignore_close then
     -- Set when the pin button is pressed just before changing player.opened
     player_data.ignore_close = false
@@ -568,16 +562,23 @@ local function close_gui(player, player_data)
     if player.opened == refs.frame then
       player.opened = nil
     end
-    --destroy_gui(player, player_data)
-    after_gui_closed(player)
+    --Gui.destroy(player, player_data)
+    Gui.after_close(player)
   end
 end
 
-local function toggle_gui(player, player_data)
+function Gui.after_close(player)
+  player.set_shortcut_toggled("search-factory", false)
+  if player.mod_settings["fs-clear-highlights-with-gui"].value then
+    ResultLocation.clear_markers(player)
+  end
+end
+
+function Gui.toggle(player, player_data)
   if player_data and player_data.refs.frame.valid and player_data.refs.frame.visible then
-    close_gui(player, player_data)
+    Gui.close(player, player_data)
   else
-    open_gui(player, player_data)
+    Gui.open(player, player_data)
   end
 end
 
@@ -604,7 +605,7 @@ local function is_valid_state(state)  -- TODO rename
   return some_checked
 end
 
-local function start_search(player, player_data)
+function Gui.start_search(player, player_data)
   local refs = player_data.refs
   local elem_button = refs.item_select
   local item = elem_button.elem_value
@@ -614,9 +615,9 @@ local function start_search(player, player_data)
     local state_valid = is_valid_state(state)
     local data
     if state_valid then
-      data = find_machines(item, force, state, player.position, player.surface, not refs.all_surfaces.state)
+      data = Search.find_machines(item, force, state, player.position, player.surface, not refs.all_surfaces.state)
     end
-    build_result_gui(data, refs.result_flow, state_valid)
+    Gui.build_results(data, refs.result_flow, state_valid)
     refs.subheader_title.caption = get_signal_name(item) or ""
   else
     -- Clear GUI
@@ -629,7 +630,7 @@ local function start_search(player, player_data)
       }
     })
     refs.subheader_title.caption = ""
-    clear_markers(player)
+    ResultLocation.clear_markers(player)
   end
 end
 
@@ -641,7 +642,7 @@ event.on_gui_elem_changed(
     if action then
       local msg = action.action
       if msg == "item_selected" then
-        start_search(player, player_data)
+        Gui.start_search(player, player_data)
       end
     end
   end
@@ -655,7 +656,7 @@ event.on_gui_checked_state_changed(
     if action then
       local msg = action.action
       if msg == "checkbox_toggled" then
-        start_search(player, player_data)
+        Gui.start_search(player, player_data)
       end
     end
   end
@@ -671,8 +672,8 @@ event.on_gui_click(
     if action then
       local msg = action.action
       if msg == "close" then
-        close_gui(player, player_data)
-        --destroy_gui(player, player_data)
+        Gui.close(player, player_data)
+        --Gui.destroy(player, player_data)
       elseif msg == "toggle_pin" then
         player_data.pinned = not player_data.pinned
         toggle_fab(player_data.refs.pin_button, "fs_flib_pin", player_data.pinned)
@@ -690,9 +691,9 @@ event.on_gui_click(
         local tags = button.tags.FactorySearch
         local mouse_button = event.button
         if mouse_button == defines.mouse_button_type.left then
-          open_location(player, tags)
+          ResultLocation.open(player, tags)
         elseif mouse_button == defines.mouse_button_type.right then
-          highlight_location(player, tags)
+          ResultLocation.highlight(player, tags)
         end
 
         local highlighted_button = player_data.refs.highlighted_button
@@ -702,9 +703,9 @@ event.on_gui_click(
         button.style = "yellow_slot_button"
         player_data.refs.highlighted_button = button
       elseif msg == "refresh" then
-        start_search(player, player_data)
+        Gui.start_search(player, player_data)
       elseif msg == "checkbox_toggled" then
-        start_search(player, player_data)
+        Gui.start_search(player, player_data)
       end
     end
   end
@@ -714,7 +715,7 @@ event.on_gui_closed(
   function(event)
     if event.element and event.element.name == "fs_frame" then
       local player = game.get_player(event.player_index)
-      close_gui(player, global.players[event.player_index])
+      Gui.close(player, global.players[event.player_index])
     end
   end
 )
@@ -724,7 +725,7 @@ local function on_shortcut_pressed(event)
   local player = game.get_player(event.player_index)
 
   local player_data = global.players[event.player_index]
-  toggle_gui(player, player_data)
+  Gui.toggle(player, player_data)
 end
 event.on_lua_shortcut(
   function(event)
@@ -787,13 +788,13 @@ script.on_event("open-search-prototype",
         player.create_local_flying_text{text = { "search-gui.invalid-item" }, create_at_cursor = true}
         return
       end
-      open_gui(player, player_data)
+      Gui.open(player, player_data)
       player_data = global.players[event.player_index]
       local refs = player_data.refs
       refs.item_select.elem_value = {type = type, name = name}
-      start_search(player, player_data)
+      Gui.start_search(player, player_data)
     end
   end
 )
 
-return {destroy_gui = destroy_gui}
+return Gui
