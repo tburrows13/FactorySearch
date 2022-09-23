@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.9.4
+Date: ???
+  Locale:
+    - Added complete German translations (thanks knniDE on Crowdin!)
+    - Added complete Brazilian Portuguese translations (thanks Henrique Pimenta on Crowdin!)
+---------------------------------------------------------------------------------------------------
 Version: 1.9.3
 Date: 15 August 2022
   Bugfixes:
@@ -130,7 +136,7 @@ Date: 17 April 2022
   Bugfixes:
     - Fixed crash when selecting 'Unknown signal' in 'Signal' search mode or with certain other mods (e.g. Miniloaders)
   Locale:
-    - Added complete Russion translations (thanks Shadow_Man on Crowdin!)
+    - Added complete Russian translations (thanks Shadow_Man on Crowdin!)
     - Added complete Korean translations (thanks x2605 on Crowdin!)
     - Added some Swedish translations (thanks Fewlike on Crowdin!)
 ---------------------------------------------------------------------------------------------------
