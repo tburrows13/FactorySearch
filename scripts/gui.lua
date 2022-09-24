@@ -247,6 +247,16 @@ function Gui.build_results(data, frame, state_valid)
   end
 end
 
+function Gui.clear_results(frame)
+  frame.clear()
+  gui.build(frame, {
+    {
+      type = "label",
+      caption = {"search-gui.explanation"},
+    }
+  })
+end
+
 function Gui.build(player)
   local refs = gui.build(player.gui.screen, {
     {
@@ -620,58 +630,25 @@ function Gui.start_search(player, player_data)
     Gui.build_results(data, refs.result_flow, state_valid)
     refs.subheader_title.caption = get_signal_name(item) or ""
   else
-    -- Clear GUI
-    local frame = refs.result_flow
-    frame.clear()
-    gui.build(frame, {
-      {
-        type = "label",
-        caption = {"search-gui.explanation"},
-      }
-    })
+    Gui.clear_results(refs.result_flow)
     refs.subheader_title.caption = ""
     ResultLocation.clear_markers(player)
   end
 end
 
-event.on_gui_elem_changed(
+gui.hook_events(
   function(event)
-    local player = game.get_player(event.player_index)
-    local player_data = global.players[event.player_index]
     local action = gui.read_action(event)
     if action then
+      local player = game.get_player(event.player_index)
+      local player_data = global.players[event.player_index]
+
       local msg = action.action
-      if msg == "item_selected" then
+      if msg == "item_selected" then  -- on_gui_elem_changed
         Gui.start_search(player, player_data)
-      end
-    end
-  end
-)
-
-event.on_gui_checked_state_changed(
-  function(event)
-    local player = game.get_player(event.player_index)
-    local player_data = global.players[event.player_index]
-    local action = gui.read_action(event)
-    if action then
-      local msg = action.action
-      if msg == "checkbox_toggled" then
+      elseif msg == "checkbox_toggled" then  -- on_gui_checked_state_changed
         Gui.start_search(player, player_data)
-      end
-    end
-  end
-)
-
-
-event.on_gui_click(
-  function(event)
-    local player = game.get_player(event.player_index)
-    local player_data = global.players[event.player_index]
-
-    local action = gui.read_action(event)
-    if action then
-      local msg = action.action
-      if msg == "close" then
+      elseif msg == "close" then  -- on_gui_click
         Gui.close(player, player_data)
         --Gui.destroy(player, player_data)
       elseif msg == "toggle_pin" then
@@ -716,83 +693,6 @@ event.on_gui_closed(
     if event.element and event.element.name == "fs_frame" then
       local player = game.get_player(event.player_index)
       Gui.close(player, global.players[event.player_index])
-    end
-  end
-)
-
-
-local function on_shortcut_pressed(event)
-  local player = game.get_player(event.player_index)
-
-  local player_data = global.players[event.player_index]
-  Gui.toggle(player, player_data)
-end
-event.on_lua_shortcut(
-  function(event)
-    if event.prototype_name == "search-factory" then
-      on_shortcut_pressed(event)
-    end
-  end
-)
-script.on_event("search-factory", on_shortcut_pressed)
-
-
-script.on_event("open-search-prototype",
-  function(event)
-    local player = game.get_player(event.player_index)
-    local player_data = global.players[event.player_index]
-    if event.selected_prototype then
-      local name = event.selected_prototype.name
-      local type
-
-      if name == "entity-ghost" or name == "tile-ghost" then
-        -- selected_prototype doesn't specify which ghost it is
-        local ghost = player.selected
-        if ghost and (ghost.name == "entity-ghost" or ghost.name == "tile-ghost") then
-          name = ghost.ghost_name
-        end
-      end
-      if game.item_prototypes[name] then
-        type = "item"
-      elseif game.fluid_prototypes[name] then
-        type = "fluid"
-      elseif game.virtual_signal_prototypes[name] then
-        type = "virtual"
-      elseif game.recipe_prototypes[name] then
-        local recipe = game.recipe_prototypes[name]
-        local main_product = recipe.main_product
-        if main_product then
-          name = main_product.name
-          type = main_product.type
-        elseif #recipe.products == 1 then
-          local product = recipe.products[1]
-          name = product.name
-          type = product.type
-        end
-      elseif game.entity_prototypes[name] then
-        local entity = game.entity_prototypes[name]
-        local items_to_place_this = entity.items_to_place_this
-        if items_to_place_this and items_to_place_this[1] then
-          name = items_to_place_this[1].name
-          type = "item"
-        end
-      elseif game.tile_prototypes[name] then
-        local tile = game.tile_prototypes[name]
-        local items_to_place_this = tile.items_to_place_this
-        if items_to_place_this and items_to_place_this[1] then
-          name = items_to_place_this[1].name
-          type = "item"
-        end
-      end
-      if not type then
-        player.create_local_flying_text{text = { "search-gui.invalid-item" }, create_at_cursor = true}
-        return
-      end
-      Gui.open(player, player_data)
-      player_data = global.players[event.player_index]
-      local refs = player_data.refs
-      refs.item_select.elem_value = {type = type, name = name}
-      Gui.start_search(player, player_data)
     end
   end
 )

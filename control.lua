@@ -1,5 +1,6 @@
 util = require "__core__.lualib.util"
 event = require "scripts.event"
+CustomInput = require "scripts.custom-input"
 Search = require "scripts.search"
 SearchResults = require "scripts.search-results"
 ResultLocation = require "scripts.result-location"
