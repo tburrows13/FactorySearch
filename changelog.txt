@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 1.9.4
-Date: ???
+Version: 1.10.0
+Date: 26 September 2022
   Features:
+    - Added non-blocking-search, which searches in the background without freezing the game (enabled by default in multiplayer only)
     - 'Control + Shift + Click' now works on entity and tile ghosts to search for the corresponding item
     - 'Logistics' search option now finds items inside loaders
   Changes:
