@@ -1,5 +1,13 @@
 data:extend{
   {
+    type = "string-setting",
+    name = "fs-non-blocking-search",
+    setting_type = "runtime-global",
+    allowed_values = {"on", "multiplayer", "off"},
+    default_value = "multiplayer",
+    order = "a"
+  },
+  {
     type = "double-setting",
     name = "fs-initial-zoom",
     setting_type = "runtime-per-user",
@@ -23,6 +31,5 @@ data:extend{
     minimum_value = 0,
     maximum_value = 1000,
     order = "bb"
-  }
-
+  },
 }

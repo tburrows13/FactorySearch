@@ -44,6 +44,7 @@ script.on_event({defines.events.on_surface_created, defines.events.on_surface_de
 script.on_init(
   function()
     global.players = {}
+    global.current_searches = {}
     global.multiple_surfaces = false
     update_surface_count()
   end
@@ -60,6 +61,10 @@ script.on_configuration_changed(
         global.players[player_index] = nil
       end
     end
+
+    -- Stop in-progress non-blocking searches
+    global.current_searches = {}
+
     global.multiple_surfaces = false
     update_surface_count()
   end

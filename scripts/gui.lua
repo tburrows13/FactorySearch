@@ -24,13 +24,6 @@ local function get_signal_name(signal)
   end
 end
 
-local function get_selection_boxes(group)
-  selection_boxes = {}
-  for i, entity in pairs(group.entities) do
-    selection_boxes[i] = entity.selection_box
-  end
-  return selection_boxes
-end
 
 function Gui.build_surface_results(surface_name, surface_data)
   local gui_elements = {}
@@ -101,7 +94,7 @@ function Gui.build_surface_results(surface_name, surface_data)
           tooltip = { "", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"} },
           style = "slot_button",
           number = group.count,
-          tags = { position = group.avg_position, surface = surface_name, selection_boxes = get_selection_boxes(group) },
+          tags = { position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes },
           actions = { on_click = { gui = "search", action = "open_location_in_map" } },
         }
       )
@@ -128,20 +121,8 @@ function Gui.build_surface_name(include_surface_name, surface_name)
 
 end
 
-function Gui.build_results(data, frame, state_valid)
+function Gui.build_results(data, frame)
   frame.clear()
-
-  if not state_valid then
-    gui.build(frame, {
-      {
-        type = "label",
-        style_mods = { font_color = {1, 0, 0, 1} },
-        caption = {"search-gui.incorrect-config"}
-      }
-    })
-    return
-  end
-
 
   local include_surface_name = false
   local surface_count = 0
@@ -253,6 +234,28 @@ function Gui.clear_results(frame)
     {
       type = "label",
       caption = {"search-gui.explanation"},
+    }
+  })
+end
+
+function Gui.build_invalid_state(frame)
+  frame.clear()
+  gui.build(frame, {
+    {
+      type = "label",
+      style_mods = { font_color = {1, 0, 0, 1} },
+      caption = {"search-gui.incorrect-config"}
+    }
+  })
+end
+
+
+function Gui.build_loading_results(frame)
+  frame.clear()
+  gui.build(frame, {
+    {
+      type = "label",
+      caption = {"search-gui.searching"},
     }
   })
 end
@@ -625,14 +628,21 @@ function Gui.start_search(player, player_data)
     local state_valid = is_valid_state(state)
     local data
     if state_valid then
-      data = Search.find_machines(item, force, state, player.position, player.surface, not refs.all_surfaces.state)
+      data = Search.find_machines(item, force, state, player, not refs.all_surfaces.state)
+      refs.subheader_title.caption = get_signal_name(item) or ""
+      if data.non_blocking_search then
+        Gui.build_loading_results(refs.result_flow)
+      else
+        Gui.build_results(data, refs.result_flow)
+      end
+    else
+      Gui.build_invalid_state(refs.result_flow)
     end
-    Gui.build_results(data, refs.result_flow, state_valid)
-    refs.subheader_title.caption = get_signal_name(item) or ""
   else
     Gui.clear_results(refs.result_flow)
     refs.subheader_title.caption = ""
     ResultLocation.clear_markers(player)
+    global.current_searches[player.index] = nil
   end
 end
 

@@ -4,7 +4,7 @@ local group_gap_size = 16
 
 function SearchResults.add_entity(entity, surface_data)
   -- Group entities
-  -- Group contains count, avg_position, selection_box, entity_name, entities
+  -- Group contains count, avg_position, selection_box, entity_name, selection_boxes
   local entity_name = entity.name
   local entity_position = entity.position
   local entity_selection_box = entity.selection_box
@@ -31,7 +31,7 @@ function SearchResults.add_entity(entity, surface_data)
         },
       }
       group.count = new_count
-      table.insert(group.entities, entity)
+      table.insert(group.selection_boxes, entity.selection_box)
       break
     end
   end
@@ -51,7 +51,7 @@ function SearchResults.add_entity(entity, surface_data)
         }
       },
       entity_name = entity_name,
-      entities = {entity},
+      selection_boxes = {[1] = entity.selection_box},
       localised_name = entity.localised_name,
     }
     table.insert(entity_surface_data, assigned_group)
@@ -127,9 +127,9 @@ function SearchResults.add_tag(tag, surface_data)
     count = 1,
     avg_position = tag_position,
     entity_name = tag.icon.name,
-    entities = {{  -- Mock LuaEntity object, which only has its selection box attribute accessed by ui.lua
-      selection_box = selection_box
-    }},
+    selection_boxes = {
+      [1] = selection_box
+    },
     localised_name = localised_name,
   }
   table.insert(tag_surface_data, group)
