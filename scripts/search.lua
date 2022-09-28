@@ -347,6 +347,8 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
 
+  local data = {}
+
   for _, surface in pairs(surface_list) do
     local surface_data = table.deepcopy(default_surface_data)
 
