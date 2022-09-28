@@ -121,7 +121,8 @@ function Gui.build_surface_name(include_surface_name, surface_name)
 
 end
 
-function Gui.build_results(data, frame)
+function Gui.build_results(data, frame, check_result_found)
+  -- check_result_found defaults to true
   frame.clear()
 
   local include_surface_name = false
@@ -216,7 +217,7 @@ function Gui.build_results(data, frame)
     ::continue::
   end
 
-  if not result_found then
+  if not result_found and check_result_found ~= false then
     frame.clear()
     gui.build(frame, {
       {
@@ -258,6 +259,15 @@ function Gui.build_loading_results(frame)
       caption = {"search-gui.searching"},
     }
   })
+end
+
+function Gui.add_loading_results(frame)
+  gui.add(frame,
+    {
+      type = "label",
+      caption = {"search-gui.searching"},
+    }
+  )
 end
 
 function Gui.build(player)

@@ -337,7 +337,6 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
     end
     ::continue::
   end
-
 end
 
 function Search.blocking_search(force, state, target_item, surface_list, type_list, neutral_type_list, player)
@@ -428,6 +427,7 @@ function Search.on_tick()
 
   local current_surface = search_data.current_surface
   if not current_surface or not current_surface.valid then
+    -- Start next surface
     current_surface = table.remove(search_data.not_started_surfaces)
     if not current_surface then
       -- All surfaces are complete
@@ -438,10 +438,19 @@ function Search.on_tick()
       return
     end
 
-    if not current_surface.valid then return end  -- Will resume next surface on next tick
+    if not current_surface.valid then return end  -- Will try another surface next tick
+
+    -- Setup next surface data
     search_data.current_surface = current_surface
     search_data.surface_data = table.deepcopy(default_surface_data)
     search_data.chunk_iterator = current_surface.get_chunks()
+
+    -- Update results
+    local player_data = global.players[search_data.player.index]
+    local refs = player_data.refs
+    Gui.build_results(search_data.data, refs.result_flow, false)
+    Gui.add_loading_results(refs.result_flow)
+    return  -- Start next surface processing on next tick
   end
 
 
@@ -528,7 +537,6 @@ function Search.on_tick()
         SearchResults.add_entity(entity, surface_data.entities)
       end
     end
-    
     ::continue::
   end
 
