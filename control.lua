@@ -18,6 +18,7 @@ function filtered_surfaces(override_surface, player_surface)
     if string.sub(surface_name, -12) ~= "-transformer"  -- Power Overload
         and string.sub(surface_name, 0, 8) ~= "starmap-"  -- Space Exploration
         and surface_name ~= "aai-signals"  -- AAI Signals
+        and surface_name ~= "secret_companion_surface_please_dont_touch"  -- Companion Drones
       then
       table.insert(surfaces, surface)
     end
