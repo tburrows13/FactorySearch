@@ -48,6 +48,8 @@ local mod_placeholder_entities = {
 
 local list_to_map = util.list_to_map
 local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive" }
+local item_ammo_ingredient_entities = list_to_map{ "artillery-turret", "artillery-wagon", "ammo-turret" }  -- spider-vehicle, character
+local fluid_ammo_ingredient_entities = list_to_map { "fluid-turret" }
 local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }  -- TODO add rocket-silo
 local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
 local neutral_item_storage_entities = list_to_map{ "character-corpse" }  -- force = "neutral"
@@ -151,6 +153,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
       goto continue
     end
 
+    -- Ingredients / Consumers
     if state.consumers then
       local recipe
       if entity_type == "assembling-machine" then
@@ -190,6 +193,19 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
           if currently_burning.name == target_name then
             SearchResults.add_entity(entity, surface_data.consumers)
           end
+        end
+      end
+
+      -- Consuming ammo
+      if target_is_item and (entity_type == "artillery-turret" or entity_type == "artillery-wagon" or entity_type == "ammo-turret") then
+        local item_count = entity.get_item_count(target_name)
+        if item_count > 0 then
+          SearchResults.add_entity_storage(entity, surface_data.consumers, item_count)
+        end
+      elseif target_is_fluid and entity_type == "fluid-turret" then
+        local fluid_count = entity.get_fluid_count(target_name)
+        if fluid_count > 0 then
+          SearchResults.add_entity_storage_fluid(entity, surface_data.consumers, fluid_count)
         end
       end
     end
@@ -242,6 +258,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
       end
     end
 
+    -- Modules
     if state.modules then
       if target_is_item and modules_entities[entity_type] then
         local inventory
@@ -559,6 +576,13 @@ function Search.find_machines(target_item, force, state, player, override_surfac
   local neutral_entity_types = {}
   if (target_is_item or target_is_fluid) and state.consumers then
     add_entity_type(entity_types, ingredient_entities)
+
+    -- Only add turrets if target is ammo
+    if target_is_item and game.get_filtered_item_prototypes({{filter = "type", type = "ammo"}})[target_name] then
+      add_entity_type(entity_types, item_ammo_ingredient_entities)
+    elseif target_is_fluid then
+      add_entity_type(entity_types, fluid_ammo_ingredient_entities)
+    end
   end
   if (target_is_item or target_is_fluid) and state.producers then
     add_entity_type(entity_types, product_entities)

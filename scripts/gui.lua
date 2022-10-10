@@ -407,7 +407,7 @@ function Gui.build(player)
                           type = "checkbox",
                           state = true,
                           caption = {"search-gui.consumers-name"},
-                          tooltip = {"search-gui.consumers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=burner-mining-drill][entity=boiler]"},
+                          tooltip = {"search-gui.consumers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=burner-mining-drill][entity=boiler][entity=gun-turret]"},
                           ref = { "include_consumers" },
                           actions = {
                             on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
