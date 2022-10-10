@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.10.2
+Date: 10 October 2022
+  Features:
+    - 'Ingredient' search option now finds ammo in turrets
+  Bugfixes:
+    - Fixed non-blocking search not being stopped when unchecking all options
+---------------------------------------------------------------------------------------------------
 Version: 1.10.1
 Date: 28 September 2022
   Bugfixes:
