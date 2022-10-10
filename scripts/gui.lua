@@ -647,6 +647,7 @@ function Gui.start_search(player, player_data)
       end
     else
       Gui.build_invalid_state(refs.result_flow)
+      global.current_searches[player.index] = nil
     end
   else
     Gui.clear_results(refs.result_flow)
