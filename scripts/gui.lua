@@ -251,23 +251,19 @@ function Gui.build_invalid_state(frame)
 end
 
 
-function Gui.build_loading_results(frame)
-  frame.clear()
-  gui.build(frame, {
-    {
-      type = "label",
-      caption = {"search-gui.searching"},
-    }
-  })
-end
-
 function Gui.add_loading_results(frame)
   gui.add(frame,
     {
       type = "label",
       caption = {"search-gui.searching"},
+      tooltip = {"search-gui.searching-tooltip", {"", "[font=default-semibold]", {"mod-setting-name.fs-non-blocking-search"}, "[/font]"}}
     }
   )
+end
+
+function Gui.build_loading_results(frame)
+  frame.clear()
+  Gui.add_loading_results(frame)
 end
 
 function Gui.build(player)
