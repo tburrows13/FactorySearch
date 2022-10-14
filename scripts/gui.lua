@@ -121,14 +121,13 @@ function Gui.build_surface_name(include_surface_name, surface_name)
 
 end
 
-function Gui.build_results(data, frame, check_result_found)
+function Gui.build_results(data, frame, check_result_found, include_surface_name)
   -- check_result_found defaults to true
 
   if not (frame and frame.valid) then return end
 
   frame.clear()
 
-  local include_surface_name = false
   local surface_count = 0
   for _, _ in pairs(data) do
     surface_count = surface_count + 1

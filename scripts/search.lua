@@ -465,7 +465,7 @@ function Search.on_tick()
     -- Update results
     local player_data = global.players[search_data.player.index]
     local refs = player_data.refs
-    Gui.build_results(search_data.data, refs.result_flow, false)
+    Gui.build_results(search_data.data, refs.result_flow, false, true)
     Gui.add_loading_results(refs.result_flow)
     return  -- Start next surface processing on next tick
   end
