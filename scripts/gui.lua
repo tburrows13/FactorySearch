@@ -123,6 +123,9 @@ end
 
 function Gui.build_results(data, frame, check_result_found)
   -- check_result_found defaults to true
+
+  if not (frame and frame.valid) then return end
+
   frame.clear()
 
   local include_surface_name = false
