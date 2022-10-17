@@ -84,6 +84,7 @@ local function generate_distance_data(surface_data, player_position)
       for _, group in pairs(groups) do
         group.distance = distance(group.avg_position, player_position)
       end
+      table.sort(groups, function (k1, k2) return k1.distance < k2.distance end)
     end
   end
 end
