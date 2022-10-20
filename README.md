@@ -35,7 +35,7 @@ Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 - Opens results from other planets in the Navigation Satellite if using Space Exploration
 - `Control + Shift + Click` on any game object (e.g. built entity, inventory item, recipe) to open the search interface with that item selected
 - Supports multiplayer and compatible with any mod. No UPS impact when not in use, but searching may freeze the game for a couple of seconds on larger maps
-    - Non-blocking search can be enabled to search in the background instead of freezing the game (enabled by default in multiplayer)
+    - Background search can be enabled to search in the background instead of freezing the game (enabled by default in multiplayer)
 
 -----
 ## Future Updates?
