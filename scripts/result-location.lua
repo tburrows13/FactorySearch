@@ -135,7 +135,7 @@ function ResultLocation.open(player, data)
     end
   end
   local remote_view_used = false
-  if remote.interfaces["space-exploration"] and
+  if remote.interfaces["space-exploration"] and remote.interfaces["space-exploration"]["remote_view_is_unlocked"] and
     remote.call("space-exploration", "remote_view_is_unlocked", { player = player }) then
     -- If Space Exploration's remote view is an option, then always use it
     if surface_name == "nauvis" then
