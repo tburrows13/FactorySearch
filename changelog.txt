@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.10.3
+Date: 20 October 2022
+  Changes:
+    - 'Non-blocking search' renamed to 'Background search'
+    - Results within an entity type are sorted by distance from player
+    - Distance from player now also shown in background search mode
+  Bugfixes:
+    - Fixed the surface name of the first result not being shown during background search
+    - Fixed crash when another mod destroys the Factory Search interface during background search
+---------------------------------------------------------------------------------------------------
 Version: 1.10.2
 Date: 10 October 2022
   Features:
