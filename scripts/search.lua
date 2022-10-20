@@ -443,16 +443,25 @@ function Search.on_tick()
   local player_index, search_data = next(global.current_searches)
   if not search_data then return end
 
+  if search_data.search_complete then
+    local player_data = global.players[player_index]
+    local refs = player_data.refs
+    Gui.build_results(search_data.data, refs.result_flow)
+    global.current_searches[player_index] = nil
+  end
+
   local current_surface = search_data.current_surface
   if not current_surface or not current_surface.valid then
     -- Start next surface
     current_surface = table.remove(search_data.not_started_surfaces)
     if not current_surface then
       -- All surfaces are complete
-      local player_data = global.players[search_data.player.index]
-      local refs = player_data.refs
-      Gui.build_results(search_data.data, refs.result_flow)
-      global.current_searches[player_index] = nil
+      local player = search_data.player
+      local surface_data = search_data.data[player.surface.name]
+      if surface_data then
+        generate_distance_data(surface_data, player.position)
+      end
+      search_data.search_complete = true
       return
     end
 
@@ -464,7 +473,7 @@ function Search.on_tick()
     search_data.chunk_iterator = current_surface.get_chunks()
 
     -- Update results
-    local player_data = global.players[search_data.player.index]
+    local player_data = global.players[player_index]
     local refs = player_data.refs
     Gui.build_results(search_data.data, refs.result_flow, false, true)
     Gui.add_loading_results(refs.result_flow)
