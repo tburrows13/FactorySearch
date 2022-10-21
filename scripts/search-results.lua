@@ -101,6 +101,12 @@ function SearchResults.add_entity_signal(entity, surface_data, signal_count)
   group.signal_count = group_signal_count + signal_count
 end
 
+function SearchResults.add_entity_resource(entity, surface_data, resource_count)
+  local group = add_entity(entity, surface_data)
+  local group_resource_count = group.resource_count or 0
+  group.resource_count = group_resource_count + resource_count
+end
+
 function SearchResults.add_tag(tag, surface_data)
   -- An alternative to add_entity*, for map tags
   local icon_name = tag.icon.name

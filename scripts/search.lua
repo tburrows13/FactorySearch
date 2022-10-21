@@ -399,15 +399,21 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     end
 
     -- Entities
-    if target_is_item and state.entities then
+    if (target_is_item or target_is_fluid) and state.entities then
       local target_entity_name = mod_placeholder_entities[target_name]
 
       if not target_entity_name then
         local item_prototype = game.item_prototypes[target_name]
         target_entity_name = target_name
-        if item_prototype.place_result then
+        if item_prototype and item_prototype.place_result then
           target_entity_name = item_prototype.place_result.name
         end
+      end
+
+      local entity_prototype = game.entity_prototypes[target_entity_name]
+      local is_resource = false
+      if entity_prototype and (entity_prototype.infinite_resource ~= nil) then
+        is_resource = true
       end
 
       entities = surface.find_entities_filtered{
@@ -415,7 +421,17 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
         force = { force, "neutral" },
       }
       for _, entity in pairs(entities) do
-        SearchResults.add_entity(entity, surface_data.entities)
+        if is_resource then
+          local amount
+          if entity.initial_amount then
+            amount = entity.amount / 3000  -- Calculate yield from amount
+          else
+            amount = entity.amount
+          end
+          SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+        else
+          SearchResults.add_entity(entity, surface_data.entities)
+        end
       end
     end
     if surface == player.surface then

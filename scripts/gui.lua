@@ -93,7 +93,7 @@ function Gui.build_surface_results(surface_name, surface_data)
           sprite = sprite,
           tooltip = { "", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"} },
           style = "slot_button",
-          number = group.count,
+          number = group.resource_count or group.count,
           tags = { position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes },
           actions = { on_click = { gui = "search", action = "open_location_in_map" } },
         }
