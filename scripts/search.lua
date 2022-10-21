@@ -607,6 +607,9 @@ function Search.find_machines(target_item, force, state, player, override_surfac
   if target_is_item and state.requesters then
     add_entity_type(entity_types, request_entities)
   end
+  if target_is_item and state.modules then
+    add_entity_type(entity_types, modules_entities)
+  end
   if target_is_item and state.logistics then
     add_entity_type(entity_types, item_logistic_entities)
   end
