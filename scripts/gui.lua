@@ -48,7 +48,7 @@ function Gui.build_surface_results(surface_name, surface_data)
           for name, recipe_info in pairs(group.recipe_list) do
             local string = "\n"
             if multiple_recipes then
-              string = string .. "×" .. recipe_info.count .. " "
+              string = string .. "[font=default-bold]" .. recipe_info.count .. " × [/font]"
             end
             string = string .. "[recipe=" .. name .. "] "
             table.insert(extra_info, string)
