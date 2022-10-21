@@ -369,10 +369,13 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
   for _, surface in pairs(surface_list) do
     local surface_data = table.deepcopy(default_surface_data)
 
-    local entities = surface.find_entities_filtered{
-      type = type_list,
-      force = force,
-    }
+    local entities = {}
+    if next(type_list) then
+      entities = surface.find_entities_filtered{
+        type = type_list,
+        force = force,
+      }
+    end
 
     -- Corpses and items on ground don't have a force: find seperately
     if next(neutral_type_list) then
@@ -515,11 +518,13 @@ function Search.on_tick()
 
     local chunk_area = chunk.area
 
-    local entities = current_surface.find_entities_filtered{
-      area = chunk_area,
-      type = search_data.type_list,
-      force = force,
-    }
+    if next(search_data.type_list) then
+      local entities = current_surface.find_entities_filtered{
+        area = chunk_area,
+        type = search_data.type_list,
+        force = force,
+      }
+    end
 
     -- Corpses and items on ground don't have a force: find seperately
     if next(search_data.neutral_type_list) then
