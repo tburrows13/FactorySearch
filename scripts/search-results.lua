@@ -1,6 +1,6 @@
 local SearchResults = {}
 
-local group_gap_size = 16
+local group_gap_size = 20
 
 function SearchResults.add_entity(entity, surface_data)
   -- Group entities
