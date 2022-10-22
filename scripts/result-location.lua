@@ -154,6 +154,7 @@ function ResultLocation.open(player, data)
     if surface_name == player.surface.name then
       player.zoom_to_world(position, zoom_level)
     else
+      player.play_sound{path = "utility/cannot_build"}
       player.create_local_flying_text{text = {"search-gui.wrong-surface"}, create_at_cursor = true}
     end
   end

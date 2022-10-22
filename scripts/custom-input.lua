@@ -58,6 +58,7 @@ script.on_event("open-search-prototype",
         end
       end
       if not type then
+        player.play_sound{path = "utility/cannot_build"}
         player.create_local_flying_text{text = { "search-gui.invalid-item" }, create_at_cursor = true}
         return
       end
