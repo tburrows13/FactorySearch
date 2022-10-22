@@ -1,10 +1,22 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.10.4
+Date: 22 October 2022
+  Changes:
+    - Resource results now show resource amount/yield instead of entity count ('Entity' search mode)
+  Bugfixes:
+    - Fixed 'Module' search mode not returning all results when used with other search options
+    - Fixed 'Control + Shift + Click' not working with some modded resources
+    - Fixed 'Entity' search mode not working with fluid resources
+    - Optimised 'Tag' search mode to search almost instantly
+    - Optimised 'Ground' and 'Entity' search modes to search twice as fast
+    - Fixed rare bug where the scroll bar covers the search results
+---------------------------------------------------------------------------------------------------
 Version: 1.10.3
 Date: 20 October 2022
   Changes:
     - 'Non-blocking search' renamed to 'Background search'
     - Results within an entity type are sorted by distance from player
-    - Distance from player now also shown in background search mode
+    - Distance from player now also shown in background search
   Bugfixes:
     - Fixed the surface name of the first result not being shown during background search
     - Fixed crash when another mod destroys the Factory Search interface during background search
@@ -12,7 +24,7 @@ Date: 20 October 2022
 Version: 1.10.2
 Date: 10 October 2022
   Features:
-    - 'Ingredient' search option now finds ammo in turrets
+    - 'Ingredient' search mode now finds ammo in turrets
   Bugfixes:
     - Fixed non-blocking search not being stopped when unchecking all options
 ---------------------------------------------------------------------------------------------------
@@ -26,9 +38,9 @@ Date: 26 September 2022
   Features:
     - Added non-blocking search, which searches in the background without freezing the game (enabled by default in multiplayer only)
     - 'Control + Shift + Click' now works on entity and tile ghosts to search for the corresponding item
-    - 'Logistics' search option now finds items inside loaders
+    - 'Logistics' search mode now finds items inside loaders
   Changes:
-    - Changed default keybind from 'Control + Shift + F' 'Shift + F' to avoid collision with vanilla prototype explorer
+    - Changed default keybind from 'Control + Shift + F' to 'Shift + F' to avoid collision with vanilla prototype explorer
   Locale:
     - Added complete German translations (thanks knniDE on Crowdin!)
     - Added complete Brazilian Portuguese translations (thanks Henrique Pimenta on Crowdin!)
@@ -43,7 +55,7 @@ Date: 5 August 2022
   Features:
     - Added yellow highlight to mark the most recently selected result button
   Bugfixes:
-    - Fixed 'Ground' search option not working
+    - Fixed 'Ground' search mode not working
 ---------------------------------------------------------------------------------------------------
 Version: 1.9.1
 Date: 20 July 2022
@@ -55,8 +67,8 @@ Date: 20 July 2022
 Version: 1.9.0
 Date: 6 July 2022
   Features:
-    - Added 'Ingredient' search option to search for machines that consume a particular item
-    - 'Entity' search now finds resources (including Space Exploration's core seams)
+    - Added 'Ingredient' search mode to search for machines that consume a particular item
+    - 'Entity' search mode now finds resources (including Space Exploration's core seams)
 ---------------------------------------------------------------------------------------------------
 Version: 1.8.0
 Date: 20 June 2022
