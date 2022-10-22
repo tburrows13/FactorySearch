@@ -23,6 +23,9 @@ local mod_placeholder_entities = {
   ['sp-spidertron-dock'] =  -- SpidertronPatrols
     {'sp-spidertron-dock-0', 'sp-spidertron-dock-30', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
 
+  ['raw-rare-metals'] = 'rare-metals',
+  ['raw-imersite'] = 'imersite',
+
   ['offshore-pump-0'] = 'offshore-pump-0',  -- P-U-M-P-S
   ['offshore-pump-1'] = 'offshore-pump-1',
   ['offshore-pump-2'] = 'offshore-pump-2',

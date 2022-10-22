@@ -49,6 +49,14 @@ script.on_event("open-search-prototype",
           name = items_to_place_this[1].name
           type = "item"
         end
+        local mineable_properties = entity.mineable_properties
+        if mineable_properties then
+          local products = mineable_properties.products
+          if products then
+            name = products[1].name
+            type = products[1].type
+          end
+        end
       elseif game.tile_prototypes[name] then
         local tile = game.tile_prototypes[name]
         local items_to_place_this = tile.items_to_place_this
