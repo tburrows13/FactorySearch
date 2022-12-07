@@ -23,6 +23,9 @@ local mod_placeholder_entities = {
   ['sp-spidertron-dock'] =  -- SpidertronPatrols
     {'sp-spidertron-dock-0', 'sp-spidertron-dock-30', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
 
+  ['po-interface'] = 
+    {'po-interface', 'po-interface-north', 'po-interface-east', 'po-interface-south'},
+
   ['raw-rare-metals'] = 'rare-metals',  -- Krastorio2
   ['raw-imersite'] = 'imersite',  -- Krastorio2
   ['bitumen'] = 'bitumen-seep',  -- Pyanodons
