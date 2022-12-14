@@ -11,7 +11,7 @@ data:extend{
     type = "int-setting",
     name = "fs-chunks-per-tick",
     setting_type = "runtime-global",
-    default_value = 60,
+    default_value = 50,
     minimum_value = 0,
     maximum_value = 1000,
     order = "b"
