@@ -8,6 +8,15 @@ data:extend{
     order = "a"
   },
   {
+    type = "int-setting",
+    name = "fs-chunks-per-tick",
+    setting_type = "runtime-global",
+    default_value = 60,
+    minimum_value = 0,
+    maximum_value = 1000,
+    order = "b"
+  },
+  {
     type = "double-setting",
     name = "fs-initial-zoom",
     setting_type = "runtime-per-user",

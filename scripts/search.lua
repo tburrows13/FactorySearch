@@ -513,7 +513,8 @@ function Search.on_tick()
     return
   end
   local chunks_processed = 0
-  while chunks_processed < 20 do
+  local chunks_per_tick = settings.global["fs-chunks-per-tick"].value
+  while chunks_processed < chunks_per_tick do
     local chunk = chunk_iterator()
     if not chunk then
       -- Surface is complete
