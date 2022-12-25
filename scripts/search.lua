@@ -29,6 +29,7 @@ local mod_placeholder_entities = {
   ['raw-rare-metals'] = 'rare-metals',  -- Krastorio2
   ['raw-imersite'] = 'imersite',  -- Krastorio2
   ['bitumen'] = 'bitumen-seep',  -- Pyanodons
+  ['steam'] = 'steam-fissure',  -- IR3
 
   ['offshore-pump-0'] = 'offshore-pump-0',  -- P-U-M-P-S
   ['offshore-pump-1'] = 'offshore-pump-1',
