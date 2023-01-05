@@ -5,6 +5,7 @@ Search = require "scripts.search"
 SearchResults = require "scripts.search-results"
 ResultLocation = require "scripts.result-location"
 Gui = require "scripts.gui"
+local foofle_integration = require "scripts.foofle-integration"
 
 function filtered_surfaces(override_surface, player_surface)
   if override_surface then
@@ -53,6 +54,13 @@ script.on_init(
     global.current_searches = {}
     global.multiple_surfaces = false
     update_surface_count()
+    foofle_integration.on_start()
+  end
+)
+
+script.on_load(
+  function()
+    foofle_integration.on_start()
   end
 )
 
