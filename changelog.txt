@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.10.7
+Date: 5 January 2022
+  Bugfixes:
+    - Fixed incorrect result counts when using background search on entities that cross chunk boundaries
+---------------------------------------------------------------------------------------------------
 Version: 1.10.6
 Date: 28 December 2022
   Compatibility:
