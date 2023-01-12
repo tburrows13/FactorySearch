@@ -1,4 +1,4 @@
-math2d = require "__core__.lualib.math2d"
+math2d = require "math2d"
 search_signals = require "__FactorySearch__.scripts.search-signals"
 
 local Search = {}
@@ -25,11 +25,6 @@ local mod_placeholder_entities = {
 
   ['po-interface'] =  -- PowerOverload
     {'po-interface', 'po-interface-north', 'po-interface-east', 'po-interface-south'},
-
-  ['raw-rare-metals'] = 'rare-metals',  -- Krastorio2
-  ['raw-imersite'] = 'imersite',  -- Krastorio2
-  ['bitumen'] = 'bitumen-seep',  -- Pyanodons
-  ['steam'] = 'steam-fissure',  -- IR3
 
   ['offshore-pump-0'] = 'offshore-pump-0',  -- P-U-M-P-S
   ['offshore-pump-1'] = 'offshore-pump-1',
@@ -411,18 +406,21 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     if (target_is_item or target_is_fluid) and state.entities then
       local target_entity_name = mod_placeholder_entities[target_name]
 
-      if not target_entity_name then
-        local item_prototype = game.item_prototypes[target_name]
-        target_entity_name = target_name
-        if item_prototype and item_prototype.place_result then
-          target_entity_name = item_prototype.place_result.name
-        end
-      end
-
-      local entity_prototype = game.entity_prototypes[target_entity_name]
       local is_resource = false
-      if entity_prototype and (entity_prototype.infinite_resource ~= nil) then
-        is_resource = true
+      if not target_entity_name then
+        -- Try as a resource
+        target_entity_name = global.items_from_resources[target_name]
+        if target_entity_name then
+          is_resource = true
+        else
+          -- Otherwise, check for the item's place_result
+          local item_prototype = game.item_prototypes[target_name]
+          target_entity_name = target_name
+          if item_prototype and item_prototype.place_result then
+            target_entity_name = item_prototype.place_result.name
+          end
+          -- Or just try an entity with the same name as the item
+        end
       end
 
       entities = surface.find_entities_filtered{
@@ -585,18 +583,21 @@ function Search.on_tick()
     if (target_is_item or target_is_fluid) and state.entities then
       local target_entity_name = mod_placeholder_entities[target_name]
 
-      if not target_entity_name then
-        local item_prototype = game.item_prototypes[target_name]
-        target_entity_name = target_name
-        if item_prototype and item_prototype.place_result then
-          target_entity_name = item_prototype.place_result.name
-        end
-      end
-
-      local entity_prototype = game.entity_prototypes[target_entity_name]
       local is_resource = false
-      if entity_prototype and (entity_prototype.infinite_resource ~= nil) then
-        is_resource = true
+      if not target_entity_name then
+        -- Try as a resource
+        target_entity_name = global.items_from_resources[target_name]
+        if target_entity_name then
+          is_resource = true
+        else
+          -- Otherwise, check for the item's place_result
+          local item_prototype = game.item_prototypes[target_name]
+          target_entity_name = target_name
+          if item_prototype and item_prototype.place_result then
+            target_entity_name = item_prototype.place_result.name
+          end
+          -- Or just try an entity with the same name as the item
+        end
       end
 
       entities = current_surface.find_entities_filtered{
