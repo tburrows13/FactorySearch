@@ -20,6 +20,8 @@ end
 -- Some entities are secretly swapped around by their mod. This allows all entities associated
 -- with an item to be found by 'Entity' search
 local mod_placeholder_entities = {
+  ['rail'] = {'straight-rail', 'curved-rail'},
+
   ['sp-spidertron-dock'] =  -- SpidertronPatrols
     {'sp-spidertron-dock-0', 'sp-spidertron-dock-30', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
 
@@ -34,6 +36,8 @@ local mod_placeholder_entities = {
 
   ['burner-offshore-pump'] = 'burner-offshore-pump',  -- BurnerOffshorePump
   ['electric-offshore-pump'] = 'electric-offshore-pump',
+
+  ['se-space-rail'] = {'se-space-straight-rail', 'se-space-curved-rail'},  -- space-exploration
   ['se-core-fragment-omni'] = {'se-core-fragment-omni', 'se-core-fragment-omni-sealed'},
   ['se-core-fragment-iron-ore'] = {'se-core-fragment-iron-ore', 'se-core-fragment-iron-ore-sealed'},
   ['se-core-fragment-copper-ore'] = {'se-core-fragment-copper-ore', 'se-core-fragment-copper-ore-sealed'},
