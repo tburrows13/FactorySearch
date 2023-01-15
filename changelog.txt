@@ -1,10 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.10.9
 Date: 15 January 2023
-  Features:
-    - Recipe signals from Crafting Combinator can now be used to search for the item/fluid that they produce
-  Bugfixes:
-    - Fixed many modded resources (including most from Pyanodons) not being searchable ('Entity' search mode)
+  Changes:
+    - Search results from undiscovered chunks are no longer shown
+    - Searching for a recipe signal from Crafting Combinator now gives a warning that you need to select an item or fluid instead
 ---------------------------------------------------------------------------------------------------
 Version: 1.10.8
 Date: 13 January 2023
