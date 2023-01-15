@@ -96,6 +96,22 @@ local function generate_distance_data(surface_data, player_position)
   end
 end
 
+local function to_chunk_position(map_position)
+  return { math.floor(map_position.x / 32), math.floor(map_position.y / 32) }
+end
+
+local function remove_uncharted_groups(surface_data, surface, force)
+  for _, entity_groups in pairs(surface_data) do
+    for _, groups in pairs(entity_groups) do
+      for i, group in pairs(groups) do
+        if not force.is_chunk_charted(surface, to_chunk_position(group.avg_position)) then
+          table.remove(groups, i)
+        end
+      end
+    end
+  end
+end
+
 function Search.process_found_entities(entities, state, surface_data, target_item)
   -- Not used for Entity and Tag search modes
   local target_name = target_item.name
@@ -448,6 +464,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     if surface == player.surface then
       generate_distance_data(surface_data, player.position)
     end
+    remove_uncharted_groups(surface_data, surface, force)
     data[surface.name] = surface_data
   end
   return data
@@ -516,6 +533,8 @@ function Search.on_tick()
     search_data.current_surface = nil
     return
   end
+
+  local force = search_data.force
   local chunks_processed = 0
   local chunks_per_tick = settings.global["fs-chunks-per-tick"].value
   while chunks_processed < chunks_per_tick do
@@ -527,7 +546,7 @@ function Search.on_tick()
       return
     end
 
-    if current_surface.is_chunk_generated(chunk) then
+    if force.is_chunk_charted(current_surface, chunk) then
       chunks_processed = chunks_processed + 1
     else
       goto continue
@@ -542,7 +561,6 @@ function Search.on_tick()
 
     local state = search_data.state
     local surface_data = search_data.surface_data
-    local force = search_data.force
 
     local chunk_area = chunk.area
 
