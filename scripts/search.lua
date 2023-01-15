@@ -641,6 +641,17 @@ function Search.find_machines(target_item, force, state, player, override_surfac
     -- 'Unknown signal selected'
     return data
   end
+
+  -- Crafting Combinator adds signals for recipes, which players sometimes mistake for items/fluids
+  if target_item.type == "virtual" and not state.signals
+    and (game.active_mods["crafting_combinator"] or game.active_mods["crafting_combinator_xeraph"]) then
+    local recipe = game.recipe_prototypes[target_name]
+    if recipe then
+      player.print("[Factory Search] It looks like you selected a recipe from the \"Crafting combinator recipes\" tab. Instead select an item or fluid from a different tab.")
+      return data
+    end
+  end
+
   local target_type = target_item.type
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
