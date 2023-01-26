@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.10.10
+Date: ???
+  Bugfixes:
+    - Fixed searching for K2 rare metals would return mining drills that are mining raw rare metals
+---------------------------------------------------------------------------------------------------
 Version: 1.10.9
 Date: 15 January 2023
   Changes:
