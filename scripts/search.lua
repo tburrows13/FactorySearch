@@ -461,7 +461,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
             amount = entity.amount
           end
           SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-        else
+        elseif entity.type ~= "resource" then
           SearchResults.add_entity(entity, surface_data.entities)
         end
       end
@@ -646,7 +646,7 @@ function Search.on_tick()
             amount = entity.amount
           end
           SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-        else
+        elseif entity.type ~= "resource" then
           SearchResults.add_entity(entity, surface_data.entities)
         end
       end
