@@ -5,6 +5,7 @@ Search = require "scripts.search"
 SearchResults = require "scripts.search-results"
 ResultLocation = require "scripts.result-location"
 Gui = require "scripts.gui"
+require "scripts.remote"
 
 function filtered_surfaces(override_surface, player_surface)
   if override_surface then
