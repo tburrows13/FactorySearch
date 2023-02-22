@@ -554,7 +554,6 @@ function Gui.open(player, player_data)
   refs.frame.visible = true
   refs.frame.bring_to_front()
   player.set_shortcut_toggled("search-factory", true)
-  return player_data
 end
 
 function Gui.destroy(player, player_data)
