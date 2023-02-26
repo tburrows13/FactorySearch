@@ -160,11 +160,12 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
                 break
               end
             end
-            if control_behavior.read_logistics then
+            if target_is_item and control_behavior.read_logistics then
               local logistic_network = entity.logistic_network
               if logistic_network then
-                if logistic_network.get_item_count(target_name) > 0 then
-                  SearchResults.add_entity(entity, surface_data.signals)
+                local signal_count = logistic_network.get_item_count(target_name)
+                if signal_count > 0 then
+                  SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
                 end
               end
             end
@@ -174,10 +175,16 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
             elseif control_behavior.read_from_train then
               local train = entity.get_stopped_train()
               if train then
-                if target_is_item and train.get_item_count(target_name) > 0 then
-                  SearchResults.add_entity(entity, surface_data.signals)
-                elseif target_is_fluid and train.get_fluid_count(target_name) > 0 then
-                  SearchResults.add_entity(entity, surface_data.signals)
+                if target_is_item then
+                  local signal_count = train.get_item_count(target_name)
+                  if signal_count > 0 then
+                    SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
+                  end
+                elseif target_is_fluid then
+                  local signal_count = train.get_fluid_count(target_name)
+                  if signal_count > 0 then
+                    SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
+                  end
                 end
               end
             end
@@ -200,13 +207,15 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               end
             end
           elseif entity_type == "container" and target_is_item then
-            if entity.get_item_count(target_name) > 0 then
-              SearchResults.add_entity(entity, surface_data.signals)
+            local signal_count = entity.get_item_count(target_name)
+            if signal_count > 0 then
+              SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
             end
           elseif entity_type == "logistic-container" and target_is_item then
             if control_behavior.circuit_mode_of_operation == defines.control_behavior.logistic_container.circuit_mode_of_operation.send_contents then
-              if entity.get_item_count(target_name) > 0 then
-                SearchResults.add_entity(entity, surface_data.signals)
+              local signal_count = entity.get_item_count(target_name)
+              if signal_count > 0 then
+                SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
               end
             end
           elseif entity_type == "inserter" and target_is_item then
@@ -214,12 +223,13 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
             if control_behavior.circuit_read_hand_contents and control_behavior.circuit_hand_read_mode == defines.control_behavior.inserter.hand_read_mode.hold then
               local held_stack = entity.held_stack
               if held_stack and held_stack.valid_for_read and held_stack.name == target_name then
-                SearchResults.add_entity(entity, surface_data.signals)
+                SearchResults.add_entity_signal(entity, surface_data.signals, held_stack.count)
               end
             end
           elseif entity_type == "storage-tank" and target_is_fluid then
-            if entity.get_fluid_count(target_name) > 0 then
-              SearchResults.add_entity(entity, surface_data.signals)
+            local signal_count = entity.get_fluid_count(target_name)
+            if signal_count > 0 then
+              SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
             end
           end
         end
