@@ -431,7 +431,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     end
 
     -- Entities
-    if (target_is_item or target_is_fluid) and state.entities then
+    if state.entities then
       local target_entity_name = mod_placeholder_entities[target_name]
 
       local is_resource = false
@@ -610,7 +610,7 @@ function Search.on_tick()
     end
 
     -- Entities
-    if (target_is_item or target_is_fluid) and state.entities then
+    if state.entities then
       local target_entity_name = mod_placeholder_entities[target_name]
 
       local is_resource = false
