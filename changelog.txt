@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.10.12
+Date: 26 February 2023
+  Features:
+    - Added remote interface so that other mods can open the search GUI at a particular item
+    - Added corpse virtual signal so that corpses can now be searched for using 'Entity' search
+    - Lava pools from Freight Forwarding can now be searched for by selecting 'Hot titansteel' using 'Entity' search
+  Locale:
+    - Added complete Ukrainian translations (thanks Met_en_Bouldry on Crowdin!)
+---------------------------------------------------------------------------------------------------
 Version: 1.10.11
 Date: 11 February 2023
   Bugfixes:
