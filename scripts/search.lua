@@ -28,6 +28,9 @@ local mod_placeholder_entities = {
   ['po-interface'] =  -- PowerOverload
     {'po-interface', 'po-interface-north', 'po-interface-east', 'po-interface-south'},
 
+  ['ff-hot-titansteel-plate'] =
+    {'ff-lava-pool', 'ff-lava-pool-small'},
+
   ['offshore-pump-0'] = 'offshore-pump-0',  -- P-U-M-P-S
   ['offshore-pump-1'] = 'offshore-pump-1',
   ['offshore-pump-2'] = 'offshore-pump-2',
