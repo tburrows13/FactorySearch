@@ -3,6 +3,7 @@ Version: 1.10.13
 Date: 26 February 2023
   Bugfixes:
     - Fixed crash on load with Picker Belt Tools
+    - Fixed spaceship clamps from Space Exploration not being searchable
 ---------------------------------------------------------------------------------------------------
 Version: 1.10.12
 Date: 26 February 2023

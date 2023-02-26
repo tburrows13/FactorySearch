@@ -19,6 +19,7 @@ end
 
 -- Some entities are secretly swapped around by their mod. This allows all entities associated
 -- with an item to be found by 'Entity' search
+-- If an item's place_result is incorrect, then assign the entity to itself here
 local mod_placeholder_entities = {
   ['rail'] = {'straight-rail', 'curved-rail'},
 
@@ -41,6 +42,7 @@ local mod_placeholder_entities = {
   ['electric-offshore-pump'] = 'electric-offshore-pump',
 
   ['se-space-rail'] = {'se-space-straight-rail', 'se-space-curved-rail'},  -- space-exploration
+  ['se-spaceship-clamp'] = 'se-spaceship-clamp',
   ['se-core-fragment-omni'] = {'se-core-fragment-omni', 'se-core-fragment-omni-sealed'},
   ['se-core-fragment-iron-ore'] = {'se-core-fragment-iron-ore', 'se-core-fragment-iron-ore-sealed'},
   ['se-core-fragment-copper-ore'] = {'se-core-fragment-copper-ore', 'se-core-fragment-copper-ore-sealed'},
