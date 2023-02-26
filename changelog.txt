@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.10.13
 Date: 26 February 2023
+  Features:
+    - All entity types (except mining drills) can now be searched for in 'Signal' mode
   Bugfixes:
     - Fixed crash on load with Picker Belt Tools
     - Fixed spaceship clamps from Space Exploration not being searchable
