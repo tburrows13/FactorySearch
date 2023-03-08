@@ -23,7 +23,7 @@ local mod_placeholder_entities = {
   ['rail'] = {'straight-rail', 'curved-rail'},
 
   ['sp-spidertron-dock'] =  -- SpidertronPatrols
-    {'sp-spidertron-dock-0', 'sp-spidertron-dock-30', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
+    {'sp-spidertron-dock-0', 'sp-spidertron-dock-5', 'sp-spidertron-dock-10', 'sp-spidertron-dock-15', 'sp-spidertron-dock-20', 'sp-spidertron-dock-30', 'sp-spidertron-dock-40', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
 
   ['po-interface'] =  -- PowerOverload
     {'po-interface', 'po-interface-north', 'po-interface-east', 'po-interface-south'},
