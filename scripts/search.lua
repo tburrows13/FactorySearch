@@ -25,10 +25,22 @@ local mod_placeholder_entities = {
   ['sp-spidertron-dock'] =  -- SpidertronPatrols
     {'sp-spidertron-dock-0', 'sp-spidertron-dock-5', 'sp-spidertron-dock-10', 'sp-spidertron-dock-15', 'sp-spidertron-dock-20', 'sp-spidertron-dock-30', 'sp-spidertron-dock-40', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
 
+  ["spidertron"] =  -- SpidertronWeaponSwitcher
+    {"sws-spidertron-spidertron-machine-gun", "sws-spidertron-spidertron-shotgun", "sws-spidertron-spidertron-flamethrower", "spidertron", "sws-spidertron-spidertron-cannon"},
+
+  ["spidertronmk2"] =  -- SpidertronWeaponSwitcher
+    {"sws-spidertronmk2-sws-machine-gun-mk2", "sws-spidertronmk2-sws-shotgun-mk2", "sws-spidertronmk2-sws-flamethrower-mk2", "spidertronmk2", "sws-spidertronmk2-sws-cannon-mk2"},
+
+  ["spidertronmk3"] =  -- SpidertronWeaponSwitcher
+    {"sws-spidertronmk3-sws-machine-gun-mk3", "sws-spidertronmk3-sws-shotgun-mk3", "sws-spidertronmk3-sws-flamethrower-mk3", "spidertronmk3", "sws-spidertronmk3-sws-cannon-mk3"},
+
+  ["sp-spiderling"] =  -- SpidertronWeaponSwitcher
+    {"sws-sp-spiderling-sws-machine-gun-spiderling", "sws-sp-spiderling-sws-shotgun-spiderling", "sws-sp-spiderling-sws-flamethrower-spiderling", "sp-spiderling", "sws-sp-spiderling-sws-cannon-spiderling"},
+
   ['po-interface'] =  -- PowerOverload
     {'po-interface', 'po-interface-north', 'po-interface-east', 'po-interface-south'},
 
-  ['ff-hot-titansteel-plate'] =
+  ['ff-hot-titansteel-plate'] =  -- Freight Forwarding
     {'ff-lava-pool', 'ff-lava-pool-small'},
 
   ['offshore-pump-0'] = 'offshore-pump-0',  -- P-U-M-P-S
