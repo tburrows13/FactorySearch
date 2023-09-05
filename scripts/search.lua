@@ -16,45 +16,12 @@ local function signal_eq(sig1, sig2)
   return sig1 and sig2 and sig1.type == sig2.type and sig1.name == sig2.name
 end
 
--- Some entities are secretly swapped around by their mod. This allows all entities associated
--- with an item to be found by 'Entity' search
--- If an item's place_result is incorrect, then assign the entity to itself here
+-- Mod-specific overrides for "Entity" search
 local mod_placeholder_entities = {
-  ['rail'] = {'straight-rail', 'curved-rail'},
-
-  ['sp-spidertron-dock'] =  -- SpidertronPatrols
-    {'sp-spidertron-dock-0', 'sp-spidertron-dock-5', 'sp-spidertron-dock-10', 'sp-spidertron-dock-15', 'sp-spidertron-dock-20', 'sp-spidertron-dock-30', 'sp-spidertron-dock-40', 'sp-spidertron-dock-80', 'sp-spidertron-dock-100'},
-
-  ["spidertron"] =  -- SpidertronWeaponSwitcher
-    {"sws-spidertron-spidertron-machine-gun", "sws-spidertron-spidertron-shotgun", "sws-spidertron-spidertron-flamethrower", "spidertron", "sws-spidertron-spidertron-cannon"},
-
-  ["spidertronmk2"] =  -- SpidertronWeaponSwitcher
-    {"sws-spidertronmk2-sws-machine-gun-mk2", "sws-spidertronmk2-sws-shotgun-mk2", "sws-spidertronmk2-sws-flamethrower-mk2", "spidertronmk2", "sws-spidertronmk2-sws-cannon-mk2"},
-
-  ["spidertronmk3"] =  -- SpidertronWeaponSwitcher
-    {"sws-spidertronmk3-sws-machine-gun-mk3", "sws-spidertronmk3-sws-shotgun-mk3", "sws-spidertronmk3-sws-flamethrower-mk3", "spidertronmk3", "sws-spidertronmk3-sws-cannon-mk3"},
-
-  ["sp-spiderling"] =  -- SpidertronWeaponSwitcher
-    {"sws-sp-spiderling-sws-machine-gun-spiderling", "sws-sp-spiderling-sws-shotgun-spiderling", "sws-sp-spiderling-sws-flamethrower-spiderling", "sp-spiderling", "sws-sp-spiderling-sws-cannon-spiderling"},
-
-  ['po-interface'] =  -- PowerOverload
-    {'po-interface', 'po-interface-north', 'po-interface-east', 'po-interface-south'},
-
   ['ff-hot-titansteel-plate'] =  -- Freight Forwarding
     {'ff-lava-pool', 'ff-lava-pool-small'},
 
-  ['offshore-pump-0'] = 'offshore-pump-0',  -- P-U-M-P-S
-  ['offshore-pump-1'] = 'offshore-pump-1',
-  ['offshore-pump-2'] = 'offshore-pump-2',
-  ['offshore-pump-3'] = 'offshore-pump-3',
-  ['offshore-pump-4'] = 'offshore-pump-4',
-
-  ['burner-offshore-pump'] = 'burner-offshore-pump',  -- BurnerOffshorePump
-  ['electric-offshore-pump'] = 'electric-offshore-pump',
-
-  ['se-space-rail'] = {'se-space-straight-rail', 'se-space-curved-rail'},  -- space-exploration
-  ['se-spaceship-clamp'] = 'se-spaceship-clamp',
-  ['se-core-fragment-omni'] = {'se-core-fragment-omni', 'se-core-fragment-omni-sealed'},
+  ['se-core-fragment-omni'] = {'se-core-fragment-omni', 'se-core-fragment-omni-sealed'},  -- space-exploration
   ['se-core-fragment-iron-ore'] = {'se-core-fragment-iron-ore', 'se-core-fragment-iron-ore-sealed'},
   ['se-core-fragment-copper-ore'] = {'se-core-fragment-copper-ore', 'se-core-fragment-copper-ore-sealed'},
   ['se-core-fragment-coal'] = {'se-core-fragment-coal', 'se-core-fragment-coal-sealed'},
@@ -505,20 +472,18 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     if state.entities then
       local target_entity_name = mod_placeholder_entities[target_name]
 
-      local is_resource = false
       if not target_entity_name then
-        -- Try as a resource
-        target_entity_name = global.items_from_resources[target_name]
-        if target_entity_name then
-          is_resource = true
-        else
+        -- Check if the item is produced by mining any entities
+        target_entity_name = global.item_to_entities[target_name]
+        if not target_entity_name then
           -- Otherwise, check for the item's place_result
           local item_prototype = game.item_prototypes[target_name]
-          target_entity_name = target_name
           if item_prototype and item_prototype.place_result then
             target_entity_name = item_prototype.place_result.name
+          else
+            -- Or just try an entity with the same name as the item
+            target_entity_name = target_name
           end
-          -- Or just try an entity with the same name as the item
         end
       end
 
@@ -527,7 +492,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
         force = { force, "neutral" },
       }
       for _, entity in pairs(entities) do
-        if is_resource then
+        if entity.type == "resource" then
           local amount
           if entity.initial_amount then
             amount = entity.amount / 3000  -- Calculate yield from amount
@@ -535,7 +500,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
             amount = entity.amount
           end
           SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-        elseif entity.type ~= "resource" then
+        else
           SearchResults.add_entity(entity, surface_data.entities)
         end
       end
@@ -684,20 +649,18 @@ function Search.on_tick()
     if state.entities then
       local target_entity_name = mod_placeholder_entities[target_name]
 
-      local is_resource = false
       if not target_entity_name then
-        -- Try as a resource
-        target_entity_name = global.items_from_resources[target_name]
-        if target_entity_name then
-          is_resource = true
-        else
+        -- Check if the item is produced by mining any entities
+        target_entity_name = global.item_to_entities[target_name]
+        if not target_entity_name then
           -- Otherwise, check for the item's place_result
           local item_prototype = game.item_prototypes[target_name]
-          target_entity_name = target_name
           if item_prototype and item_prototype.place_result then
             target_entity_name = item_prototype.place_result.name
+          else
+            -- Or just try an entity with the same name as the item
+            target_entity_name = target_name
           end
-          -- Or just try an entity with the same name as the item
         end
       end
 
@@ -712,7 +675,7 @@ function Search.on_tick()
         end
       end
       for _, entity in pairs(entities) do
-        if is_resource then
+        if entity.type == "resource" then
           local amount
           if entity.initial_amount then
             amount = entity.amount / 3000  -- Calculate yield from amount
@@ -720,7 +683,7 @@ function Search.on_tick()
             amount = entity.amount
           end
           SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-        elseif entity.type ~= "resource" then
+        else
           SearchResults.add_entity(entity, surface_data.entities)
         end
       end
