@@ -50,7 +50,8 @@ script.on_event({defines.events.on_surface_created, defines.events.on_surface_de
 
 local function generate_item_to_entity_table()
   -- Make map of {item_name -> list[entity_name]}
-  -- Exception is we don't want to include entity_name when type == "simple-entity" if item_name is a resource
+  -- First try items_to_place_this, then mineable_properties
+  -- Exception in mineable_properties is we don't want to include entity_name when type == "simple-entity" if item_name is a resource
   -- This prevents things like rocks showing when searching for stone
 
   local resource_prototypes = game.get_filtered_entity_prototypes({{filter = "type", type = "resource"}})
@@ -64,14 +65,24 @@ local function generate_item_to_entity_table()
   -- Filter out rocks
   local item_to_entities = {}
   for _, prototype in pairs(prototypes) do
-    local properties = prototype.mineable_properties
-    if properties.minable and properties.products then
-      for _, item in pairs(prototype.mineable_properties.products) do
+    local items_to_place_this = prototype.items_to_place_this
+    if items_to_place_this then
+      for _, item in pairs(items_to_place_this) do
         local item_name = item.name
-        if prototype.type ~= "simple-entity" or not is_resource[item_name] then
-          local associated_entities = item_to_entities[item_name] or {}
-          table.insert(associated_entities, prototype.name)
-          item_to_entities[item_name] = associated_entities
+        local associated_entities = item_to_entities[item_name] or {}
+        table.insert(associated_entities, prototype.name)
+        item_to_entities[item_name] = associated_entities
+      end
+    else
+      local properties = prototype.mineable_properties
+      if properties.minable and properties.products then
+        for _, item in pairs(prototype.mineable_properties.products) do
+          local item_name = item.name
+          if prototype.type ~= "simple-entity" or not is_resource[item_name] then
+            local associated_entities = item_to_entities[item_name] or {}
+            table.insert(associated_entities, prototype.name)
+            item_to_entities[item_name] = associated_entities
+          end
         end
       end
     end
