@@ -18,6 +18,10 @@ end
 
 -- Mod-specific overrides for "Entity" search
 local mod_placeholder_entities = {
+  ['ff-ferrous-nodule'] = {'ff-seamount'},  -- Freight Forwarding
+  ['ff-cupric-nodule'] = {'ff-seamount'},
+  ['ff-cobalt-crust'] = {'ff-seamount'},
+
   ['ff-hot-titansteel-plate'] =  -- Freight Forwarding
     {'ff-lava-pool', 'ff-lava-pool-small'},
 
