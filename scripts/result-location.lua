@@ -111,6 +111,10 @@ function ResultLocation.highlight(player, data)
   local surface_name = data.surface
 
   ResultLocation.clear_markers(player)
+
+  -- In case surface was deleted
+  if not game.surfaces[surface_name] then return end
+
   ResultLocation.draw_markers(player, surface_name, data.selection_boxes)
   ResultLocation.draw_arrows(player, surface_name, data.position)
 end
