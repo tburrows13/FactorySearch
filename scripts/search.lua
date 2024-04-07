@@ -53,7 +53,7 @@ local request_entities = list_to_map{ "logistic-container", "character", "spider
 local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "loader", "loader-1x1", "inserter", "logistic-robot", "construction-robot" }
 local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
 local ground_entities = list_to_map{ "item-entity" }  -- force = "neutral"
-local signal_entities = list_to_map{ "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall", "container", "logistic-container", "inserter", "storage-tank" }
+local signal_entities = list_to_map{ "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall", "container", "logistic-container", "inserter", "storage-tank", "mining-drill" }
 
 local function add_entity_type(type_list, to_add_list)
   for name, _ in pairs(to_add_list) do
@@ -213,6 +213,23 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
             local signal_count = entity.get_fluid_count(target_name)
             if signal_count > 0 then
               SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
+            end
+          elseif entity_type == "mining-drill" then
+            if control_behavior.circuit_read_resources then
+              local resources = control_behavior.resource_read_targets
+              local count = 0
+              for _, resource in pairs(resources) do
+                if resource.name == target_name then
+                  if resource.initial_amount then
+                    count = count + (resource.amount / 30000)  -- Calculate fluid/s from amount
+                  else        
+                    count = count + resource.amount
+                  end
+                end
+              end
+              if count > 0 then
+                SearchResults.add_entity_signal(entity, surface_data.signals, count)
+              end
             end
           end
         end
