@@ -116,7 +116,74 @@ function Gui.build_surface_name(include_surface_name, surface_name)
   else
     return {}
   end
+end
 
+local function count_label(string, count)
+  return {
+    type = "label",
+    caption = {"", "[font=default-semibold]", string, ":[/font] ", util.format_number(math.floor(count), true)},
+    style = "bold_label",
+    tooltip = nil,
+    --style_mods = { font = "default-bold"
+  }
+end
+
+function Gui.build_surface_count(surface_info, surface_name_included)
+  local labels = {}
+  --[[if next(surface_info) then
+    table.insert(labels, {
+      type = "label",
+      caption = "Totals",
+      style = "bold_label",
+      -- Less margin top
+      style_mods = { top_margin = -8}  -- TODO don't reduce top margin when no planet name
+    })
+  end]]
+  if surface_info.consumers_count then
+    table.insert(labels, count_label({"search-gui.total-consumers"}, surface_info.consumers_count))
+  end
+  if surface_info.producers_count then
+    table.insert(labels, count_label({"search-gui.total-producers"}, surface_info.producers_count))
+  end
+  if surface_info.item_count then
+    table.insert(labels, count_label({"search-gui.total-items"}, surface_info.item_count))
+  end
+  if surface_info.fluid_count then
+    table.insert(labels, count_label({"search-gui.total-fluids"}, surface_info.fluid_count))
+  end
+  if surface_info.module_count then
+    table.insert(labels, count_label({"search-gui.total-modules"}, surface_info.module_count))
+  end
+  if surface_info.entity_count then
+    table.insert(labels, count_label({"search-gui.total-entities"}, surface_info.entity_count))
+  end
+  if surface_info.resource_count then
+    table.insert(labels, count_label({"search-gui.total-resources"}, surface_info.resource_count))
+  end
+  if surface_info.ground_count then
+    table.insert(labels, count_label({"search-gui.total-ground"}, surface_info.ground_count))
+  end
+  if surface_info.request_count then
+    table.insert(labels, count_label({"search-gui.total-requested"}, surface_info.request_count))
+  end
+  if surface_info.signal_count then
+    table.insert(labels, count_label({"search-gui.total-signals"}, surface_info.signal_count))
+  end
+  if surface_info.tag_count then
+    table.insert(labels, count_label({"search-gui.total-tags"}, surface_info.tag_count))
+  end
+  local flow = {
+    type = "flow",
+    direction = "vertical",
+    --style = "bold_label",
+    --tooltip = nil,
+    style_mods = {
+      vertical_spacing = -4,
+      top_margin = surface_name_included and -8 or 0,  -- Don't place too high if there isn't a surface name
+    },
+    children = labels,
+  }
+  return flow
 end
 
 function Gui.build_results(data, frame, check_result_found, include_surface_name)
@@ -139,6 +206,7 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
   for surface_name, surface_data in pairs(data) do
     local surface_contains_results = false
     for _, category_data in pairs(surface_data) do
+      -- TODO surface_info check here?
       surface_contains_results = surface_contains_results or not not next(category_data)
     end
     result_found = result_found or surface_contains_results
@@ -147,6 +215,7 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
     end
     gui.build(frame, {
       Gui.build_surface_name(include_surface_name, surface_name),
+      Gui.build_surface_count(surface_data.surface_info, include_surface_name),
       {
         type = "frame",
         direction = "vertical",

@@ -143,4 +143,10 @@ function SearchResults.add_tag(tag, surface_data)
   surface_data[icon_name] = tag_surface_data
 end
 
+function SearchResults.add_surface_info(category, amount, surface_info)
+  surface_info[category] = surface_info[category] or 0
+  surface_info[category] = surface_info[category] + amount
+
+end
+
 return SearchResults
