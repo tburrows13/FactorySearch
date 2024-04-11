@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.11.0
+Date: 11 April 2024
+  Features:
+    - Added per-surface totals for all search modes
+    - Added 1-second debounce to checkboxes, which gives users a short period to change more checkboxes before search starts
+    - 'Signal' search mode can now find mining drills and pumpjacks (these were the last entities that 'Signal' mode didn't work with)
+  Bugfixes:
+    - Fixed crash when clicking on result from a deleted surface
+---------------------------------------------------------------------------------------------------
 Version: 1.10.14
 Date: 8 September 2023
   Features:
