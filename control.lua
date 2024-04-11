@@ -7,6 +7,8 @@ ResultLocation = require "scripts.result-location"
 Gui = require "scripts.gui"
 require "scripts.remote"
 
+DEBOUNCE_TICKS = 60
+
 function filtered_surfaces(override_surface, player_surface)
   if override_surface then
     return {player_surface}

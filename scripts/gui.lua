@@ -685,7 +685,7 @@ local function is_valid_state(state)  -- TODO rename
   return some_checked
 end
 
-function Gui.start_search(player, player_data)
+function Gui.start_search(player, player_data, immediate)
   local refs = player_data.refs
   local elem_button = refs.item_select
   local item = elem_button.elem_value
@@ -695,12 +695,12 @@ function Gui.start_search(player, player_data)
     local state_valid = is_valid_state(state)
     local data
     if state_valid then
-      data = Search.find_machines(item, force, state, player, not refs.all_surfaces.state)
+      search_started = Search.find_machines(item, force, state, player, not refs.all_surfaces.state, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
-      if data.non_blocking_search then
+      if search_started then
         Gui.build_loading_results(refs.result_flow)
       else
-        Gui.build_results(data, refs.result_flow)
+        Gui.build_results({}, refs.result_flow)
       end
     else
       Gui.build_invalid_state(refs.result_flow)
@@ -758,9 +758,7 @@ gui.hook_events(
         button.style = "yellow_slot_button"
         player_data.refs.highlighted_button = button
       elseif msg == "refresh" then
-        Gui.start_search(player, player_data)
-      elseif msg == "checkbox_toggled" then
-        Gui.start_search(player, player_data)
+        Gui.start_search(player, player_data, true)
       end
     end
   end

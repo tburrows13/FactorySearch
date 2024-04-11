@@ -571,28 +571,25 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     end
     data[surface.name] = surface_data
   end
-  return data
-end
 
-function Search.non_blocking_search(force, state, target_item, surface_list, type_list, neutral_type_list, player)
-  search_data = {
-    force = force,
-    state = state,
-    target_item = target_item,
-    type_list = type_list,
-    neutral_type_list = neutral_type_list,
-    player = player,
-    data = {},
-    not_started_surfaces = surface_list,
-    completed_surfaces = {}
-  }
-
-  global.current_searches[player.index] = search_data
+  local player_data = global.players[player.index]
+  local refs = player_data.refs
+  Gui.build_results(data, refs.result_flow)
+  global.current_searches[player.index] = nil
 end
 
 function Search.on_tick()
   local player_index, search_data = next(global.current_searches)
   if not search_data then return end
+
+  -- First, check to see if we can trigger a blocking search
+  if search_data.blocking then
+    if search_data.tick_triggered + DEBOUNCE_TICKS < game.tick then
+      -- TODO Check player is still online?
+      Search.blocking_search(search_data.force, search_data.state, search_data.target_item, search_data.not_started_surfaces, search_data.type_list, search_data.neutral_type_list, search_data.player)
+    end
+    return
+  end
 
   if search_data.search_complete then
     local player_data = global.players[player_index]
@@ -757,12 +754,11 @@ function Search.on_tick()
 end
 event.on_tick(Search.on_tick)
 
-function Search.find_machines(target_item, force, state, player, override_surface)
-  local data = {}
+function Search.find_machines(target_item, force, state, player, override_surface, immediate)
   local target_name = target_item.name
   if target_name == nil then
     -- 'Unknown signal selected'
-    return data
+    return false
   end
 
   -- Crafting Combinator adds signals for recipes, which players sometimes mistake for items/fluids
@@ -771,7 +767,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
     local recipe = game.recipe_prototypes[target_name]
     if recipe then
       player.print("[Factory Search] It looks like you selected a recipe from the \"Crafting combinator recipes\" tab. Instead select an item or fluid from a different tab.")
-      return data
+      return false
     end
   end
 
@@ -825,16 +821,27 @@ function Search.find_machines(target_item, force, state, player, override_surfac
 
   local surface_list = filtered_surfaces(override_surface, player.surface)
 
-  local non_blocking_search = settings.global["fs-non-blocking-search"].value
-  if non_blocking_search == "on" or (non_blocking_search == "multiplayer" and game.is_multiplayer()) then
-    -- Do non blocking search
-    Search.non_blocking_search(force, state, target_item, surface_list, type_list, neutral_type_list, player)
-    data = { non_blocking_search = true }
+  local non_blocking_setting = settings.global["fs-non-blocking-search"].value
+  if non_blocking_setting == "on" or (non_blocking_setting == "multiplayer" and game.is_multiplayer()) then
+    non_blocking_search = true
   else
-    data = Search.blocking_search(force, state, target_item, surface_list, type_list, neutral_type_list, player)
+    non_blocking_search = false
   end
-
-  return data
+  search_data = {
+    blocking = not non_blocking_search,
+    tick_triggered = game.tick - (immediate and DEBOUNCE_TICKS or 0),
+    force = force,
+    state = state,
+    target_item = target_item,
+    type_list = type_list,
+    neutral_type_list = neutral_type_list,
+    player = player,
+    data = {},
+    not_started_surfaces = surface_list,
+    completed_surfaces = {}
+  }
+  global.current_searches[player.index] = search_data
+  return true
 end
 
 return Search
