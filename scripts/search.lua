@@ -491,6 +491,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
   local data = {}
 
   for _, surface in pairs(surface_list) do
+    if not surface.valid then goto continue end
     local surface_data = table.deepcopy(default_surface_data)
 
     local entities = {}
@@ -570,6 +571,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
       generate_distance_data(surface_data, player.position)
     end
     data[surface.name] = surface_data
+    ::continue::
   end
 
   local player_data = global.players[player.index]
