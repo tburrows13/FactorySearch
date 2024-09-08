@@ -476,7 +476,7 @@ function Gui.build(player)
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.storage-name"},
-                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
+                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=storage-chest][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
                       ref = { "include_inventories" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
@@ -526,7 +526,7 @@ function Gui.build(player)
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.requesters-name"},
-                      tooltip = {"search-gui.requesters-tooltip", "[entity=logistic-chest-requester][entity=logistic-chest-buffer]"},
+                      tooltip = {"search-gui.requesters-tooltip", "[entity=requester-chest][entity=buffer-chest]"},
                       ref = { "include_requesters" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
