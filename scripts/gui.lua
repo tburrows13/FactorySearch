@@ -218,60 +218,60 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",  --       padding = 0, TODO 2.0
             children = Gui.build_surface_results(surface_name, surface_data.consumers)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.producers)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.storage)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.logistics)
           },          {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.modules)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.entities)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.ground_items)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.requesters)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.signals)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.map_tags)
           },
         }
