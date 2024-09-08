@@ -104,7 +104,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
   -- Not used for Entity and Tag search modes
   -- Only provide `force` if you want to filter out uncharted entities
   local target_name = target_item.name
-  local target_type = target_item.type
+  local target_type = target_item.type or "item"
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
@@ -483,7 +483,7 @@ end
 
 function Search.blocking_search(force, state, target_item, surface_list, type_list, neutral_type_list, player)
   local target_name = target_item.name
-  local target_type = target_item.type
+  local target_type = target_item.type or "item"
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
@@ -657,7 +657,7 @@ function Search.on_tick()
 
     local target_item = search_data.target_item
     local target_name = target_item.name
-    local target_type = target_item.type
+    local target_type = target_item.type or "item"
     local target_is_item = target_type == "item"
     local target_is_fluid = target_type == "fluid"
     local target_is_virtual = target_type == "virtual"
@@ -773,7 +773,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
     end
   end
 
-  local target_type = target_item.type
+  local target_type = target_item.type or "item"
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
