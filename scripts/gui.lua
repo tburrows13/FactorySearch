@@ -3,13 +3,7 @@ local gui = require("__FactorySearch__.scripts.flib-gui")
 local Gui = {}
 
 local function toggle_fab(elem, sprite, state)
-  if state then
-    elem.style = "fs_flib_selected_frame_action_button"
-    elem.sprite = sprite .. "_black"
-  else
-    elem.style = "frame_action_button"
-    elem.sprite = sprite .. "_white"
-  end
+  elem.toggled = state
 end
 
 local function get_signal_name(signal)
@@ -367,8 +361,6 @@ function Gui.build(player)
               type = "sprite-button",
               style = "frame_action_button",
               sprite = "fs_flib_pin_white",
-              hovered_sprite = "fs_flib_pin_black",
-              clicked_sprite = "fs_flib_pin_black",
               mouse_button_filter = { "left" },
               tooltip = { "search-gui.keep-open" },
               ref = { "pin_button" },
@@ -379,9 +371,7 @@ function Gui.build(player)
             {
               type = "sprite-button",
               style = "close_button",
-              sprite = "utility/close_white",
-              hovered_sprite = "utility/close_black",
-              clicked_sprite = "utility/close_black",
+              sprite = "utility/close",
               mouse_button_filter = { "left" },
               tooltip = { "gui.close-instruction" },
               ref = { "close_button" },
