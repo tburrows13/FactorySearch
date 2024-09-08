@@ -94,9 +94,9 @@ end
 
 local function is_wire_connected(entity, entity_type)
   if entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" then
-    return entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output) or entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_output)
+    return entity.get_circuit_network(defines.wire_connector_id.combinator_output_red) or entity.get_circuit_network(defines.wire_connector_id.combinator_output_green)
   else
-    return entity.get_circuit_network(defines.wire_type.red) or entity.get_circuit_network(defines.wire_type.green)
+    return entity.get_circuit_network(defines.wire_connector_id.circuit_red) or entity.get_circuit_network(defines.wire_connector_id.circuit_green)
   end
 end
 
