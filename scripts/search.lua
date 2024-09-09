@@ -399,45 +399,24 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
 
     -- Requesters
     if target_is_item and state.requesters then
-      -- Buffer and Requester chests
-      if entity_type == "logistic-container" then
-        for i=1, entity.request_slot_count do
-          local request = entity.get_request_slot(i)
-          if request and request.name == target_name then
-            local count = request.count
-            if count then
-              SearchResults.add_entity_request(entity, surface_data.requesters, count)
-              SearchResults.add_surface_info("request_count", count, surface_data.surface_info)
-            end
-          end
-        end
-      elseif entity_type == "character" then
-        for i=1, entity.request_slot_count do
-          local request = entity.get_personal_logistic_slot(i)
-          if request and request.name == target_name then
-            local count = request.min
-            if count and count > 0 then
-              SearchResults.add_entity_request(entity, surface_data.requesters, request.min)
-              SearchResults.add_surface_info("request_count", request.min, surface_data.surface_info)
-            end
-          end
-        end
-      elseif entity_type == "spider-vehicle" then
-        for i=1, entity.request_slot_count do
-          local request = entity.get_vehicle_logistic_slot(i)
-          if request and request.name == target_name then
-            local count = request.min
-            if count and count > 0 then
-              SearchResults.add_entity_request(entity, surface_data.requesters, request.min)
-              SearchResults.add_surface_info("request_count", request.min, surface_data.surface_info)
+      -- Buffer and Requester chests, character, and spidertron
+      if entity_type == "logistic-container" or entity_type == "character" or entity_type == "spider-vehicle" then
+        local logistic_points = entity.get_logistic_point()
+        for _, logistic_point in pairs(logistic_points) do
+          for _, filter in pairs(logistic_point.filters or {}) do
+            if filter and filter.name == target_name then
+              SearchResults.add_entity_request(entity, surface_data.requesters, filter.count)
+              SearchResults.add_surface_info("request_count", filter.count, surface_data.surface_info)  
             end
           end
         end
       elseif entity_type == "item-request-proxy" then
-        local request_count = entity.item_requests[target_name]
-        if request_count ~= nil then
-          SearchResults.add_entity_request(entity.proxy_target, surface_data.requesters, request_count)
-          SearchResults.add_surface_info("request_count", request_count, surface_data.surface_info)
+        local requests = entity.item_requests
+        for _, item in pairs(requests) do
+          if item.name == target_name then
+            SearchResults.add_entity_request(entity.proxy_target, surface_data.requesters, item.count)
+            SearchResults.add_surface_info("request_count", item.count, surface_data.surface_info)
+          end
         end
       end
     end
