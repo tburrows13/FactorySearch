@@ -122,42 +122,19 @@ function ResultLocation.open(player, data)
   local position = data.position
   local zoom_level = player.mod_settings["fs-initial-zoom"].value * player.display_resolution.width / 1920
 
-  -- If using factorissimo-2-notnotmelon, take the player to the outer position of the factory
-  if surface_name ~= player.surface.name and surface_name:sub(1, 14) == "factory-floor-" and remote.interfaces["factorissimo"] then
-    local factory
-    while surface_name:sub(1, 14) == "factory-floor-" do
-      factory = remote.call("factorissimo", "find_surrounding_factory", {name = surface_name}, position)
-      surface_name = factory.outside_surface.name
-      position = {x = factory.outside_x, y = factory.outside_y}
-    end
-    if factory.building then  -- May not exist if building was mined or destroyed
-      data.surface = surface_name
-      data.position = position
-      data.selection_boxes = {[1] = factory.building.selection_box}
-    end
+  player.set_controller{
+    type = defines.controllers.remote,
+    position = position,
+    surface = surface_name,
+  }
+  player.zoom = zoom_level
+
+  local player_data = storage.players[player.index]
+  local refs = player_data.refs
+  if not player_data.pinned then
+    player.opened = refs.frame
   end
-  local remote_view_used = false
-  if remote.interfaces["space-exploration"] and remote.interfaces["space-exploration"]["remote_view_is_unlocked"] and
-    remote.call("space-exploration", "remote_view_is_unlocked", { player = player }) then
-    -- If Space Exploration's remote view is an option, then always use it
-    surface_name = surface_name:gsub("^%l", string.upper)
-    --if remote.call("space-exploration", "get_zone_from_name", {zone_name = surface_name}) then
-      remote.call("space-exploration", "remote_view_start", {player = player, zone_name = surface_name, position = position})
-      if remote.call("space-exploration", "remote_view_is_active", { player = player }) then
-        -- remote_view_start worked
-        remote_view_used = true
-        player.close_map()
-        player.zoom = zoom_level
-      end
-    end
-  if not remote_view_used then
-    if surface_name == player.surface.name then
-      player.zoom_to_world(position, zoom_level)
-    else
-      player.play_sound{path = "utility/cannot_build"}
-      player.create_local_flying_text{text = {"search-gui.wrong-surface"}, create_at_cursor = true}
-    end
-  end
+  refs.frame.visible = true
 
   ResultLocation.highlight(player, data)
 end
