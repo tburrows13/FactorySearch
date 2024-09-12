@@ -409,7 +409,7 @@ function Gui.build(player)
                       type = "checkbox",
                       state = true,
                       caption = { "search-gui.all-surfaces" },
-                      visible = global.multiple_surfaces,
+                      visible = storage.multiple_surfaces,
                       ref = { "all_surfaces" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
@@ -596,7 +596,7 @@ function Gui.build(player)
   refs.titlebar_flow.drag_target = refs.frame
   refs.frame.force_auto_center()
   player_data.refs = refs
-  global.players[player.index] = player_data
+  storage.players[player.index] = player_data
   return player_data
 end
 
@@ -618,7 +618,7 @@ function Gui.destroy(player, player_data)
   if main_frame then
     main_frame.destroy()
   end
-  global.players[player.index] = nil
+  storage.players[player.index] = nil
   Gui.after_close(player)
 end
 
@@ -694,13 +694,13 @@ function Gui.start_search(player, player_data, immediate)
       end
     else
       Gui.build_invalid_state(refs.result_flow)
-      global.current_searches[player.index] = nil
+      storage.current_searches[player.index] = nil
     end
   else
     Gui.clear_results(refs.result_flow)
     refs.subheader_title.caption = ""
     ResultLocation.clear_markers(player)
-    global.current_searches[player.index] = nil
+    storage.current_searches[player.index] = nil
   end
 end
 
@@ -709,7 +709,7 @@ gui.hook_events(
     local action = gui.read_action(event)
     if action then
       local player = game.get_player(event.player_index)
-      local player_data = global.players[event.player_index]
+      local player_data = storage.players[event.player_index]
 
       local msg = action.action
       if msg == "item_selected" then  -- on_gui_elem_changed
@@ -758,7 +758,7 @@ event.on_gui_closed(
   function(event)
     if event.element and event.element.name == "fs_frame" then
       local player = game.get_player(event.player_index)
-      Gui.close(player, global.players[event.player_index])
+      Gui.close(player, storage.players[event.player_index])
     end
   end
 )

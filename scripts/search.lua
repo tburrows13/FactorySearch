@@ -509,7 +509,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
 
       if not target_entity_name then
         -- Check if the item is produced by mining any entities
-        target_entity_name = global.item_to_entities[target_name]
+        target_entity_name = storage.item_to_entities[target_name]
         if not target_entity_name then
           -- Otherwise, check for the item's place_result
           local item_prototype = game.item_prototypes[target_name]
@@ -553,14 +553,14 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     ::continue::
   end
 
-  local player_data = global.players[player.index]
+  local player_data = storage.players[player.index]
   local refs = player_data.refs
   Gui.build_results(data, refs.result_flow)
-  global.current_searches[player.index] = nil
+  storage.current_searches[player.index] = nil
 end
 
 function Search.on_tick()
-  local player_index, search_data = next(global.current_searches)
+  local player_index, search_data = next(storage.current_searches)
   if not search_data then return end
 
   -- First, check to see if we can trigger a blocking search
@@ -573,10 +573,10 @@ function Search.on_tick()
   end
 
   if search_data.search_complete then
-    local player_data = global.players[player_index]
+    local player_data = storage.players[player_index]
     local refs = player_data.refs
     Gui.build_results(search_data.data, refs.result_flow)
-    global.current_searches[player_index] = nil
+    storage.current_searches[player_index] = nil
   end
 
   local current_surface = search_data.current_surface
@@ -602,7 +602,7 @@ function Search.on_tick()
     search_data.chunk_iterator = current_surface.get_chunks()
 
     -- Update results
-    local player_data = global.players[player_index]
+    local player_data = storage.players[player_index]
     local refs = player_data.refs
     Gui.build_results(search_data.data, refs.result_flow, false, true)
     Gui.add_loading_results(refs.result_flow)
@@ -690,7 +690,7 @@ function Search.on_tick()
 
       if not target_entity_name then
         -- Check if the item is produced by mining any entities
-        target_entity_name = global.item_to_entities[target_name]
+        target_entity_name = storage.item_to_entities[target_name]
         if not target_entity_name then
           -- Otherwise, check for the item's place_result
           local item_prototype = game.item_prototypes[target_name]
@@ -821,7 +821,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
     not_started_surfaces = surface_list,
     completed_surfaces = {}
   }
-  global.current_searches[player.index] = search_data
+  storage.current_searches[player.index] = search_data
   return true
 end
 
