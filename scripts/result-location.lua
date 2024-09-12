@@ -15,10 +15,10 @@ function ResultLocation.clear_markers(player)
   if #game.players == 1 then
     rendering.clear("FactorySearch")
   else
-    local ids = rendering.get_all_ids("FactorySearch")
-    for _, id in pairs(ids) do
-      if rendering.get_players(id)[1].index == player.index then
-        rendering.destroy(id)
+    local objects = rendering.get_all_objects("FactorySearch")
+    for _, object in pairs(objects) do
+      if object.players[1].index == player.index then
+        object.destroy()
       end
     end
   end
@@ -96,10 +96,8 @@ function ResultLocation.draw_arrows(player, surface, position)
       sprite = "fs_arrow",
       x_scale = 1,
       y_scale = 1,
-      target = character,
-      target_offset = ARROW_TARGET_OFFSET,
-      orientation_target = position,
-      oriented_offset = ARROW_ORIENTATED_OFFSET,
+      target = {entity=character, offset=ARROW_TARGET_OFFSET},
+      orientation_target = {position=position, offset=ARROW_ORIENTATED_OFFSET},
       surface = surface,
       time_to_live = player.mod_settings["fs-highlight-duration"].value * 60,
       players = {player},
@@ -166,11 +164,11 @@ end
 
 -- Move arrow to new character when jetpack is activated
 local function on_character_swapped_event(data)
-  local ids = rendering.get_all_ids("FactorySearch")
-  for _, id in pairs(ids) do
-    local target = rendering.get_target(id)
+  local objects = rendering.get_all_objects("FactorySearch")
+  for _, object in pairs(objects) do
+    local target = object.target
     if target and target.entity and target.entity.unit_number == data.old_unit_number then
-      rendering.set_target(id, data.new_character, ARROW_TARGET_OFFSET)
+      object.target = {entity=data.new_character, offset=ARROW_TARGET_OFFSET}
     end
   end
 end
