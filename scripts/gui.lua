@@ -99,11 +99,22 @@ end
 
 function Gui.build_surface_name(include_surface_name, surface_name)
   if include_surface_name then
+    local surface = game.get_surface(surface_name)
+    local display_name
     -- Capitalize first letter
-    surface_name = surface_name:gsub("^%l", string.upper)
+    if not surface then
+      display_name = surface_name:gsub("^%l", string.upper)
+    elseif surface.platform then
+      display_name = surface.platform.name
+    -- TODO check if surface has planet associated
+    elseif surface.localised_name then
+      display_name = surface.localised_name
+    else
+      display_name = surface_name:gsub("^%l", string.upper)
+    end
     return  {
       type = "label",
-      caption = surface_name,
+      caption = display_name,
       style = "bold_label",
       style_mods = { font = "default-large-bold" }
     }
