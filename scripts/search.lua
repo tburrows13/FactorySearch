@@ -44,16 +44,16 @@ local mod_placeholder_entities = {
 }
 
 local list_to_map = util.list_to_map
-local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive" }
+local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "fusion-generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive", "thruster" }
 local item_ammo_ingredient_entities = list_to_map{ "artillery-turret", "artillery-wagon", "ammo-turret" }  -- spider-vehicle, character
 local fluid_ammo_ingredient_entities = list_to_map { "fluid-turret" }
-local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill" }  -- TODO add rocket-silo
-local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
+local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill", "fusion-generator" }  -- TODO add rocket-silo
+local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "temporary-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
 local neutral_item_storage_entities = list_to_map{ "character-corpse" }  -- force = "neutral"
 local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
 local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
 local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "item-request-proxy" }
-local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "loader", "loader-1x1", "inserter", "logistic-robot", "construction-robot" }
+local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "linked-belt", "lane-splitter", "loader", "loader-1x1", "inserter", "logistic-robot", "construction-robot" }
 local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
 local ground_entities = list_to_map{ "item-entity" }  -- force = "neutral"
 local signal_entities = list_to_map{ "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall", "container", "logistic-container", "inserter", "storage-tank", "mining-drill" }
@@ -121,7 +121,6 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
       if signal_entities[entity_type] then
         local control_behavior = entity.get_control_behavior()
         if control_behavior and is_wire_connected(entity, entity_type) then
-          -- Does everything except mining drill, as API doesn't support that
           if entity_type == "constant-combinator" then
             -- If prototype's `item_slot_count = 0` then .parameters will be nil
             for _, parameter in pairs(control_behavior.parameters or {}) do
@@ -282,9 +281,19 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
           SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
         end
       end
-      if target_is_fluid and entity_type == "generator" then
+      if target_is_fluid and (entity_type == "generator" or entity_type == "thruster") then
         local fluid_count = entity.get_fluid_count(target_name)
         if fluid_count > 0 then
+          SearchResults.add_entity(entity, surface_data.consumers)
+          SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
+        end
+      end
+      -- Do fusion-generator separately because it has both input and output fluids
+      if target_is_fluid and (entity_type == "fusion-generator") then
+        local prototype = entity.prototype
+        local fluidboxes = prototype.fluidbox_prototypes
+        local input = fluidboxes[1]  -- TODO check assumption
+        if input.filter.name == target_name then
           SearchResults.add_entity(entity, surface_data.consumers)
           SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
         end
@@ -352,6 +361,15 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
             SearchResults.add_entity_product(entity, surface_data.producers, recipe)
             SearchResults.add_surface_info("producers_count", 1, surface_data.surface_info)
           end
+        end
+      end
+      if target_is_fluid and (entity_type == "fusion-generator") then
+        local prototype = entity.prototype
+        local fluidboxes = prototype.fluidbox_prototypes
+        local output = fluidboxes[2]  -- TODO check assumption
+        if output.filter.name == target_name then
+          SearchResults.add_entity(entity, surface_data.producers)
+          SearchResults.add_surface_info("producers_count", 1, surface_data.surface_info)
         end
       end
     end
