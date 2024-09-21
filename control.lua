@@ -105,6 +105,7 @@ script.on_init(
   function()
     global.players = {}
     global.current_searches = {}
+    global.finished_searches = {}
     global.multiple_surfaces = false
     update_surface_count()
     generate_item_to_entity_table()
@@ -125,6 +126,7 @@ script.on_configuration_changed(
 
     -- Stop in-progress non-blocking searches
     global.current_searches = {}
+    global.finished_searches = {}
 
     global.multiple_surfaces = false
     update_surface_count()

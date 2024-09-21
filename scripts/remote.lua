@@ -5,6 +5,6 @@ remote.add_interface("factory-search", {
     Gui.open(player, global.players[player.index])
     local player_data = global.players[player.index]
     player_data.refs.item_select.elem_value = search_value
-    Gui.start_search(player, player_data)
+    Gui.search_for_item(player, player_data)
   end
 })
