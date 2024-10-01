@@ -2,6 +2,9 @@ local SearchResults = {}
 
 local group_gap_size = 20
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@return ResultGroup
 function SearchResults.add_entity(entity, surface_data)
   -- Group entities
   -- Group contains count, avg_position, selection_box, entity_name, selection_boxes
@@ -62,6 +65,9 @@ end
 
 local add_entity = SearchResults.add_entity
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@param recipe LuaRecipe
 function SearchResults.add_entity_product(entity, surface_data, recipe)
   local group = add_entity(entity, surface_data)
   local group_recipe_list = group.recipe_list or {}
@@ -71,42 +77,62 @@ function SearchResults.add_entity_product(entity, surface_data, recipe)
   group.recipe_list = group_recipe_list
 end
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@param item_count int
 function SearchResults.add_entity_storage(entity, surface_data, item_count)
   local group = add_entity(entity, surface_data)
   local group_item_count = group.item_count or 0
   group.item_count = group_item_count + item_count
 end
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@param fluid_count double
 function SearchResults.add_entity_storage_fluid(entity, surface_data, fluid_count)
   local group = add_entity(entity, surface_data)
   local group_fluid_count = group.fluid_count or 0
   group.fluid_count = group_fluid_count + fluid_count
 end
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@param module_count int
 function SearchResults.add_entity_module(entity, surface_data, module_count)
   local group = add_entity(entity, surface_data)
   local group_module_count = group.module_count or 0
   group.module_count = group_module_count + module_count
 end
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@param request_count int
 function SearchResults.add_entity_request(entity, surface_data, request_count)
   local group = add_entity(entity, surface_data)
   local group_request_count = group.request_count or 0
   group.request_count = group_request_count + request_count
 end
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@param signal_count int
 function SearchResults.add_entity_signal(entity, surface_data, signal_count)
   local group = add_entity(entity, surface_data)
   local group_signal_count = group.signal_count or 0
   group.signal_count = group_signal_count + signal_count
 end
 
+---@param entity LuaEntity
+---@param surface_data CategoryResult
+---@param resource_count int
 function SearchResults.add_entity_resource(entity, surface_data, resource_count)
   local group = add_entity(entity, surface_data)
   local group_resource_count = group.resource_count or 0
   group.resource_count = group_resource_count + resource_count
 end
 
+---@param tag LuaCustomChartTag
+---@param surface_data CategoryResult
 function SearchResults.add_tag(tag, surface_data)
   -- An alternative to add_entity*, for map tags
   local icon_name = tag.icon.name
@@ -143,6 +169,9 @@ function SearchResults.add_tag(tag, surface_data)
   surface_data[icon_name] = tag_surface_data
 end
 
+---@param category string
+---@param amount int
+---@param surface_info SurfaceInfoResult
 function SearchResults.add_surface_info(category, amount, surface_info)
   surface_info[category] = surface_info[category] or 0
   surface_info[category] = surface_info[category] + amount

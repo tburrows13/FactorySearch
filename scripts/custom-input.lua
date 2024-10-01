@@ -81,7 +81,7 @@ script.on_event("open-search-prototype",
       player_data = global.players[event.player_index]
       local refs = player_data.refs
       refs.item_select.elem_value = {type = type, name = name}
-      Gui.start_search(player, player_data)
+      Gui.search_for_item(player, player_data)
     end
   end
 )

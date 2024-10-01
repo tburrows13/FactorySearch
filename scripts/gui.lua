@@ -24,6 +24,37 @@ local function get_signal_name(signal)
   end
 end
 
+---@param surface_data SurfaceSearchNameResult
+---@param player_position MapPosition
+local function generate_distance_data(surface_data, player_position)
+  local distance = math2d.position.distance
+  for category_name, entity_groups in pairs(surface_data) do
+    if category_name ~= "surface_info" then
+      for _, groups in pairs(entity_groups) do
+        for _, group in pairs(groups) do
+          group.distance = distance(group.avg_position, player_position)
+        end
+        table.sort(groups, function (k1, k2) return k1.distance < k2.distance end)
+      end
+    end
+  end
+end
+
+---@return SearchState
+local function generate_state(refs)
+  return {
+    consumers = refs.include_consumers.state,
+    producers = refs.include_machines.state,
+    storage = refs.include_inventories.state,
+    logistics = refs.include_logistics.state,
+    modules = refs.include_modules.state,
+    requesters = refs.include_requesters.state,
+    ground_items = refs.include_ground_items.state,
+    entities = refs.include_entities.state,
+    signals = refs.include_signals.state,
+    map_tags = refs.include_map_tags.state
+  }
+end
 
 function Gui.build_surface_results(surface_name, surface_data)
   local gui_elements = {}
@@ -186,12 +217,25 @@ function Gui.build_surface_count(surface_info, surface_name_included)
   return flow
 end
 
-function Gui.build_results(data, frame, check_result_found, include_surface_name)
+---@param data SearchResult
+---@param player_index int
+---@param check_result_found any
+---@param include_surface_name any
+function Gui.build_results(data, player_index, check_result_found, include_surface_name)
+  local player = game.get_player(player_index)
+  local refs = global.players[player_index].refs
+  local frame = refs.result_flow
+  --- @type SignalID
+  local target_item = refs.item_select.elem_value
   -- check_result_found defaults to true
 
-  if not (frame and frame.valid) then return end
+  if not (frame and frame.valid and player) then return end
 
   frame.clear()
+
+  refs.subheader_title.caption = target_item and get_signal_name(target_item) or ""
+
+  if not target_item then return end
 
   local surface_count = 0
   for _, _ in pairs(data) do
@@ -202,10 +246,13 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
     include_surface_name = true
   end
 
+  local state = generate_state(refs)
+
   local result_found = false
   for surface_name, surface_data in pairs(data) do
+    local item_data = Search.get_item_surface_data(surface_data, target_item.type, target_item.name)
     local surface_contains_results = false
-    for _, category_data in pairs(surface_data) do
+    for _, category_data in pairs(item_data) do
       -- TODO surface_info check here?
       surface_contains_results = surface_contains_results or not not next(category_data)
     end
@@ -213,9 +260,14 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
     if not surface_contains_results then
       goto continue
     end
+
+    if item_data and player.surface.name == surface_name then
+      generate_distance_data(item_data, player.position)
+    end
+
     gui.build(frame, {
       Gui.build_surface_name(include_surface_name, surface_name),
-      Gui.build_surface_count(surface_data.surface_info, include_surface_name),
+      Gui.build_surface_count(item_data.surface_info, include_surface_name),
       {
         type = "frame",
         direction = "vertical",
@@ -225,60 +277,60 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.consumers)
+            children = Gui.build_surface_results(surface_name, state.consumers and item_data.consumers or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.producers)
+            children = Gui.build_surface_results(surface_name, state.producers and item_data.producers or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.storage)
+            children = Gui.build_surface_results(surface_name, state.storage and item_data.storage or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.logistics)
+            children = Gui.build_surface_results(surface_name, state.logistics and item_data.logistics or {})
           },          {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.modules)
+            children = Gui.build_surface_results(surface_name, state.modules and item_data.modules or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.entities)
+            children = Gui.build_surface_results(surface_name, state.entities and item_data.entities or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.ground_items)
+            children = Gui.build_surface_results(surface_name, state.ground_items and item_data.ground_items or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.requesters)
+            children = Gui.build_surface_results(surface_name, state.requesters and item_data.requesters or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.signals)
+            children = Gui.build_surface_results(surface_name, state.signals and item_data.signals or {})
           },
           {
             type = "table",
             column_count = 10,
             style = "logistics_slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.map_tags)
+            children = Gui.build_surface_results(surface_name, state.map_tags and item_data.map_tags or {})
           },
         }
       }
@@ -662,21 +714,6 @@ function Gui.toggle(player, player_data)
   end
 end
 
-local function generate_state(refs)
-  return {
-    consumers = refs.include_consumers.state,
-    producers = refs.include_machines.state,
-    storage = refs.include_inventories.state,
-    logistics = refs.include_logistics.state,
-    modules = refs.include_modules.state,
-    requesters = refs.include_requesters.state,
-    ground_items = refs.include_ground_items.state,
-    entities = refs.include_entities.state,
-    signals = refs.include_signals.state,
-    map_tags = refs.include_map_tags.state
-  }
-end
-
 local function is_valid_state(state)  -- TODO rename
   local some_checked = false
   for _, checked in pairs(state) do
@@ -687,30 +724,20 @@ end
 
 function Gui.start_search(player, player_data, immediate)
   local refs = player_data.refs
-  local elem_button = refs.item_select
-  local item = elem_button.elem_value
-  if item then
-    local force = player.force
-    local state = generate_state(refs)
-    local state_valid = is_valid_state(state)
-    local data
-    if state_valid then
-      search_started = Search.find_machines(item, force, state, player, not refs.all_surfaces.state, immediate)
-      refs.subheader_title.caption = get_signal_name(item) or ""
-      if search_started then
-        Gui.build_loading_results(refs.result_flow)
-      else
-        Gui.build_results({}, refs.result_flow)
-      end
+  local force = player.force
+  local state = generate_state(refs)
+  local state_valid = is_valid_state(state)
+  if state_valid then
+    search_started = Search.find_machines(force, state, player, not refs.all_surfaces.state, immediate)
+    if search_started then
+      Gui.build_loading_results(refs.result_flow)
     else
-      Gui.build_invalid_state(refs.result_flow)
-      global.current_searches[player.index] = nil
+      Gui.build_results({}, player.index)
     end
   else
-    Gui.clear_results(refs.result_flow)
-    refs.subheader_title.caption = ""
-    ResultLocation.clear_markers(player)
+    Gui.build_invalid_state(refs.result_flow)
     global.current_searches[player.index] = nil
+    global.finished_searches[player.index] = nil
   end
 end
 
@@ -723,9 +750,9 @@ gui.hook_events(
 
       local msg = action.action
       if msg == "item_selected" then  -- on_gui_elem_changed
-        Gui.start_search(player, player_data)
+        Gui.search_for_item(player, player_data)
       elseif msg == "checkbox_toggled" then  -- on_gui_checked_state_changed
-        Gui.start_search(player, player_data)
+        Gui.search_for_item(player, player_data)
       elseif msg == "close" then  -- on_gui_click
         Gui.close(player, player_data)
         --Gui.destroy(player, player_data)
@@ -763,6 +790,27 @@ gui.hook_events(
     end
   end
 )
+
+
+function Gui.search_for_item(player, player_data)
+  local refs = player_data.refs
+  local elem_button = refs.item_select
+  local item = elem_button.elem_value
+  if item then
+    local search_data = global.finished_searches[player.index]
+    if search_data then
+      Gui.build_results(search_data, player.index)
+    elseif global.current_searches[player.index] then
+      Gui.build_loading_results(refs.result_flow)
+    else
+      Gui.build_results({}, player.index)
+    end
+  else
+    Gui.clear_results(refs.result_flow)
+    refs.subheader_title.caption = ""
+    ResultLocation.clear_markers(player)
+  end
+end
 
 event.on_gui_closed(
   function(event)
