@@ -56,14 +56,14 @@ local function generate_item_to_entity_table()
   -- Exception in mineable_properties is we don't want to include entity_name when type == "simple-entity" if item_name is a resource
   -- This prevents things like rocks showing when searching for stone
 
-  local resource_prototypes = game.get_filtered_entity_prototypes({{filter = "type", type = "resource"}})
+  local resource_prototypes = prototypes.get_entity_filtered({{filter = "type", type = "resource"}})
   local is_resource = {}
   for _, resource in pairs(resource_prototypes) do
     is_resource[resource.name] = true
   end
 
 
-  local prototypes = game.get_filtered_entity_prototypes({})
+  local prototypes = prototypes.get_entity_filtered({})
   -- Filter out rocks
   local item_to_entities = {}
   for _, prototype in pairs(prototypes) do

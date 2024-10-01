@@ -530,7 +530,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
         target_entity_name = storage.item_to_entities[target_name]
         if not target_entity_name then
           -- Otherwise, check for the item's place_result
-          local item_prototype = game.item_prototypes[target_name]
+          local item_prototype = prototypes.item[target_name]
           if item_prototype and item_prototype.place_result then
             target_entity_name = item_prototype.place_result.name
           else
@@ -711,7 +711,7 @@ function Search.on_tick()
         target_entity_name = storage.item_to_entities[target_name]
         if not target_entity_name then
           -- Otherwise, check for the item's place_result
-          local item_prototype = game.item_prototypes[target_name]
+          local item_prototype = prototypes.item[target_name]
           if item_prototype and item_prototype.place_result then
             target_entity_name = item_prototype.place_result.name
           else
@@ -763,7 +763,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
   -- Crafting Combinator adds signals for recipes, which players sometimes mistake for items/fluids
   if target_item.type == "virtual" and not state.signals
     and (game.active_mods["crafting_combinator"] or game.active_mods["crafting_combinator_xeraph"]) then
-    local recipe = game.recipe_prototypes[target_name]
+    local recipe = prototypes.recipe[target_name]
     if recipe then
       player.print("[Factory Search] It looks like you selected a recipe from the \"Crafting combinator recipes\" tab. Instead select an item or fluid from a different tab.")
       return false
@@ -781,7 +781,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
     add_entity_type(entity_types, ingredient_entities)
 
     -- Only add turrets if target is ammo
-    if target_is_item and game.get_filtered_item_prototypes({{filter = "type", type = "ammo"}})[target_name] then
+    if target_is_item and prototypes.get_item_filtered({{filter = "type", type = "ammo"}})[target_name] then
       add_entity_type(entity_types, item_ammo_ingredient_entities)
     elseif target_is_fluid then
       add_entity_type(entity_types, fluid_ammo_ingredient_entities)

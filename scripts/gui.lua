@@ -9,11 +9,11 @@ end
 local function get_signal_name(signal)
   if signal.name then
     if signal.type == "item" then
-      return game.item_prototypes[signal.name].localised_name
+      return prototypes.item[signal.name].localised_name
     elseif signal.type == "fluid" then
-      return game.fluid_prototypes[signal.name].localised_name
+      return prototypes.fluid[signal.name].localised_name
     elseif signal.type == "virtual" then
-      return game.virtual_signal_prototypes[signal.name].localised_name
+      return prototypes.virtual_signal[signal.name].localised_name
     end
   end
 end
