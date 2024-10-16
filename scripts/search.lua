@@ -15,8 +15,11 @@ local function extend(t1, t2)
   end
 end
 
+--- @param sig1 SignalID
+--- @param sig2 SignalID
+--- @return boolean
 local function signal_eq(sig1, sig2)
-  return sig1 and sig2 and sig1.type == sig2.type and sig1.name == sig2.name
+  return sig1 and sig2 and (sig1.type or 'item') == (sig2.type or 'item') and sig1.name == sig2.name
 end
 
 -- Mod-specific overrides for "Entity" search
@@ -44,7 +47,7 @@ local mod_placeholder_entities = {
 }
 
 local list_to_map = util.list_to_map
-local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "fusion-generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive", "thruster" }
+local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "mining-drill", "boiler", "burner-generator", "generator", "fusion-reactor", "fusion-generator", "reactor", "inserter", "lab", "car", "spider-vehicle", "locomotive", "thruster" }
 local item_ammo_ingredient_entities = list_to_map{ "artillery-turret", "artillery-wagon", "ammo-turret" }  -- spider-vehicle, character
 local fluid_ammo_ingredient_entities = list_to_map { "fluid-turret" }
 local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill", "fusion-generator" }  -- TODO add rocket-silo
@@ -52,7 +55,7 @@ local item_storage_entities = list_to_map{ "container", "logistic-container", "l
 local neutral_item_storage_entities = list_to_map{ "character-corpse" }  -- force = "neutral"
 local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
 local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
-local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "item-request-proxy" }
+local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "roboport", "space-platform-hub", "cargo-landing-pad", "item-request-proxy" }
 local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "linked-belt", "lane-splitter", "loader", "loader-1x1", "inserter", "logistic-robot", "construction-robot" }
 local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
 local ground_entities = list_to_map{ "item-entity" }  -- force = "neutral"
@@ -120,110 +123,197 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
     if state.signals then
       if signal_entities[entity_type] then
         local control_behavior = entity.get_control_behavior()
-        if control_behavior and is_wire_connected(entity, entity_type) then
-          if entity_type == "constant-combinator" then
-            -- If prototype's `item_slot_count = 0` then .parameters will be nil
-            for _, parameter in pairs(control_behavior.parameters or {}) do
-              if signal_eq(parameter.signal, target_item) then
-                SearchResults.add_entity_signal(entity, surface_data.signals, parameter.count)
-                SearchResults.add_surface_info("signal_count", parameter.count, surface_data.surface_info)
-              end
+        if control_behavior then
+          local signals = {}
+          if entity_type == "accumulator" then
+            if control_behavior.read_charge then
+              table.insert(signals, control_behavior.output_signal)
             end
-          elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" then
-            local signal_count = control_behavior.get_signal_last_tick(target_item)
-            if signal_count ~= nil then
-              SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
-              SearchResults.add_surface_info("signal_count", signal_count, surface_data.surface_info)
+          elseif entity_type == "assembling-machine" then
+            if control_behavior.circuit_read_recipe_finished then
+              table.insert(signals, control_behavior.circuit_recipe_finished_signal)
+            end
+            if control_behavior.circuit_read_working then
+              table.insert(signals, control_behavior.circuit_working_signal)
+            end
+          elseif entity_type == "rail-signal" and control_behavior.read_signal then
+            if control_behavior.read_signal then
+              table.insert(signals, control_behavior.red_signal)
+              table.insert(signals, control_behavior.orange_signal)
+              table.insert(signals, control_behavior.green_signal)
+            end
+          elseif entity_type == "rail-chain-signal" then
+            if control_behavior.read_signal then
+              table.insert(signals, control_behavior.red_signal)
+              table.insert(signals, control_behavior.orange_signal)
+              table.insert(signals, control_behavior.blue_signal)
+              table.insert(signals, control_behavior.green_signal)
+            end
+          elseif entity_type == "reactor" then
+            if control_behavior.read_temperature then
+              table.insert(signals, control_behavior.temperature_signal)
             end
           elseif entity_type == "roboport" then
-            for _, signal in pairs({ control_behavior.available_logistic_output_signal, control_behavior.total_logistic_output_signal, control_behavior.available_construction_output_signal, control_behavior.total_construction_output_signal }) do
-              if signal_eq(signal, target_item) then
+            if control_behavior.read_robot_stats then
+              table.insert(signals, control_behavior.available_logistic_output_signal)
+              table.insert(signals, control_behavior.total_logistic_output_signal)
+              table.insert(signals, control_behavior.available_construction_output_signal)
+              table.insert(signals, control_behavior.total_construction_output_signal)
+              table.insert(signals, control_behavior.roboport_count_output_signal)
+            end
+          elseif entity_type == "space-platform" then
+            if control_behavior.read_speed then
+              table.insert(signals, control_behavior.speed_signal)
+            end
+            if control_behavior.read_damage_taken then
+              table.insert(signals, control_behavior.damage_taken_signal)
+            end
+          elseif entity_type == "train-stop" then
+            if control_behavior.read_stopped_train then
+              table.insert(signals, control_behavior.stopped_train_signal)
+            end
+            if control_behavior.read_trains_count then
+              table.insert(signals, control_behavior.trains_count_signal)
+            end
+          elseif entity_type == "wall" then
+            if control_behavior.read_sensor then
+              table.insert(signals, control_behavior.output_signal)
+            end
+          end
+
+          for _, signal in ipairs(signals) do
+            if signal_eq(target_item, signal) then
+              SearchResults.add_entity(entity, surface_data.signals)
+              SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+              break
+            end
+          end
+
+          if entity_type == 'assembling-machine' then
+            -- to avoid duplicate when both circuit_read_contents and circuit_read_ingredients are enabled
+            local added_signals = {}
+
+            if control_behavior.circuit_read_contents then
+              -- doesn't include current working recipe, but we can't access it at the moment
+              local signal_count = entity.get_item_count(target_name)
+              if signal_count > 0 then
                 SearchResults.add_entity(entity, surface_data.signals)
                 SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
-                break
+                added_signals[target_type..'/'..target_name] = true
               end
             end
-            if target_is_item and control_behavior.read_logistics then
+            if control_behavior.circuit_read_ingredients then
+              local inventory = entity.get_inventory(defines.inventory.assembling_machine_input)
+              if inventory then
+                local signal_count = inventory.get_item_count(target_name)
+                if signal_count > 0 and not added_signals[target_type..'/'..target_name] then
+                  SearchResults.add_entity(entity, surface_data.signals)
+                  SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+                end
+              end
+            end
+          elseif entity_type == "constant-combinator" then
+            for _, section in ipairs(control_behavior.sections) do
+              for _, filter in ipairs(section.filters) do
+                if signal_eq(target_item, filter.value) then
+                  SearchResults.add_entity(entity, surface_data.signals)
+                  SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+                  goto break_both
+                end
+              end
+            end
+            ::break_both::
+          elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" or entity_type == 'selector-combinator' then
+            local signal_count = control_behavior.get_signal_last_tick(target_item)
+            if signal_count and signal_count > 0 then
+              SearchResults.add_entity(entity, surface_data.signals)
+              SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+            end
+          elseif entity_type == "reactor" then
+            local signal_count = entity.burner.inventory.get_item_count(target_name)
+            if signal_count > 0 then
+              SearchResults.add_entity(entity, surface_data.signals)
+              SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+            elseif signal_eq(target_item, entity.burner.currently_burning) then
+              SearchResults.add_entity(entity, surface_data.signals)
+              SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+            end
+          elseif entity_type == "roboport" then
+            if control_behavior.read_items_mode == defines.control_behavior.roboport.read_items_mode.logistics then
               local logistic_network = entity.logistic_network
               if logistic_network then
                 local signal_count = logistic_network.get_item_count(target_name)
                 if signal_count > 0 then
-                  SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
-                  SearchResults.add_surface_info("signal_count", signal_count, surface_data.surface_info)
+                  SearchResults.add_entity(entity, surface_data.signals)
+                  SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
                 end
               end
+            elseif control_behavior.read_items_mode == defines.control_behavior.roboport.read_items_mode.missing_requests then
+              -- TODO not possible right now
+            end
+          elseif entity_type == 'space-platform-hub' then
+            if control_behavior.read_contents then
+              local signal_count = entity.get_item_count(target_name)
+              if signal_count > 0 then
+                SearchResults.add_entity(entity, surface_data.signals)
+                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+              end
+            elseif control_behavior.read_moving_from then
+              -- TODO would be really hacky to get
+            elseif control_behavior.read_moving_to then
+              -- TODO would be really hacky to get
             end
           elseif entity_type == "train-stop" then
-            if signal_eq(control_behavior.stopped_train_signal, target_item) or signal_eq(control_behavior.trains_count_signal, target_item) then
-              SearchResults.add_entity(entity, surface_data.signals)
-              SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
-            elseif control_behavior.read_from_train then
+            if control_behavior.read_from_train then
               local train = entity.get_stopped_train()
               if train then
                 if target_is_item then
                   local signal_count = train.get_item_count(target_name)
                   if signal_count > 0 then
-                    SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
-                    SearchResults.add_surface_info("signal_count", signal_count, surface_data.surface_info)
+                    SearchResults.add_entity(entity, surface_data.signals)
+                    SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
                   end
                 elseif target_is_fluid then
                   local signal_count = train.get_fluid_count(target_name)
                   if signal_count > 0 then
-                    SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
-                    SearchResults.add_surface_info("signal_count", signal_count, surface_data.surface_info)
+                    SearchResults.add_entity(entity, surface_data.signals)
+                    SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
                   end
                 end
               end
             end
-          elseif entity_type == "accumulator" or entity_type == "wall" then
-            if signal_eq(control_behavior.output_signal, target_item) then
-              SearchResults.add_entity(entity, surface_data.signals)
-              SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
-            end
-          elseif entity_type == "rail-signal" then
-            for _, signal in pairs({ control_behavior.red_signal, control_behavior.orange_signal, control_behavior.green_signal }) do
-              if signal_eq(signal, target_item) then
-                SearchResults.add_entity(entity, surface_data.signals)
-                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
-                break
-              end
-            end
-          elseif entity_type == "rail-chain-signal" then
-            for _, signal in pairs({ control_behavior.red_signal, control_behavior.orange_signal, control_behavior.green_signal, control_behavior.blue_signal }) do
-              if signal_eq(signal, target_item) then
-                SearchResults.add_entity(entity, surface_data.signals)
-                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
-                break
-              end
-            end
           elseif entity_type == "container" and target_is_item then
-            local signal_count = entity.get_item_count(target_name)
-            if signal_count > 0 then
-              SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
-              SearchResults.add_surface_info("signal_count", signal_count, surface_data.surface_info)
-            end
-          elseif entity_type == "logistic-container" and target_is_item then
-            if control_behavior.circuit_mode_of_operation == defines.control_behavior.logistic_container.circuit_mode_of_operation.send_contents then
+            if control_behavior.read_contents then
               local signal_count = entity.get_item_count(target_name)
               if signal_count > 0 then
-                SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
-                SearchResults.add_surface_info("signal_count", signal_count, surface_data.surface_info)
+                SearchResults.add_entity(entity, surface_data.signals)
+                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+              end
+            end
+          elseif entity_type == "logistic-container" and target_is_item then
+            if control_behavior.circuit_exclusive_mode_of_operation == defines.control_behavior.logistic_container.exclusive_mode.send_contents then
+              local signal_count = entity.get_item_count(target_name)
+              if signal_count > 0 then
+                SearchResults.add_entity(entity, surface_data.signals)
+                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
               end
             end
           elseif entity_type == "inserter" and target_is_item then
             -- Doesn't check inserter if in pulse mode
             if control_behavior.circuit_read_hand_contents and control_behavior.circuit_hand_read_mode == defines.control_behavior.inserter.hand_read_mode.hold then
               local held_stack = entity.held_stack
-              if held_stack and held_stack.valid_for_read and held_stack.name == target_name then
-                SearchResults.add_entity_signal(entity, surface_data.signals, held_stack.count)
-                SearchResults.add_surface_info("signal_count", held_stack.count, surface_data.surface_info)
+              if held_stack and held_stack.valid_for_read and signal_eq(target_item, held_stack) then
+                SearchResults.add_entity(entity, surface_data.signals)
+                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
               end
             end
           elseif entity_type == "storage-tank" and target_is_fluid then
-            local signal_count = entity.get_fluid_count(target_name)
-            if signal_count > 0 then
-              SearchResults.add_entity_signal(entity, surface_data.signals, signal_count)
-              SearchResults.add_surface_info("signal_count", signal_count, surface_data.surface_info)
+            if control_behavior.read_contents then
+              local signal_count = entity.get_fluid_count(target_name)
+              if signal_count > 0 then
+                SearchResults.add_entity(entity, surface_data.signals)
+                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
+              end
             end
           elseif entity_type == "mining-drill" then
             if control_behavior.circuit_read_resources then
@@ -233,14 +323,14 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
                 if resource.name == target_name then
                   if resource.initial_amount then
                     count = count + (resource.amount / 30000)  -- Calculate fluid/s from amount
-                  else        
+                  else
                     count = count + resource.amount
                   end
                 end
               end
               if count > 0 then
-                SearchResults.add_entity_signal(entity, surface_data.signals, count)
-                SearchResults.add_surface_info("signal_count", count, surface_data.surface_info)
+                SearchResults.add_entity(entity, surface_data.signals)
+                SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
               end
             end
           end
@@ -258,54 +348,46 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
       if entity_type == "assembling-machine" then
         recipe = entity.get_recipe()
       elseif entity_type == "furnace" then
-        recipe = entity.get_recipe()
-        if recipe == nil then
-          -- Even if the furnace has stopped smelting, this records the last item it was smelting
-          recipe = entity.previous_recipe
-        end
+        -- Even if the furnace has stopped smelting, this records the last item it was smelting
+        recipe = entity.get_recipe() or entity.previous_recipe
       end
-      if recipe then
-        local ingredients = recipe.ingredients
-        for _, ingredient in pairs(ingredients) do
-          local name = ingredient.name
-          if name == target_name then
+
+      if recipe and recipe.ingredients then
+        for _, ingredient in pairs(recipe.ingredients) do
+          if signal_eq(target_item, ingredient) then
             SearchResults.add_entity_product(entity, surface_data.consumers, recipe)
             SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
+            break
           end
         end
-      end
-      if target_is_item and entity_type == "lab" then
+      elseif target_is_item and entity_type == "lab" then
         local item_count = entity.get_item_count(target_name)
         if item_count > 0 then
           SearchResults.add_entity(entity, surface_data.consumers)
           SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
         end
-      end
-      if target_is_fluid and (entity_type == "generator" or entity_type == "thruster") then
-        local fluid_count = entity.get_fluid_count(target_name)
-        if fluid_count > 0 then
-          SearchResults.add_entity(entity, surface_data.consumers)
-          SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
-        end
-      end
-      -- Do fusion-generator separately because it has both input and output fluids
-      if target_is_fluid and (entity_type == "fusion-generator") then
-        local prototype = entity.prototype
-        local fluidboxes = prototype.fluidbox_prototypes
-        local input = fluidboxes[1]  -- TODO check assumption
-        if input.filter.name == target_name then
-          SearchResults.add_entity(entity, surface_data.consumers)
-          SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
-        end
-      end
-      local burner = entity.burner
-      if burner then
-        local currently_burning = burner.currently_burning
-        if currently_burning then
-          if currently_burning.name == target_name then
+      elseif target_is_fluid then
+        if entity_type == "generator" or entity_type == "thruster" then
+          local fluid_count = entity.get_fluid_count(target_name)
+          if fluid_count > 0 then
             SearchResults.add_entity(entity, surface_data.consumers)
             SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
           end
+        else
+          local input_fluidbox = entity.prototype.fluidbox_prototypes[1]  -- TODO check assumption
+          if input_fluidbox and input_fluidbox.filter and input_fluidbox.filter.name == target_name then
+            SearchResults.add_entity(entity, surface_data.consumers)
+            SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
+          end
+        end
+      end
+
+      local burner = entity.burner
+      if burner then
+        local currently_burning = burner.currently_burning
+        if currently_burning and signal_eq(target_item, currently_burning.name) then
+          SearchResults.add_entity(entity, surface_data.consumers)
+          SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
         end
       end
 
@@ -313,13 +395,13 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
       if target_is_item and (entity_type == "artillery-turret" or entity_type == "artillery-wagon" or entity_type == "ammo-turret") then
         local item_count = entity.get_item_count(target_name)
         if item_count > 0 then
-          SearchResults.add_entity_storage(entity, surface_data.consumers, item_count)
+          SearchResults.add_entity(entity, surface_data.consumers)
           SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
         end
       elseif target_is_fluid and entity_type == "fluid-turret" then
         local fluid_count = entity.get_fluid_count(target_name)
         if fluid_count > 0 then
-          SearchResults.add_entity_storage_fluid(entity, surface_data.consumers, fluid_count)
+          SearchResults.add_entity(entity, surface_data.consumers)
           SearchResults.add_surface_info("consumers_count", 1, surface_data.surface_info)
         end
       end
@@ -331,19 +413,27 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
       if entity_type == "assembling-machine" then
         recipe = entity.get_recipe()
       elseif entity_type == "furnace" then
-        recipe = entity.get_recipe()
-        if recipe == nil then
-          -- Even if the furnace has stopped smelting, this records the last item it was smelting
-          recipe = entity.previous_recipe
+        -- Even if the furnace has stopped smelting, this records the last item it was smelting
+        recipe = entity.get_recipe() or entity.previous_recipe
+      end
+
+      if recipe and recipe.products then
+        for _, product in pairs(recipe.products) do
+          if signal_eq(target_item, product) then
+            SearchResults.add_entity_product(entity, surface_data.producers, recipe)
+            SearchResults.add_surface_info("producers_count", 1, surface_data.surface_info)
+            break
+          end
         end
       elseif entity_type == "mining-drill" then
         local mining_target = entity.mining_target
         if mining_target then
           local mineable_properties = mining_target.prototype.mineable_properties
           for _, product in pairs(mineable_properties.products or {}) do
-            if product.name == target_name then
+            if signal_eq(target_item, product) then
               SearchResults.add_entity(entity, surface_data.producers)
               SearchResults.add_surface_info("producers_count", 1, surface_data.surface_info)
+              break
             end
           end
         end
@@ -352,18 +442,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
           SearchResults.add_entity(entity, surface_data.producers)
           SearchResults.add_surface_info("producers_count", 1, surface_data.surface_info)
         end
-      end
-      if recipe then
-        local products = recipe.products
-        for _, product in pairs(products) do
-          local name = product.name
-          if name == target_name then
-            SearchResults.add_entity_product(entity, surface_data.producers, recipe)
-            SearchResults.add_surface_info("producers_count", 1, surface_data.surface_info)
-          end
-        end
-      end
-      if target_is_fluid and (entity_type == "fusion-generator") then
+      elseif target_is_fluid and (entity_type == "fusion-generator") then
         local prototype = entity.prototype
         local fluidboxes = prototype.fluidbox_prototypes
         local output = fluidboxes[2]  -- TODO check assumption
@@ -424,7 +503,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
           for _, filter in pairs(logistic_point.filters or {}) do
             if filter and filter.name == target_name then
               SearchResults.add_entity_request(entity, surface_data.requesters, filter.count)
-              SearchResults.add_surface_info("request_count", filter.count, surface_data.surface_info)  
+              SearchResults.add_surface_info("request_count", filter.count, surface_data.surface_info)
             end
           end
         end
@@ -484,6 +563,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
+  local target_is_entity = target_type == "entity"
 
   local data = {}
 
@@ -514,7 +594,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
       local tags = force.find_chart_tags(surface.name)
       for _, tag in pairs(tags) do
         local tag_icon = tag.icon
-        if tag_icon and tag_icon.type == target_type and tag_icon.name == target_name then
+        if tag_icon and signal_eq(target_item, tag_icon) then
           SearchResults.add_tag(tag, surface_data.map_tags)
           SearchResults.add_surface_info("tag_count", 1, surface_data.surface_info)
         end
@@ -523,21 +603,23 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
 
     -- Entities
     if state.entities then
-      local target_entity_name = mod_placeholder_entities[target_name]
-
+      local target_entity_name = target_is_entity and target_name
+      if target_is_entity then
+        target_entity_name = target_name
+      else
+        target_entity_name = mod_placeholder_entities[target_name]
+      end
       if not target_entity_name then
         -- Check if the item is produced by mining any entities
         target_entity_name = storage.item_to_entities[target_name]
-        if not target_entity_name then
-          -- Otherwise, check for the item's place_result
-          local item_prototype = prototypes.item[target_name]
-          if item_prototype and item_prototype.place_result then
-            target_entity_name = item_prototype.place_result.name
-          else
-            -- Or just try an entity with the same name as the item
-            target_entity_name = target_name
-          end
-        end
+      end
+      if not target_entity_name and prototypes.item[target_name] and prototypes.item[target_name].place_result then
+        -- Check for the item's place_result
+        target_entity_name = prototypes.item[target_name].place_result.name
+      end
+      if not target_entity_name then
+        -- Or just try an entity with the same name as the item
+        target_entity_name = target_name
       end
 
       entities = surface.find_entities_filtered{
@@ -545,25 +627,24 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
         force = { force, "neutral" },
       }
       for _, entity in pairs(entities) do
-        if not force.is_chunk_charted(surface, to_chunk_position(entity.position)) then
-          goto continue
-        end
-        if entity.type == "resource" then
-          local amount
-          if entity.initial_amount then
-            amount = entity.amount / 3000  -- Calculate yield from amount
+        if math2d.bounding_box.contains_point(chunk_area, entity.position) then
+          if entity.type == "resource" then
+            local amount
+            if entity.initial_amount then
+              amount = entity.amount / 3000  -- Calculate yield from amount
+            else
+              amount = entity.amount
+            end
+            SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+            SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
           else
-            amount = entity.amount
+            SearchResults.add_entity(entity, surface_data.entities)
+            SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
           end
-          SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-          SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
-        else
-          SearchResults.add_entity(entity, surface_data.entities)
-          SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
         end
-        ::continue::
       end
     end
+
     if surface == player.surface then
       generate_distance_data(surface_data, player.position)
     end
@@ -658,6 +739,7 @@ function Search.on_tick()
     local target_is_item = target_type == "item"
     local target_is_fluid = target_type == "fluid"
     local target_is_virtual = target_type == "virtual"
+    local target_is_entity = target_type == "entity"
 
     local state = search_data.state
     local surface_data = search_data.surface_data
@@ -692,33 +774,38 @@ function Search.on_tick()
 
     -- Map tags
     if state.map_tags then
-      local tags = force.find_chart_tags(current_surface.name, chunk_area)
-      for _, tag in pairs(tags) do
-        local tag_icon = tag.icon
-        if tag_icon and tag_icon.type == target_type and tag_icon.name == target_name then
-          SearchResults.add_tag(tag, surface_data.map_tags)
-          SearchResults.add_surface_info("tag_count", 1, surface_data.surface_info)
+      local slightly_smaller_chunk_area = {left_top = {chunk_area.left_top.x, chunk_area.left_top.y}, right_bottom = {chunk_area.right_bottom.x - 1, chunk_area.right_bottom.y - 1}}
+      local tags = force.find_chart_tags(current_surface.name, slightly_smaller_chunk_area)
+      for _, tag in ipairs(tags) do
+        if math2d.bounding_box.contains_point(chunk_area, tag.position) then
+          local tag_icon = tag.icon
+          if tag_icon and signal_eq(target_item, tag_icon) then
+            SearchResults.add_tag(tag, surface_data.map_tags)
+            SearchResults.add_surface_info("tag_count", 1, surface_data.surface_info)
+          end
         end
       end
     end
 
     -- Entities
     if state.entities then
-      local target_entity_name = mod_placeholder_entities[target_name]
-
+      local target_entity_name = target_is_entity and target_name
+      if target_is_entity then
+        target_entity_name = target_name
+      else
+        target_entity_name = mod_placeholder_entities[target_name]
+      end
       if not target_entity_name then
         -- Check if the item is produced by mining any entities
         target_entity_name = storage.item_to_entities[target_name]
-        if not target_entity_name then
-          -- Otherwise, check for the item's place_result
-          local item_prototype = prototypes.item[target_name]
-          if item_prototype and item_prototype.place_result then
-            target_entity_name = item_prototype.place_result.name
-          else
-            -- Or just try an entity with the same name as the item
-            target_entity_name = target_name
-          end
-        end
+      end
+      if not target_entity_name and prototypes.item[target_name] and prototypes.item[target_name].place_result then
+        -- Check for the item's place_result
+        target_entity_name = prototypes.item[target_name].place_result.name
+      end
+      if not target_entity_name then
+        -- Or just try an entity with the same name as the item
+        target_entity_name = target_name
       end
 
       entities = current_surface.find_entities_filtered{
@@ -726,24 +813,21 @@ function Search.on_tick()
         name = target_entity_name,
         force = { force, "neutral" },
       }
-      for i, entity in pairs(entities) do
-        if not math2d.bounding_box.contains_point(chunk_area, entity.position) then
-          entities[i] = nil
-        end
-      end
       for _, entity in pairs(entities) do
-        if entity.type == "resource" then
-          local amount
-          if entity.initial_amount then
-            amount = entity.amount / 3000  -- Calculate yield from amount
+        if math2d.bounding_box.contains_point(chunk_area, entity.position) then
+          if entity.type == "resource" then
+            local amount
+            if entity.initial_amount then
+              amount = entity.amount / 3000  -- Calculate yield from amount
+            else
+              amount = entity.amount
+            end
+            SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+            SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
           else
-            amount = entity.amount
+            SearchResults.add_entity(entity, surface_data.entities)
+            SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
           end
-          SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-          SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
-        else
-          SearchResults.add_entity(entity, surface_data.entities)
-          SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
         end
       end
     end

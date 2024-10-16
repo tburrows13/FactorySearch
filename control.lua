@@ -91,7 +91,7 @@ local function generate_item_to_entity_table()
   end
 
   -- Hardcode some Pyanodons associations
-  if game.active_mods["pypetroleumhandling"] then
+  if script.active_mods["pypetroleumhandling"] then
     --  or {} in case something removed those items or playing an older version of Py
     table.insert(item_to_entities["raw-gas"] or {}, "bitumen-seep")
     table.insert(item_to_entities["tar"] or {}, "bitumen-seep")

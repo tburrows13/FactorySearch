@@ -66,15 +66,15 @@ function Gui.build_surface_results(surface_name, surface_data)
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
       end
       local sprite = "item/" .. entity_name
-      if not game.is_valid_sprite_path(sprite) then
+      if not helpers.is_valid_sprite_path(sprite) then
         sprite = "fluid/" .. entity_name
-        if not game.is_valid_sprite_path(sprite) then
+        if not helpers.is_valid_sprite_path(sprite) then
           sprite = "entity/" .. entity_name
-          if not game.is_valid_sprite_path(sprite) then
+          if not helpers.is_valid_sprite_path(sprite) then
             sprite = "recipe/" .. entity_name
-            if not game.is_valid_sprite_path(sprite) then
+            if not helpers.is_valid_sprite_path(sprite) then
               sprite = "virtual-signal/" .. entity_name
-              if not game.is_valid_sprite_path(sprite) then
+              if not helpers.is_valid_sprite_path(sprite) then
                 sprite = "utility/questionmark"
               end
             end
@@ -218,6 +218,8 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
     if not surface_contains_results then
       goto continue
     end
+
+    -- TODO sort somewhere before showing storage, modules, requesters, ...
     gui.build(frame, {
       Gui.build_surface_name(include_surface_name, surface_name),
       Gui.build_surface_count(surface_data.surface_info, include_surface_name),
