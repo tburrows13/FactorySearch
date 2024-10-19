@@ -51,7 +51,7 @@ local ingredient_entities = list_to_map{ "assembling-machine", "furnace", "minin
 local item_ammo_ingredient_entities = list_to_map{ "artillery-turret", "artillery-wagon", "ammo-turret" }  -- spider-vehicle, character
 local fluid_ammo_ingredient_entities = list_to_map { "fluid-turret" }
 local product_entities = list_to_map{ "assembling-machine", "furnace", "offshore-pump", "mining-drill", "fusion-generator" }  -- TODO add rocket-silo
-local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "temporary-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle" }
+local item_storage_entities = list_to_map{ "container", "logistic-container", "linked-container", "temporary-container", "roboport", "character", "car", "artillery-wagon", "cargo-wagon", "spider-vehicle", "cargo-landing-pad", "space-platform-hub" }
 local neutral_item_storage_entities = list_to_map{ "character-corpse" }  -- force = "neutral"
 local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
 local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
@@ -621,24 +621,25 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
         -- Or just try an entity with the same name as the item
         target_entity_name = target_name
       end
-
-      entities = surface.find_entities_filtered{
-        name = target_entity_name,
-        force = { force, "neutral" },
-      }
-      for _, entity in pairs(entities) do
-        if entity.type == "resource" then
-          local amount
-          if entity.initial_amount then
-            amount = entity.amount / 3000  -- Calculate yield from amount
+      if prototypes.entity[target_entity_name] then
+        entities = surface.find_entities_filtered{
+          name = target_entity_name,
+          force = { force, "neutral" },
+        }
+        for _, entity in pairs(entities) do
+          if entity.type == "resource" then
+            local amount
+            if entity.initial_amount then
+              amount = entity.amount / 3000  -- Calculate yield from amount
+            else
+              amount = entity.amount
+            end
+            SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+            SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
           else
-            amount = entity.amount
+            SearchResults.add_entity(entity, surface_data.entities)
+            SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
           end
-          SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-          SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
-        else
-          SearchResults.add_entity(entity, surface_data.entities)
-          SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
         end
       end
     end
