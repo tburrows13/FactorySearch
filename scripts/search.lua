@@ -627,20 +627,18 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
         force = { force, "neutral" },
       }
       for _, entity in pairs(entities) do
-        if math2d.bounding_box.contains_point(chunk_area, entity.position) then
-          if entity.type == "resource" then
-            local amount
-            if entity.initial_amount then
-              amount = entity.amount / 3000  -- Calculate yield from amount
-            else
-              amount = entity.amount
-            end
-            SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-            SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
+        if entity.type == "resource" then
+          local amount
+          if entity.initial_amount then
+            amount = entity.amount / 3000  -- Calculate yield from amount
           else
-            SearchResults.add_entity(entity, surface_data.entities)
-            SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
+            amount = entity.amount
           end
+          SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+          SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
+        else
+          SearchResults.add_entity(entity, surface_data.entities)
+          SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
         end
       end
     end
