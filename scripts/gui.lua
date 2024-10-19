@@ -106,7 +106,8 @@ function Gui.build_surface_name(include_surface_name, surface_name)
       display_name = surface_name:gsub("^%l", string.upper)
     elseif surface.platform then
       display_name = surface.platform.name
-    -- TODO check if surface has planet associated
+    elseif surface.planet then
+      display_name = surface.planet.prototype.localised_name
     elseif surface.localised_name then
       display_name = surface.localised_name
     else
