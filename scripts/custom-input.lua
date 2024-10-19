@@ -3,7 +3,7 @@ local function on_shortcut_pressed(event)
   if event.prototype_name and event.prototype_name ~= "search-factory" then return end
   local player = game.get_player(event.player_index)
 
-  local player_data = global.players[event.player_index]
+  local player_data = storage.players[event.player_index]
   Gui.toggle(player, player_data)
 end
 event.on_lua_shortcut(on_shortcut_pressed)
@@ -13,7 +13,7 @@ script.on_event("search-factory", on_shortcut_pressed)
 script.on_event("open-search-prototype",
   function(event)
     local player = game.get_player(event.player_index)
-    local player_data = global.players[event.player_index]
+    local player_data = storage.players[event.player_index]
     if event.selected_prototype then
       local name = event.selected_prototype.name
       local type
@@ -27,19 +27,19 @@ script.on_event("open-search-prototype",
       end
       if event.selected_prototype.derived_type == "resource" then
         -- If we know it is a resource, then ensure we treat it as one first
-        local products = game.entity_prototypes[name].mineable_properties.products
+        local products = prototypes.entity[name].mineable_properties.products
         if products then
           name = products[1].name
           type = products[1].type
         end
-      elseif game.item_prototypes[name] then
+      elseif prototypes.item[name] then
         type = "item"
-      elseif game.fluid_prototypes[name] then
+      elseif prototypes.fluid[name] then
         type = "fluid"
-      elseif game.virtual_signal_prototypes[name] then
+      elseif prototypes.virtual_signal[name] then
         type = "virtual"
-      elseif game.recipe_prototypes[name] then
-        local recipe = game.recipe_prototypes[name]
+      elseif prototypes.recipe[name] then
+        local recipe = prototypes.recipe[name]
         local main_product = recipe.main_product
         if main_product then
           name = main_product.name
@@ -49,8 +49,8 @@ script.on_event("open-search-prototype",
           name = product.name
           type = product.type
         end
-      elseif game.entity_prototypes[name] then
-        local entity = game.entity_prototypes[name]
+      elseif prototypes.entity[name] then
+        local entity = prototypes.entity[name]
         local items_to_place_this = entity.items_to_place_this
         if items_to_place_this and items_to_place_this[1] then
           name = items_to_place_this[1].name
@@ -64,8 +64,8 @@ script.on_event("open-search-prototype",
             type = products[1].type
           end
         end
-      elseif game.tile_prototypes[name] then
-        local tile = game.tile_prototypes[name]
+      elseif prototypes.tile[name] then
+        local tile = prototypes.tile[name]
         local items_to_place_this = tile.items_to_place_this
         if items_to_place_this and items_to_place_this[1] then
           name = items_to_place_this[1].name
@@ -78,7 +78,7 @@ script.on_event("open-search-prototype",
         return
       end
       Gui.open(player, player_data)
-      player_data = global.players[event.player_index]
+      player_data = storage.players[event.player_index]
       local refs = player_data.refs
       refs.item_select.elem_value = {type = type, name = name}
       Gui.start_search(player, player_data)

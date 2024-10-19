@@ -5,27 +5,10 @@ local search_shortcut = {
   associated_control_input = "search-factory",
   toggleable = true,
   order = "d",
-  icon = {
-    filename = "__FactorySearch__/graphics/search-black.png",
-    size = 26,
-    flags = {"gui-icon"}
-  },
-  --[[small_icon = {
-    filename = "__SpidertronEnhancements__/graphics/follow-shortcut-24.png",
-    size = 24,
-    flags = {"gui-icon"}
-  },]]
-  disabled_icon = {
-    filename = "__FactorySearch__/graphics/search-white.png",
-    size = 26,
-    flags = {"gui-icon"}
-  },
-  --[[disabled_small_icon =
-  {
-    filename = "__SpidertronEnhancements__/graphics/follow-shortcut-white-24.png",
-    size = 24,
-    flags = {"gui-icon"}
-  }]]
+  icon = "__FactorySearch__/graphics/search-black.png",
+  icon_size = 26,
+  small_icon = "__FactorySearch__/graphics/search-black.png",
+  small_icon_size = 26,
 }
 local search_input = {
 	type = "custom-input",

@@ -3,23 +3,17 @@ local gui = require("__FactorySearch__.scripts.flib-gui")
 local Gui = {}
 
 local function toggle_fab(elem, sprite, state)
-  if state then
-    elem.style = "fs_flib_selected_frame_action_button"
-    elem.sprite = sprite .. "_black"
-  else
-    elem.style = "frame_action_button"
-    elem.sprite = sprite .. "_white"
-  end
+  elem.toggled = state
 end
 
 local function get_signal_name(signal)
   if signal.name then
     if signal.type == "item" then
-      return game.item_prototypes[signal.name].localised_name
+      return prototypes.item[signal.name].localised_name
     elseif signal.type == "fluid" then
-      return game.fluid_prototypes[signal.name].localised_name
+      return prototypes.fluid[signal.name].localised_name
     elseif signal.type == "virtual" then
-      return game.virtual_signal_prototypes[signal.name].localised_name
+      return prototypes.virtual_signal[signal.name].localised_name
     end
   end
 end
@@ -72,15 +66,15 @@ function Gui.build_surface_results(surface_name, surface_data)
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
       end
       local sprite = "item/" .. entity_name
-      if not game.is_valid_sprite_path(sprite) then
+      if not helpers.is_valid_sprite_path(sprite) then
         sprite = "fluid/" .. entity_name
-        if not game.is_valid_sprite_path(sprite) then
+        if not helpers.is_valid_sprite_path(sprite) then
           sprite = "entity/" .. entity_name
-          if not game.is_valid_sprite_path(sprite) then
+          if not helpers.is_valid_sprite_path(sprite) then
             sprite = "recipe/" .. entity_name
-            if not game.is_valid_sprite_path(sprite) then
+            if not helpers.is_valid_sprite_path(sprite) then
               sprite = "virtual-signal/" .. entity_name
-              if not game.is_valid_sprite_path(sprite) then
+              if not helpers.is_valid_sprite_path(sprite) then
                 sprite = "utility/questionmark"
               end
             end
@@ -105,11 +99,23 @@ end
 
 function Gui.build_surface_name(include_surface_name, surface_name)
   if include_surface_name then
+    local surface = game.get_surface(surface_name)
+    local display_name
     -- Capitalize first letter
-    surface_name = surface_name:gsub("^%l", string.upper)
+    if not surface then
+      display_name = surface_name:gsub("^%l", string.upper)
+    elseif surface.platform then
+      display_name = surface.platform.name
+    elseif surface.planet then
+      display_name = surface.planet.prototype.localised_name
+    elseif surface.localised_name then
+      display_name = surface.localised_name
+    else
+      display_name = surface_name:gsub("^%l", string.upper)
+    end
     return  {
       type = "label",
-      caption = surface_name,
+      caption = display_name,
       style = "bold_label",
       style_mods = { font = "default-large-bold" }
     }
@@ -213,6 +219,8 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
     if not surface_contains_results then
       goto continue
     end
+
+    -- TODO sort somewhere before showing storage, modules, requesters, ...
     gui.build(frame, {
       Gui.build_surface_name(include_surface_name, surface_name),
       Gui.build_surface_count(surface_data.surface_info, include_surface_name),
@@ -224,60 +232,60 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",  --       padding = 0, TODO 2.0
             children = Gui.build_surface_results(surface_name, surface_data.consumers)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.producers)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.storage)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.logistics)
           },          {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.modules)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.entities)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.ground_items)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.requesters)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.signals)
           },
           {
             type = "table",
             column_count = 10,
-            style = "logistics_slot_table",
+            style = "slot_table",
             children = Gui.build_surface_results(surface_name, surface_data.map_tags)
           },
         }
@@ -367,8 +375,6 @@ function Gui.build(player)
               type = "sprite-button",
               style = "frame_action_button",
               sprite = "fs_flib_pin_white",
-              hovered_sprite = "fs_flib_pin_black",
-              clicked_sprite = "fs_flib_pin_black",
               mouse_button_filter = { "left" },
               tooltip = { "search-gui.keep-open" },
               ref = { "pin_button" },
@@ -379,9 +385,7 @@ function Gui.build(player)
             {
               type = "sprite-button",
               style = "close_button",
-              sprite = "utility/close_white",
-              hovered_sprite = "utility/close_black",
-              clicked_sprite = "utility/close_black",
+              sprite = "utility/close",
               mouse_button_filter = { "left" },
               tooltip = { "gui.close-instruction" },
               ref = { "close_button" },
@@ -419,7 +423,7 @@ function Gui.build(player)
                       type = "checkbox",
                       state = true,
                       caption = { "search-gui.all-surfaces" },
-                      visible = global.multiple_surfaces,
+                      visible = storage.multiple_surfaces,
                       ref = { "all_surfaces" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
@@ -486,7 +490,7 @@ function Gui.build(player)
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.storage-name"},
-                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=logistic-chest-storage][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
+                      tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=storage-chest][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
                       ref = { "include_inventories" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
@@ -536,7 +540,7 @@ function Gui.build(player)
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.requesters-name"},
-                      tooltip = {"search-gui.requesters-tooltip", "[entity=logistic-chest-requester][entity=logistic-chest-buffer]"},
+                      tooltip = {"search-gui.requesters-tooltip", "[entity=requester-chest][entity=buffer-chest]"},
                       ref = { "include_requesters" },
                       actions = {
                         on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
@@ -606,7 +610,7 @@ function Gui.build(player)
   refs.titlebar_flow.drag_target = refs.frame
   refs.frame.force_auto_center()
   player_data.refs = refs
-  global.players[player.index] = player_data
+  storage.players[player.index] = player_data
   return player_data
 end
 
@@ -628,7 +632,7 @@ function Gui.destroy(player, player_data)
   if main_frame then
     main_frame.destroy()
   end
-  global.players[player.index] = nil
+  storage.players[player.index] = nil
   Gui.after_close(player)
 end
 
@@ -704,13 +708,13 @@ function Gui.start_search(player, player_data, immediate)
       end
     else
       Gui.build_invalid_state(refs.result_flow)
-      global.current_searches[player.index] = nil
+      storage.current_searches[player.index] = nil
     end
   else
     Gui.clear_results(refs.result_flow)
     refs.subheader_title.caption = ""
     ResultLocation.clear_markers(player)
-    global.current_searches[player.index] = nil
+    storage.current_searches[player.index] = nil
   end
 end
 
@@ -719,7 +723,7 @@ gui.hook_events(
     local action = gui.read_action(event)
     if action then
       local player = game.get_player(event.player_index)
-      local player_data = global.players[event.player_index]
+      local player_data = storage.players[event.player_index]
 
       local msg = action.action
       if msg == "item_selected" then  -- on_gui_elem_changed
@@ -768,7 +772,7 @@ event.on_gui_closed(
   function(event)
     if event.element and event.element.name == "fs_frame" then
       local player = game.get_player(event.player_index)
-      Gui.close(player, global.players[event.player_index])
+      Gui.close(player, storage.players[event.player_index])
     end
   end
 )

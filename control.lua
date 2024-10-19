@@ -38,14 +38,14 @@ local function update_surface_count()
   -- Hides 'All surfaces' button
   local multiple_surfaces = #filtered_surfaces() > 1
 
-  if multiple_surfaces ~= global.multiple_surfaces then
-    for _, player_data in pairs(global.players) do
+  if multiple_surfaces ~= storage.multiple_surfaces then
+    for _, player_data in pairs(storage.players) do
       local all_surfaces = player_data.refs.all_surfaces
       all_surfaces.visible = multiple_surfaces
     end
   end
 
-  global.multiple_surfaces = multiple_surfaces
+  storage.multiple_surfaces = multiple_surfaces
 end
 
 script.on_event({defines.events.on_surface_created, defines.events.on_surface_deleted}, update_surface_count)
@@ -56,14 +56,14 @@ local function generate_item_to_entity_table()
   -- Exception in mineable_properties is we don't want to include entity_name when type == "simple-entity" if item_name is a resource
   -- This prevents things like rocks showing when searching for stone
 
-  local resource_prototypes = game.get_filtered_entity_prototypes({{filter = "type", type = "resource"}})
+  local resource_prototypes = prototypes.get_entity_filtered({{filter = "type", type = "resource"}})
   local is_resource = {}
   for _, resource in pairs(resource_prototypes) do
     is_resource[resource.name] = true
   end
 
 
-  local prototypes = game.get_filtered_entity_prototypes({})
+  local prototypes = prototypes.get_entity_filtered({})
   -- Filter out rocks
   local item_to_entities = {}
   for _, prototype in pairs(prototypes) do
@@ -91,21 +91,21 @@ local function generate_item_to_entity_table()
   end
 
   -- Hardcode some Pyanodons associations
-  if game.active_mods["pypetroleumhandling"] then
+  if script.active_mods["pypetroleumhandling"] then
     --  or {} in case something removed those items or playing an older version of Py
     table.insert(item_to_entities["raw-gas"] or {}, "bitumen-seep")
     table.insert(item_to_entities["tar"] or {}, "bitumen-seep")
     table.insert(item_to_entities["crude-oil"] or {}, "bitumen-seep")
   end
 
-  global.item_to_entities = item_to_entities
+  storage.item_to_entities = item_to_entities
 end
 
 script.on_init(
   function()
-    global.players = {}
-    global.current_searches = {}
-    global.multiple_surfaces = false
+    storage.players = {}
+    storage.current_searches = {}
+    storage.multiple_surfaces = false
     update_surface_count()
     generate_item_to_entity_table()
   end
@@ -114,19 +114,19 @@ script.on_init(
 script.on_configuration_changed(
   function()
     -- Destroy all GUIs
-    for player_index, player_data in pairs(global.players) do
+    for player_index, player_data in pairs(storage.players) do
       local player = game.get_player(player_index)
       if player then
         Gui.destroy(player, player_data)
       else
-        global.players[player_index] = nil
+        storage.players[player_index] = nil
       end
     end
 
     -- Stop in-progress non-blocking searches
-    global.current_searches = {}
+    storage.current_searches = {}
 
-    global.multiple_surfaces = false
+    storage.multiple_surfaces = false
     update_surface_count()
     generate_item_to_entity_table()
   end
