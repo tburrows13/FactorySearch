@@ -15,6 +15,11 @@ Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where i
 Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
 
 -----
+## Doesn't 2.0 have built-in search?
+
+Factorio 2.0 has some brilliant built-in search functionality ([Product, Tag, and Train stop search](https://factorio.com/blog/post/fff-400), [Resource search](https://factorio.com/blog/post/fff-426)). However, you might still want to use Factory Search for the other search modes that vanilla can't do, such as searching for items in storage, modules in machines, requests for an item, or signals. Factory Search is also useful for searching across all planets at once, whereas built-in search only searches your current planet.
+
+-----
 ## Features
 
 - Press `Shift + F` to open search interface (can be changed in Settings > Controls)

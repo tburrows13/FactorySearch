@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.12.0
+Date: 21 October 2024
+  Features:
+    - Compatibility with Factorio 2.0 and Space Age (thanks to Atria for helping with the update)
+    - Support for some new entity types may be missing, please report any blind spots you find
+---------------------------------------------------------------------------------------------------
 Version: 1.11.1
 Date: 12 June 2024
   Bugfixes:
