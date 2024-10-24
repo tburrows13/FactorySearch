@@ -144,9 +144,11 @@ end
 local function on_character_swapped_event(data)
   local objects = rendering.get_all_objects("FactorySearch")
   for _, object in pairs(objects) do
-    local target = object.target
-    if target and target.entity and target.entity.unit_number == data.old_unit_number then
-      object.target = {entity=data.new_character, offset=ARROW_TARGET_OFFSET}
+    if object.type == "sprite" then
+      local target = object.target
+      if target and target.entity and target.entity.unit_number == data.old_unit_number then
+        object.target = {entity=data.new_character, offset=ARROW_TARGET_OFFSET}
+      end
     end
   end
 end
