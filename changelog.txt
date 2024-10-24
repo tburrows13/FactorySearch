@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.12.1
+Date: 21 October 2024
+  Bugfixes:
+    - Fixed 'Entity' search mode not working in many cases
+    - Fixed arrow pointing to results drawing on top of the player
+    - Fixed crash when using Jetpack mod
+---------------------------------------------------------------------------------------------------
 Version: 1.12.0
 Date: 21 October 2024
   Features:
