@@ -621,7 +621,8 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
         -- Or just try an entity with the same name as the item
         target_entity_name = target_name
       end
-      if prototypes.entity[target_entity_name] then
+      -- Type will be table if storage.item_to_entities succeeded. We know they are all valid entities
+      if type(target_entity_name) == "table" or prototypes.entity[target_entity_name] then
         entities = surface.find_entities_filtered{
           name = target_entity_name,
           force = { force, "neutral" },
