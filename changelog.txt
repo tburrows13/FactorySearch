@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.12.2
+Date: 28 October 2024
+  Bugfixes:
+    - Fixed 'Entity' search mode crashing when searching for an item with background search enabled
+---------------------------------------------------------------------------------------------------
 Version: 1.12.1
 Date: 21 October 2024
   Bugfixes:
