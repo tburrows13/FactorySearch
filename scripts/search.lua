@@ -808,25 +808,27 @@ function Search.on_tick()
         target_entity_name = target_name
       end
 
-      entities = current_surface.find_entities_filtered{
-        area = chunk_area,
-        name = target_entity_name,
-        force = { force, "neutral" },
-      }
-      for _, entity in pairs(entities) do
-        if math2d.bounding_box.contains_point(chunk_area, entity.position) then
-          if entity.type == "resource" then
-            local amount
-            if entity.initial_amount then
-              amount = entity.amount / 3000  -- Calculate yield from amount
+      if type(target_entity_name) == "table" or prototypes.entity[target_entity_name] then
+        entities = current_surface.find_entities_filtered{
+          area = chunk_area,
+          name = target_entity_name,
+          force = { force, "neutral" },
+        }
+        for _, entity in pairs(entities) do
+          if math2d.bounding_box.contains_point(chunk_area, entity.position) then
+            if entity.type == "resource" then
+              local amount
+              if entity.initial_amount then
+                amount = entity.amount / 3000  -- Calculate yield from amount
+              else
+                amount = entity.amount
+              end
+              SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+              SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
             else
-              amount = entity.amount
+              SearchResults.add_entity(entity, surface_data.entities)
+              SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
             end
-            SearchResults.add_entity_resource(entity, surface_data.entities, amount)
-            SearchResults.add_surface_info("resource_count", amount, surface_data.surface_info)
-          else
-            SearchResults.add_entity(entity, surface_data.entities)
-            SearchResults.add_surface_info("entity_count", 1, surface_data.surface_info)
           end
         end
       end
