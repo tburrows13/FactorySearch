@@ -229,7 +229,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               SearchResults.add_entity(entity, surface_data.signals)
               SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
             end
-          elseif entity_type == "reactor" then
+          elseif entity_type == "reactor" and target_is_item then  -- TODO reactors can also burn fluids
             local signal_count = entity.burner.inventory.get_item_count(target_name)
             if signal_count > 0 then
               SearchResults.add_entity(entity, surface_data.signals)
@@ -238,7 +238,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               SearchResults.add_entity(entity, surface_data.signals)
               SearchResults.add_surface_info("signal_count", 1, surface_data.surface_info)
             end
-          elseif entity_type == "roboport" then
+          elseif entity_type == "roboport" and target_is_item then
             if control_behavior.read_items_mode == defines.control_behavior.roboport.read_items_mode.logistics then
               local logistic_network = entity.logistic_network
               if logistic_network then
@@ -251,7 +251,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
             elseif control_behavior.read_items_mode == defines.control_behavior.roboport.read_items_mode.missing_requests then
               -- TODO not possible right now
             end
-          elseif entity_type == 'space-platform-hub' then
+          elseif entity_type == "space-platform-hub" and target_is_item then
             if control_behavior.read_contents then
               local signal_count = entity.get_item_count(target_name)
               if signal_count > 0 then
@@ -848,7 +848,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
 
   -- Crafting Combinator adds signals for recipes, which players sometimes mistake for items/fluids
   if target_item.type == "virtual" and not state.signals
-    and (game.active_mods["crafting_combinator"] or game.active_mods["crafting_combinator_xeraph"]) then
+    and (script.active_mods["crafting_combinator"] or script.active_mods["crafting_combinator_xeraph"]) then
     local recipe = prototypes.recipe[target_name]
     if recipe then
       player.print("[Factory Search] It looks like you selected a recipe from the \"Crafting combinator recipes\" tab. Instead select an item or fluid from a different tab.")
