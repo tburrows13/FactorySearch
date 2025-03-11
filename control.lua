@@ -4,7 +4,7 @@ CustomInput = require "scripts.custom-input"
 Search = require "scripts.search"
 SearchResults = require "scripts.search-results"
 ResultLocation = require "scripts.result-location"
-Gui = require "scripts.gui"
+Gui = require "scripts.search-gui"
 require "scripts.remote"
 
 DEBOUNCE_TICKS = 60
