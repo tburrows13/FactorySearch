@@ -5,10 +5,10 @@ local search_shortcut = {
   associated_control_input = "search-factory",
   toggleable = true,
   order = "d",
-  icon = "__FactorySearch__/graphics/search-black.png",
-  icon_size = 26,
-  small_icon = "__FactorySearch__/graphics/search-black.png",
-  small_icon_size = 26,
+  icon = "__FactorySearch__/graphics/search.png",
+  icon_size = 64,
+  small_icon = "__FactorySearch__/graphics/search.png",
+  small_icon_size = 64,
 }
 local search_input = {
 	type = "custom-input",
