@@ -64,9 +64,10 @@ function flib_gui.add(parent, def, elems)
       if not first then
         first = elem
       end
-      if def.name then
-        elems[def.name] = elem
-      end
+      -- Removed by Xorimuth
+      --if def.name then
+      --  elems[def.name] = elem
+      --end
       -- Added by Xorimuth
       local refs = def.ref
       if refs then

@@ -10,12 +10,90 @@ ResultLocation = require "scripts.result-location"
 SearchGui = require "scripts.search-gui"
 require "scripts.remote"
 
----@alias PlayerData any
+---@class (exact) SearchGuiRefs
+---@field frame LuaGuiElement frame
+---@field pin_button LuaGuiElement sprite-button
+---@field close_button LuaGuiElement sprite-button
+---@field subheader_title LuaGuiElement label
+---@field all_surfaces LuaGuiElement checkbox
+---@field item_select LuaGuiElement choose-elem-button
+---@field include_consumers LuaGuiElement checkbox
+---@field include_machines LuaGuiElement checkbox
+---@field include_inventories LuaGuiElement checkbox
+---@field include_logistics LuaGuiElement checkbox
+---@field include_modules LuaGuiElement checkbox
+---@field include_entities LuaGuiElement checkbox
+---@field include_ground_items LuaGuiElement checkbox
+---@field include_requesters LuaGuiElement checkbox
+---@field include_signals LuaGuiElement checkbox
+---@field include_map_tags LuaGuiElement checkbox
+---@field result_flow LuaGuiElement flow
+---@field highlighted_button? LuaGuiElement sprite-button
+
+---@class (exact) PlayerData
+---@field refs SearchGuiRefs
+---@field pinned? boolean
+---@field ignore_close? boolean
+
+---@class (exact) SearchGuiState
+---@field consumers boolean
+---@field producers boolean
+---@field storage boolean
+---@field logistics boolean
+---@field modules boolean
+---@field requesters boolean
+---@field ground_items boolean
+---@field entities boolean
+---@field signals boolean
+---@field map_tags boolean
+
+---@class (exact) SearchData
+---@field blocking boolean
+---@field tick_triggered GameTick
+---@field force LuaForce
+---@field state SearchGuiState
+---@field target_item SignalID
+---@field type_list string[]
+---@field neutral_type_list string[]
+---@field player LuaPlayer
+---@field data any
+---@field not_started_surfaces LuaSurface[]
+---@field search_complete boolean
+---@field current_surface? LuaSurface
+---@field SurfaceData? any
+---@field chunk_iterator? LuaChunkIterator
+
+---@class (exact) EntityGroup
+---@field count number
+---@field avg_position MapPosition
+---@field selection_box BoundingBox
+---@field entity_name EntityName
+---@field selection_boxes BoundingBox[]
+---@field localised_name LocalisedString
+---@field recipe_list? table<string, {localised_name: LocalisedString, count: number}>
+---@field item_count? number
+---@field fluid_count? number
+---@field module_count? number
+---@field request_count? number
+---@field signal_count? number
+---@field resource_count? number
+---@
+
+---@alias EntitySurfaceData EntityGroup[]
+
+---@alias EntityName string
+---@alias CategorisedSurfaceData table<EntityName, EntitySurfaceData>
+
+---@alias CategoryName "consumers"|"producers"|"storage"|"logistics"|"modules"|"requesters"|"ground_items"|"entities"|"signals"|"map_tags"
+---@alias SurfaceData table<CategoryName, CategorisedSurfaceData> TODO and with surface_info
 
 DEBOUNCE_TICKS = 60
 
 Control = {}
 
+---@param override_surface? boolean
+---@param player_surface? LuaSurface
+---@return LuaSurface[]
 function filtered_surfaces(override_surface, player_surface)
   if override_surface then
     return {player_surface}
@@ -109,7 +187,7 @@ end
 local function on_init()
   ---@type table<PlayerIndex, PlayerData>
   storage.players = {}
-  ---@type table<PlayerIndex, any>
+  ---@type table<PlayerIndex, SearchData>
   storage.current_searches = {}
   ---@type boolean
   storage.multiple_surfaces = false

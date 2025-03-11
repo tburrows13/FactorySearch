@@ -2,6 +2,7 @@ math2d = require "math2d"
 
 local Search = {}
 
+---@type SurfaceData
 local default_surface_data = {
   consumers = {}, producers = {}, storage = {}, logistics = {}, modules = {}, requesters = {}, ground_items = {}, entities = {}, signals = {}, map_tags = {},
   surface_info = {},
@@ -15,9 +16,6 @@ local function extend(t1, t2)
   end
 end
 
---- @param sig1 SignalID
---- @param sig2 SignalID
---- @return boolean
 local function signal_eq(sig1, sig2)
   return sig1 and sig2 and (sig1.type or 'item') == (sig2.type or 'item') and sig1.name == sig2.name
 end
@@ -103,6 +101,11 @@ local function is_wire_connected(entity, entity_type)
   end
 end
 
+---@param entities LuaEntity[]
+---@param state SearchGuiState
+---@param surface_data any
+---@param target_item SignalID
+---@param force? LuaForce
 function Search.process_found_entities(entities, state, surface_data, target_item, force)
   -- Not used for Entity and Tag search modes
   -- Only provide `force` if you want to filter out uncharted entities
@@ -126,23 +129,27 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
         if control_behavior then
           local signals = {}
           if entity_type == "accumulator" then
+            ---@cast control_behavior LuaAccumulatorControlBehavior
             if control_behavior.read_charge then
               table.insert(signals, control_behavior.output_signal)
             end
           elseif entity_type == "assembling-machine" then
+            ---@cast control_behavior LuaAssemblingMachineControlBehavior
             if control_behavior.circuit_read_recipe_finished then
               table.insert(signals, control_behavior.circuit_recipe_finished_signal)
             end
             if control_behavior.circuit_read_working then
               table.insert(signals, control_behavior.circuit_working_signal)
             end
-          elseif entity_type == "rail-signal" and control_behavior.read_signal then
+          elseif entity_type == "rail-signal" then  -- and control_behavior.read_signal -- TODO check
+            ---@cast control_behavior LuaRailSignalBaseControlBehavior
             if control_behavior.read_signal then
               table.insert(signals, control_behavior.red_signal)
               table.insert(signals, control_behavior.orange_signal)
               table.insert(signals, control_behavior.green_signal)
             end
           elseif entity_type == "rail-chain-signal" then
+            ---@cast control_behavior LuaRailSignalBaseControlBehavior
             if control_behavior.read_signal then
               table.insert(signals, control_behavior.red_signal)
               table.insert(signals, control_behavior.orange_signal)
@@ -150,10 +157,12 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               table.insert(signals, control_behavior.green_signal)
             end
           elseif entity_type == "reactor" then
+            ---@cast control_behavior LuaReactorControlBehavior
             if control_behavior.read_temperature then
               table.insert(signals, control_behavior.temperature_signal)
             end
           elseif entity_type == "roboport" then
+            ---@cast control_behavior LuaRoboportControlBehavior
             if control_behavior.read_robot_stats then
               table.insert(signals, control_behavior.available_logistic_output_signal)
               table.insert(signals, control_behavior.total_logistic_output_signal)
@@ -162,6 +171,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               table.insert(signals, control_behavior.roboport_count_output_signal)
             end
           elseif entity_type == "space-platform" then
+            ---@cast control_behavior LuaSpacePlatformHubControlBehavior
             if control_behavior.read_speed then
               table.insert(signals, control_behavior.speed_signal)
             end
@@ -169,6 +179,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               table.insert(signals, control_behavior.damage_taken_signal)
             end
           elseif entity_type == "train-stop" then
+            ---@cast control_behavior LuaTrainStopControlBehavior
             if control_behavior.read_stopped_train then
               table.insert(signals, control_behavior.stopped_train_signal)
             end
@@ -176,6 +187,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               table.insert(signals, control_behavior.trains_count_signal)
             end
           elseif entity_type == "wall" then
+            ---@cast control_behavior LuaWallControlBehavior
             if control_behavior.read_sensor then
               table.insert(signals, control_behavior.output_signal)
             end
@@ -213,6 +225,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               end
             end
           elseif entity_type == "constant-combinator" then
+            ---@cast control_behavior LuaConstantCombinatorControlBehavior
             for _, section in ipairs(control_behavior.sections) do
               for _, filter in ipairs(section.filters) do
                 if signal_eq(target_item, filter.value) then
@@ -224,6 +237,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
             end
             ::break_both::
           elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" or entity_type == 'selector-combinator' then
+            ---@cast control_behavior LuaCombinatorControlBehavior
             local signal_count = control_behavior.get_signal_last_tick(target_item)
             if signal_count and signal_count > 0 then
               SearchResults.add_entity(entity, surface_data.signals)
@@ -291,6 +305,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               end
             end
           elseif entity_type == "logistic-container" and target_is_item then
+            ---@cast control_behavior LuaLogisticContainerControlBehavior
             if control_behavior.circuit_exclusive_mode_of_operation == defines.control_behavior.logistic_container.exclusive_mode.send_contents then
               local signal_count = entity.get_item_count(target_name)
               if signal_count > 0 then
@@ -299,6 +314,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               end
             end
           elseif entity_type == "inserter" and target_is_item then
+            ---@cast control_behavior LuaInserterControlBehavior
             -- Doesn't check inserter if in pulse mode
             if control_behavior.circuit_read_hand_contents and control_behavior.circuit_hand_read_mode == defines.control_behavior.inserter.hand_read_mode.hold then
               local held_stack = entity.held_stack
@@ -316,6 +332,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
               end
             end
           elseif entity_type == "mining-drill" then
+            ---@cast control_behavior LuaMiningDrillControlBehavior
             if control_behavior.circuit_read_resources then
               local resources = control_behavior.resource_read_targets
               local count = 0
@@ -349,7 +366,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
         recipe = entity.get_recipe()
       elseif entity_type == "furnace" then
         -- Even if the furnace has stopped smelting, this records the last item it was smelting
-        recipe = entity.get_recipe() or entity.previous_recipe
+        recipe = entity.get_recipe() or (entity.previous_recipe and entity.previous_recipe.name) --[[@as LuaRecipe]]
       end
 
       if recipe and recipe.ingredients then
@@ -414,7 +431,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
         recipe = entity.get_recipe()
       elseif entity_type == "furnace" then
         -- Even if the furnace has stopped smelting, this records the last item it was smelting
-        recipe = entity.get_recipe() or entity.previous_recipe
+        recipe = entity.get_recipe() or (entity.previous_recipe and entity.previous_recipe.name) --[[@as LuaRecipe]]
       end
 
       if recipe and recipe.products then
@@ -498,7 +515,7 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
     if target_is_item and state.requesters then
       -- Buffer and Requester chests, character, and spidertron
       if entity_type == "logistic-container" or entity_type == "character" or entity_type == "spider-vehicle" then
-        local logistic_points = entity.get_logistic_point()
+        local logistic_points = entity.get_logistic_point() --[=[@as LuaLogisticPoint[]]=]
         for _, logistic_point in pairs(logistic_points) do
           for _, filter in pairs(logistic_point.filters or {}) do
             if filter and filter.name == target_name then
@@ -557,6 +574,13 @@ function Search.process_found_entities(entities, state, surface_data, target_ite
   end
 end
 
+---@param force LuaForce
+---@param state SearchGuiState
+---@param target_item SignalID
+---@param surface_list LuaSurface[]
+---@param type_list string[]
+---@param neutral_type_list string[]
+---@param player LuaPlayer
 function Search.blocking_search(force, state, target_item, surface_list, type_list, neutral_type_list, player)
   local target_name = target_item.name
   local target_type = target_item.type or "item"
@@ -660,7 +684,7 @@ end
 
 function on_tick()
   local player_index, search_data = next(storage.current_searches)
-  if not search_data then return end
+  if not player_index or not search_data then return end
 
   -- First, check to see if we can trigger a blocking search
   if search_data.blocking then
@@ -837,6 +861,13 @@ function on_tick()
   end
 end
 
+---@param target_item SignalID
+---@param force LuaForce
+---@param state SearchGuiState
+---@param player LuaPlayer
+---@param override_surface boolean
+---@param immediate? boolean
+---@return boolean
 function Search.find_machines(target_item, force, state, player, override_surface, immediate)
   local target_name = target_item.name
   if target_name == nil then
@@ -921,7 +952,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
     player = player,
     data = {},
     not_started_surfaces = surface_list,
-    completed_surfaces = {}
+    search_complete = false,
   }
   storage.current_searches[player.index] = search_data
   return true

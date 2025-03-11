@@ -1,7 +1,5 @@
 local SearchGui = {}
 
----@alias SearchState any
-
 ---@param elem LuaGuiElement
 ---@param state boolean
 local function toggle_fab(elem, state)
@@ -365,6 +363,7 @@ end
 ---@param player LuaPlayer
 ---@return PlayerData
 function SearchGui.build(player)
+  ---@type SearchGuiRefs
   local refs = gui.add(player.gui.screen, {
     {
       type = "frame",
@@ -380,7 +379,7 @@ function SearchGui.build(player)
         {
           type = "flow",
           style = "fs_flib_titlebar_flow",
-          ref = {"titlebar_flow"},
+          drag_target = "frame",
           children = {
             {
               type = "label",
@@ -599,7 +598,6 @@ function SearchGui.build(player)
   })
 
   local player_data = {}
-  refs.titlebar_flow.drag_target = refs.frame
   refs.frame.force_auto_center()
   player_data.refs = refs
   storage.players[player.index] = player_data
@@ -607,7 +605,7 @@ function SearchGui.build(player)
 end
 
 ---@param player LuaPlayer
----@param player_data any
+---@param player_data PlayerData
 function SearchGui.open(player, player_data)
   if not player_data or not player_data.refs.frame.valid then
     player_data = SearchGui.build(player)
@@ -622,7 +620,7 @@ function SearchGui.open(player, player_data)
 end
 
 ---@param player LuaPlayer
----@param player_data any
+---@param player_data PlayerData
 function SearchGui.destroy(player, player_data)
   local main_frame = player_data.refs.frame
   if main_frame then
@@ -633,7 +631,7 @@ function SearchGui.destroy(player, player_data)
 end
 
 ---@param player LuaPlayer
----@param player_data any
+---@param player_data PlayerData
 function SearchGui.close(player, player_data)
   if player_data.ignore_close then
     -- Set when the pin button is pressed just before changing player.opened
@@ -650,7 +648,7 @@ function SearchGui.close(player, player_data)
 end
 
 ---@param player LuaPlayer
----@param player_data any
+---@param player_data PlayerData
 function SearchGui.toggle_pin(player, player_data)
   player_data.pinned = not player_data.pinned
   toggle_fab(player_data.refs.pin_button, player_data.pinned)
@@ -674,7 +672,7 @@ function SearchGui.after_close(player)
 end
 
 ---@param player LuaPlayer
----@param player_data any
+---@param player_data PlayerData
 function SearchGui.toggle(player, player_data)
   if player_data and player_data.refs.frame.valid and player_data.refs.frame.visible then
     SearchGui.close(player, player_data)
@@ -684,8 +682,8 @@ function SearchGui.toggle(player, player_data)
 end
 
 ---@param player LuaPlayer
----@param player_data any
----@param element LuaGuiElement
+---@param player_data PlayerData
+---@param element LuaGuiElement sprite-button
 ---@param mouse_button defines.mouse_button_type
 function SearchGui.open_location_on_map(player, player_data, element, mouse_button)
   local tags = element.tags
@@ -703,8 +701,8 @@ function SearchGui.open_location_on_map(player, player_data, element, mouse_butt
   player_data.refs.highlighted_button = element
 end
 
----@param refs any
----@return SearchState
+---@param refs SearchGuiRefs
+---@return SearchGuiState
 local function generate_state(refs)
   return {
     consumers = refs.include_consumers.state,
@@ -720,14 +718,14 @@ local function generate_state(refs)
   }
 end
 
----@param state SearchState
+---@param state SearchGuiState
 ---@return boolean
 local function is_valid_state(state)
-  local some_checked = false
+  local are_any_checked = false
   for _, checked in pairs(state) do
-    some_checked = some_checked or checked
+    are_any_checked = are_any_checked or checked
   end
-  return some_checked
+  return are_any_checked
 end
 
 ---@param player LuaPlayer
@@ -736,12 +734,11 @@ end
 function SearchGui.start_search(player, player_data, immediate)
   local refs = player_data.refs
   local elem_button = refs.item_select
-  local item = elem_button.elem_value
+  local item = elem_button.elem_value --[[@as SignalID]]
   if item then
-    local force = player.force
+    local force = player.force --[[@as LuaForce]]
     local state = generate_state(refs)
     local state_valid = is_valid_state(state)
-    local data
     if state_valid then
       search_started = Search.find_machines(item, force, state, player, not refs.all_surfaces.state, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""

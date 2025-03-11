@@ -10,6 +10,7 @@ local ARROW_ORIENTATED_OFFSET = { 0, -4 }
 
 local ResultLocation = {}
 
+---@param player LuaPlayer
 function ResultLocation.clear_markers(player)
   -- Clear all old markers belonging to player
   if #game.players == 1 then
