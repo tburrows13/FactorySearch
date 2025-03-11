@@ -654,11 +654,11 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
 
   local player_data = storage.players[player.index]
   local refs = player_data.refs
-  Gui.build_results(data, refs.result_flow)
+  SearchGui.build_results(data, refs.result_flow)
   storage.current_searches[player.index] = nil
 end
 
-function Search.on_tick()
+function on_tick()
   local player_index, search_data = next(storage.current_searches)
   if not search_data then return end
 
@@ -674,7 +674,7 @@ function Search.on_tick()
   if search_data.search_complete then
     local player_data = storage.players[player_index]
     local refs = player_data.refs
-    Gui.build_results(search_data.data, refs.result_flow)
+    SearchGui.build_results(search_data.data, refs.result_flow)
     storage.current_searches[player_index] = nil
   end
 
@@ -703,8 +703,8 @@ function Search.on_tick()
     -- Update results
     local player_data = storage.players[player_index]
     local refs = player_data.refs
-    Gui.build_results(search_data.data, refs.result_flow, false, true)
-    Gui.add_loading_results(refs.result_flow)
+    SearchGui.build_results(search_data.data, refs.result_flow, false, true)
+    SearchGui.add_loading_results(refs.result_flow)
     return  -- Start next surface processing on next tick
   end
 
@@ -835,9 +835,7 @@ function Search.on_tick()
     end
     ::continue::
   end
-
 end
-event.on_tick(Search.on_tick)
 
 function Search.find_machines(target_item, force, state, player, override_surface, immediate)
   local target_name = target_item.name
@@ -928,5 +926,9 @@ function Search.find_machines(target_item, force, state, player, override_surfac
   storage.current_searches[player.index] = search_data
   return true
 end
+
+Search.events = {
+  [defines.events.on_tick] = on_tick,
+}
 
 return Search

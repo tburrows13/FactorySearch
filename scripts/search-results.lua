@@ -146,7 +146,6 @@ end
 function SearchResults.add_surface_info(category, amount, surface_info)
   surface_info[category] = surface_info[category] or 0
   surface_info[category] = surface_info[category] + amount
-
 end
 
 return SearchResults

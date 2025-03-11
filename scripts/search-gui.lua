@@ -1,11 +1,15 @@
-local gui = require("__FactorySearch__.scripts.flib-gui")
+local SearchGui = {}
 
-local Gui = {}
+---@alias SearchState any
 
-local function toggle_fab(elem, sprite, state)
+---@param elem LuaGuiElement
+---@param state boolean
+local function toggle_fab(elem, state)
   elem.toggled = state
 end
 
+---@param signal SignalID
+---@return LocalisedString
 local function get_signal_name(signal)
   if signal.name then
     if signal.type == "item" then
@@ -18,8 +22,10 @@ local function get_signal_name(signal)
   end
 end
 
-
-function Gui.build_surface_results(surface_name, surface_data)
+---@param surface_name string
+---@param surface_data any
+---@return GuiElemDef[]
+function SearchGui.build_surface_results(surface_name, surface_data)
   local gui_elements = {}
   for entity_name, entity_surface_data in pairs(surface_data) do
     for _, group in pairs(entity_surface_data) do
@@ -85,11 +91,11 @@ function Gui.build_surface_results(surface_name, surface_data)
         {
           type = "sprite-button",
           sprite = sprite,
-          tooltip = { "", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"} },
+          tooltip = {"", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"}},
           style = "slot_button",
           number = group.resource_count or group.count,
-          tags = { position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes },
-          actions = { on_click = { gui = "search", action = "open_location_in_map" } },
+          tags = {position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes},
+          handler = {[defines.events.on_gui_click] = SearchGui.open_location_on_map}
         }
       )
     end
@@ -97,7 +103,10 @@ function Gui.build_surface_results(surface_name, surface_data)
   return gui_elements
 end
 
-function Gui.build_surface_name(include_surface_name, surface_name)
+---@param include_surface_name boolean?
+---@param surface_name string
+---@return GuiElemDef
+function SearchGui.build_surface_name(include_surface_name, surface_name)
   if include_surface_name then
     local surface = game.get_surface(surface_name)
     local display_name
@@ -117,24 +126,30 @@ function Gui.build_surface_name(include_surface_name, surface_name)
       type = "label",
       caption = display_name,
       style = "bold_label",
-      style_mods = { font = "default-large-bold" }
+      style_mods = {font = "default-large-bold"}
     }
   else
     return {}
   end
 end
 
+---@param string LocalisedString
+---@param count number
+---@return GuiElemDef
 local function count_label(string, count)
   return {
     type = "label",
     caption = {"", "[font=default-semibold]", string, ":[/font] ", util.format_number(math.floor(count), true)},
     style = "bold_label",
     tooltip = nil,
-    --style_mods = { font = "default-bold"
+    --style_mods = {font = "default-bold"
   }
 end
 
-function Gui.build_surface_count(surface_info, surface_name_included)
+---@param surface_info any
+---@param surface_name_included boolean?
+---@return GuiElemDef
+function SearchGui.build_surface_count(surface_info, surface_name_included)
   local labels = {}
   --[[if next(surface_info) then
     table.insert(labels, {
@@ -142,7 +157,7 @@ function Gui.build_surface_count(surface_info, surface_name_included)
       caption = "Totals",
       style = "bold_label",
       -- Less margin top
-      style_mods = { top_margin = -8}  -- TODO don't reduce top margin when no planet name
+      style_mods = {top_margin = -8}  -- TODO don't reduce top margin when no planet name
     })
   end]]
   if surface_info.consumers_count then
@@ -192,9 +207,11 @@ function Gui.build_surface_count(surface_info, surface_name_included)
   return flow
 end
 
-function Gui.build_results(data, frame, check_result_found, include_surface_name)
-  -- check_result_found defaults to true
-
+---@param data any
+---@param frame LuaGuiElement
+---@param check_result_found? boolean Default: true
+---@param include_surface_name? boolean Whether to show the surface name when there's only one surface in `data`
+function SearchGui.build_results(data, frame, check_result_found, include_surface_name)
   if not (frame and frame.valid) then return end
 
   frame.clear()
@@ -221,9 +238,9 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
     end
 
     -- TODO sort somewhere before showing storage, modules, requesters, ...
-    gui.build(frame, {
-      Gui.build_surface_name(include_surface_name, surface_name),
-      Gui.build_surface_count(surface_data.surface_info, include_surface_name),
+    gui.add(frame, {
+      SearchGui.build_surface_name(include_surface_name, surface_name),
+      SearchGui.build_surface_count(surface_data.surface_info, include_surface_name),
       {
         type = "frame",
         direction = "vertical",
@@ -233,60 +250,60 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
             type = "table",
             column_count = 10,
             style = "slot_table",  --       padding = 0, TODO 2.0
-            children = Gui.build_surface_results(surface_name, surface_data.consumers)
+            children = SearchGui.build_surface_results(surface_name, surface_data.consumers)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.producers)
+            children = SearchGui.build_surface_results(surface_name, surface_data.producers)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.storage)
+            children = SearchGui.build_surface_results(surface_name, surface_data.storage)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.logistics)
+            children = SearchGui.build_surface_results(surface_name, surface_data.logistics)
           },          {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.modules)
+            children = SearchGui.build_surface_results(surface_name, surface_data.modules)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.entities)
+            children = SearchGui.build_surface_results(surface_name, surface_data.entities)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.ground_items)
+            children = SearchGui.build_surface_results(surface_name, surface_data.ground_items)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.requesters)
+            children = SearchGui.build_surface_results(surface_name, surface_data.requesters)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.signals)
+            children = SearchGui.build_surface_results(surface_name, surface_data.signals)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = Gui.build_surface_results(surface_name, surface_data.map_tags)
+            children = SearchGui.build_surface_results(surface_name, surface_data.map_tags)
           },
         }
       }
@@ -296,19 +313,20 @@ function Gui.build_results(data, frame, check_result_found, include_surface_name
 
   if not result_found and check_result_found ~= false then
     frame.clear()
-    gui.build(frame, {
+    gui.add(frame, {
       {
         type = "label",
-        style_mods = { font_color = {1, 0, 0, 1} },
+        style_mods = {font_color = {1, 0, 0, 1}},
         caption = {"search-gui.no-results"}
       }
     })
   end
 end
 
-function Gui.clear_results(frame)
+---@param frame LuaGuiElement
+function SearchGui.clear_results(frame)
   frame.clear()
-  gui.build(frame, {
+  gui.add(frame, {
     {
       type = "label",
       caption = {"search-gui.explanation"},
@@ -316,19 +334,20 @@ function Gui.clear_results(frame)
   })
 end
 
-function Gui.build_invalid_state(frame)
+---@param frame LuaGuiElement
+function SearchGui.build_invalid_state(frame)
   frame.clear()
-  gui.build(frame, {
+  gui.add(frame, {
     {
       type = "label",
-      style_mods = { font_color = {1, 0, 0, 1} },
+      style_mods = {font_color = {1, 0, 0, 1}},
       caption = {"search-gui.incorrect-config"}
     }
   })
 end
 
-
-function Gui.add_loading_results(frame)
+---@param frame LuaGuiElement
+function SearchGui.add_loading_results(frame)
   gui.add(frame,
     {
       type = "label",
@@ -338,59 +357,58 @@ function Gui.add_loading_results(frame)
   )
 end
 
-function Gui.build_loading_results(frame)
+function SearchGui.build_loading_results(frame)
   frame.clear()
-  Gui.add_loading_results(frame)
+  SearchGui.add_loading_results(frame)
 end
 
-function Gui.build(player)
-  local refs = gui.build(player.gui.screen, {
+---@param player LuaPlayer
+---@return PlayerData
+function SearchGui.build(player)
+  local refs = gui.add(player.gui.screen, {
     {
       type = "frame",
       name = "fs_frame",
       direction = "vertical",
       visible = true,
-      ref = { "frame" },
-      style_mods = { maximal_height = 800 },
-      actions = {
-        on_closed = { gui = "search", action = "close" },
+      ref = {"frame"},
+      style_mods = {maximal_height = 800},
+      handler = {
+        [defines.events.on_gui_closed] = SearchGui.close,  -- TODO check that this works
       },
       children = {
         {
           type = "flow",
           style = "fs_flib_titlebar_flow",
-          ref = { "titlebar_flow" },
-          actions = {
-            on_click = { gui = "search", action = "recenter" },  -- TODO What is this?
-          },
+          ref = {"titlebar_flow"},
           children = {
             {
               type = "label",
               style = "frame_title",
-              caption = { "mod-name.FactorySearch" },
+              caption = {"mod-name.FactorySearch"},
               ignored_by_interaction = true,
             },
-            { type = "empty-widget", style = "fs_flib_titlebar_drag_handle", ignored_by_interaction = true },
+            {type = "empty-widget", style = "fs_flib_titlebar_drag_handle", ignored_by_interaction = true},
             {
               type = "sprite-button",
               style = "frame_action_button",
               sprite = "fs_flib_pin_white",
-              mouse_button_filter = { "left" },
-              tooltip = { "search-gui.keep-open" },
-              ref = { "pin_button" },
-              actions = {
-                on_click = { gui = "search", action = "toggle_pin"},
+              mouse_button_filter = {"left"},
+              tooltip = {"search-gui.keep-open"},
+              ref = {"pin_button"},
+              handler = {
+                [defines.events.on_gui_click] = SearchGui.toggle_pin,
               }
             },
             {
               type = "sprite-button",
               style = "close_button",
               sprite = "utility/close",
-              mouse_button_filter = { "left" },
-              tooltip = { "gui.close-instruction" },
-              ref = { "close_button" },
-              actions = {
-                on_click = { gui = "search", action = "close" },
+              mouse_button_filter = {"left"},
+              tooltip = {"gui.close-instruction"},
+              ref = {"close_button"},
+              handler = {
+                [defines.events.on_gui_click] = SearchGui.close,
               },
             },
           },
@@ -408,36 +426,32 @@ function Gui.build(player)
                 {
                   type = "flow",
                   style = "horizontal_flow",
-                  style_mods = { vertical_align = "center", horizontally_stretchable = true, horizontal_spacing = 12 },
+                  style_mods = {vertical_align = "center", horizontally_stretchable = true, horizontal_spacing = 12},
                   children = {
                     {
                       type = "label",
                       style = "subheader_caption_label",
-                      ref = { "subheader_title" },
+                      ref = {"subheader_title"},
                     },
                     {
                       type = "empty-widget",
-                      style_mods = { horizontally_stretchable = true, horizontally_squashable = true }
+                      style_mods = {horizontally_stretchable = true, horizontally_squashable = true}
                     },
                     {
                       type = "checkbox",
                       state = true,
-                      caption = { "search-gui.all-surfaces" },
+                      caption = {"search-gui.all-surfaces"},
                       visible = storage.multiple_surfaces,
-                      ref = { "all_surfaces" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"all_surfaces"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "sprite-button",
                       style = "tool_button",
                       sprite = "utility/refresh",
-                      tooltip = { "gui.refresh" },
-                      mouse_button_filter = { "left" },
-                      actions = {
-                        on_click = { gui = "search", action = "refresh" },
-                      },
+                      tooltip = {"gui.refresh"},
+                      mouse_button_filter = {"left"},
+                      handler = {[defines.events.on_gui_click] = SearchGui.start_search_immediate,},
                     },
                   }
                 }
@@ -450,130 +464,108 @@ function Gui.build(player)
                 {
                   type = "flow",
                   direction = "vertical",
-                  style_mods = { padding = 12, right_padding = 6 },
+                  style_mods = {padding = 12, right_padding = 6},
                   children = {
                     {
                       type = "choose-elem-button",
                       style = "slot_button_in_shallow_frame",
                       elem_type = "signal",
                       mouse_button_filter = {"left"},
-                      ref = { "item_select" },
+                      ref = {"item_select"},
                       style_mods = {
                         width = 84,
                         height = 84,
                       },
-                      actions = {
-                        on_elem_changed = { gui = "search", action = "item_selected" }
-                      }
+                      handler = {[defines.events.on_gui_elem_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = true,
                       caption = {"search-gui.consumers-name"},
                       tooltip = {"search-gui.consumers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=burner-mining-drill][entity=boiler][entity=gun-turret]"},
-                      ref = { "include_consumers" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_consumers"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = true,
                       caption = {"search-gui.producers-name"},
                       tooltip = {"search-gui.producers-tooltip", "[entity=assembling-machine-2][entity=chemical-plant][entity=steel-furnace][entity=electric-mining-drill][entity=pumpjack]"},
-                      ref = { "include_machines" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_machines"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.storage-name"},
                       tooltip = {"search-gui.storage-tooltip", "[entity=steel-chest][entity=storage-chest][entity=storage-tank][entity=car][entity=spidertron][entity=cargo-wagon][entity=roboport]"},
-                      ref = { "include_inventories" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_inventories"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.logistics-name"},
                       tooltip = {"search-gui.logistics-tooltip", "[entity=fast-transport-belt][entity=fast-underground-belt][entity=fast-splitter][entity=pipe][entity=fast-inserter][entity=logistic-robot]"},
-                      ref = { "include_logistics" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_logistics"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.modules-name"},
                       tooltip = {"search-gui.modules-tooltip", "[entity=assembling-machine-2][entity=steel-furnace][entity=electric-mining-drill][entity=beacon][entity=lab][entity=rocket-silo]"},
-                      ref = { "include_modules" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_modules"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.entities-name"},
                       tooltip = {"search-gui.entities-tooltip"},
-                      ref = { "include_entities" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_entities"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.ground-items-name"},
                       tooltip = {"search-gui.ground-items-tooltip"},
-                      ref = { "include_ground_items" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_ground_items"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.requesters-name"},
                       tooltip = {"search-gui.requesters-tooltip", "[entity=requester-chest][entity=buffer-chest]"},
-                      ref = { "include_requesters" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_requesters"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.signals-name"},
                       tooltip = {"search-gui.signals-tooltip"},
-                      ref = { "include_signals" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_signals"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
                       state = false,
                       caption = {"search-gui.map-tags-name"},
                       tooltip = {"search-gui.map-tags-tooltip"},
-                      ref = { "include_map_tags" },
-                      actions = {
-                        on_checked_state_changed = { gui = "search", action = "checkbox_toggled" }
-                      }
+                      ref = {"include_map_tags"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     --[[{
                       type = "sprite-button",
                       style = "slot_sized_button",
                       sprite = "utility/search_icon",
                       mouse_button_filter = {"left"},
-                      ref = { "search" },
+                      ref = {"search"},
                       actions = {
-                        on_click = { gui = "search", action = "search" }
+                        on_click = {gui = "search", action = "search"}
                       }
                     },]]
                   },
@@ -583,11 +575,11 @@ function Gui.build(player)
                   style = "naked_scroll_pane",
                   horizontal_scroll_policy = "never",
                   vertical_scroll_policy = "auto-and-reserve-space",
-                  style_mods = { top_padding = 12, bottom_padding = 12, left_padding = 6 },
+                  style_mods = {top_padding = 12, bottom_padding = 12, left_padding = 6},
                   children = {
                     {
                       type = "flow",
-                      ref = { "result_flow" },
+                      ref = {"result_flow"},
                       direction = "vertical",
                       children = {
                         {
@@ -614,9 +606,11 @@ function Gui.build(player)
   return player_data
 end
 
-function Gui.open(player, player_data)
+---@param player LuaPlayer
+---@param player_data any
+function SearchGui.open(player, player_data)
   if not player_data or not player_data.refs.frame.valid then
-    player_data = Gui.build(player)
+    player_data = SearchGui.build(player)
   end
   local refs = player_data.refs
   if not player_data.pinned then
@@ -627,16 +621,20 @@ function Gui.open(player, player_data)
   player.set_shortcut_toggled("search-factory", true)
 end
 
-function Gui.destroy(player, player_data)
+---@param player LuaPlayer
+---@param player_data any
+function SearchGui.destroy(player, player_data)
   local main_frame = player_data.refs.frame
   if main_frame then
     main_frame.destroy()
   end
   storage.players[player.index] = nil
-  Gui.after_close(player)
+  SearchGui.after_close(player)
 end
 
-function Gui.close(player, player_data)
+---@param player LuaPlayer
+---@param player_data any
+function SearchGui.close(player, player_data)
   if player_data.ignore_close then
     -- Set when the pin button is pressed just before changing player.opened
     player_data.ignore_close = false
@@ -646,26 +644,67 @@ function Gui.close(player, player_data)
     if player.opened == refs.frame then
       player.opened = nil
     end
-    --Gui.destroy(player, player_data)
-    Gui.after_close(player)
+    --SearchGui.destroy(player, player_data)
+    SearchGui.after_close(player)
   end
 end
 
-function Gui.after_close(player)
+---@param player LuaPlayer
+---@param player_data any
+function SearchGui.toggle_pin(player, player_data)
+  player_data.pinned = not player_data.pinned
+  toggle_fab(player_data.refs.pin_button, player_data.pinned)
+  if player_data.pinned then
+    player_data.ignore_close = true
+    player.opened = nil
+    player_data.refs.close_button.tooltip = {"gui.close"}
+  else
+    player.opened = player_data.refs.frame
+    player_data.refs.frame.force_auto_center()
+    player_data.refs.close_button.tooltip = {"gui.close-instruction"}
+  end
+end
+
+---@param player LuaPlayer
+function SearchGui.after_close(player)
   player.set_shortcut_toggled("search-factory", false)
   if player.mod_settings["fs-clear-highlights-with-gui"].value then
     ResultLocation.clear_markers(player)
   end
 end
 
-function Gui.toggle(player, player_data)
+---@param player LuaPlayer
+---@param player_data any
+function SearchGui.toggle(player, player_data)
   if player_data and player_data.refs.frame.valid and player_data.refs.frame.visible then
-    Gui.close(player, player_data)
+    SearchGui.close(player, player_data)
   else
-    Gui.open(player, player_data)
+    SearchGui.open(player, player_data)
   end
 end
 
+---@param player LuaPlayer
+---@param player_data any
+---@param element LuaGuiElement
+---@param mouse_button defines.mouse_button_type
+function SearchGui.open_location_on_map(player, player_data, element, mouse_button)
+  local tags = element.tags
+  if mouse_button == defines.mouse_button_type.left then
+    ResultLocation.open(player, tags)
+  elseif mouse_button == defines.mouse_button_type.right then
+    ResultLocation.highlight(player, tags)
+  end
+
+  local highlighted_button = player_data.refs.highlighted_button
+  if highlighted_button and highlighted_button.valid then
+    highlighted_button.style = "slot_button"
+  end
+  element.style = "yellow_slot_button"
+  player_data.refs.highlighted_button = element
+end
+
+---@param refs any
+---@return SearchState
 local function generate_state(refs)
   return {
     consumers = refs.include_consumers.state,
@@ -681,7 +720,9 @@ local function generate_state(refs)
   }
 end
 
-local function is_valid_state(state)  -- TODO rename
+---@param state SearchState
+---@return boolean
+local function is_valid_state(state)
   local some_checked = false
   for _, checked in pairs(state) do
     some_checked = some_checked or checked
@@ -689,7 +730,10 @@ local function is_valid_state(state)  -- TODO rename
   return some_checked
 end
 
-function Gui.start_search(player, player_data, immediate)
+---@param player LuaPlayer
+---@param player_data PlayerData
+---@param immediate boolean?
+function SearchGui.start_search(player, player_data, immediate)
   local refs = player_data.refs
   local elem_button = refs.item_select
   local item = elem_button.elem_value
@@ -702,79 +746,45 @@ function Gui.start_search(player, player_data, immediate)
       search_started = Search.find_machines(item, force, state, player, not refs.all_surfaces.state, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
-        Gui.build_loading_results(refs.result_flow)
+        SearchGui.build_loading_results(refs.result_flow)
       else
-        Gui.build_results({}, refs.result_flow)
+        SearchGui.build_results({}, refs.result_flow)
       end
     else
-      Gui.build_invalid_state(refs.result_flow)
+      SearchGui.build_invalid_state(refs.result_flow)
       storage.current_searches[player.index] = nil
     end
   else
-    Gui.clear_results(refs.result_flow)
+    SearchGui.clear_results(refs.result_flow)
     refs.subheader_title.caption = ""
     ResultLocation.clear_markers(player)
     storage.current_searches[player.index] = nil
   end
 end
 
-gui.hook_events(
-  function(event)
-    local action = gui.read_action(event)
-    if action then
-      local player = game.get_player(event.player_index)
-      local player_data = storage.players[event.player_index]
+---@param player LuaPlayer
+---@param player_data PlayerData
+function SearchGui.start_search_immediate(player, player_data)
+  SearchGui.start_search(player, player_data, true)
+end
 
-      local msg = action.action
-      if msg == "item_selected" then  -- on_gui_elem_changed
-        Gui.start_search(player, player_data)
-      elseif msg == "checkbox_toggled" then  -- on_gui_checked_state_changed
-        Gui.start_search(player, player_data)
-      elseif msg == "close" then  -- on_gui_click
-        Gui.close(player, player_data)
-        --Gui.destroy(player, player_data)
-      elseif msg == "toggle_pin" then
-        player_data.pinned = not player_data.pinned
-        toggle_fab(player_data.refs.pin_button, "fs_flib_pin", player_data.pinned)
-        if player_data.pinned then
-          player_data.ignore_close = true
-          player.opened = nil
-          player_data.refs.close_button.tooltip = { "gui.close" }
-        else
-          player.opened = player_data.refs.frame
-          player_data.refs.frame.force_auto_center()
-          player_data.refs.close_button.tooltip = { "gui.close-instruction" }
-        end
-      elseif msg == "open_location_in_map" then
-        local button = event.element
-        local tags = button.tags.FactorySearch
-        local mouse_button = event.button
-        if mouse_button == defines.mouse_button_type.left then
-          ResultLocation.open(player, tags)
-        elseif mouse_button == defines.mouse_button_type.right then
-          ResultLocation.highlight(player, tags)
-        end
-
-        local highlighted_button = player_data.refs.highlighted_button
-        if highlighted_button and highlighted_button.valid then
-          highlighted_button.style = "slot_button"
-        end
-        button.style = "yellow_slot_button"
-        player_data.refs.highlighted_button = button
-      elseif msg == "refresh" then
-        Gui.start_search(player, player_data, true)
-      end
-    end
+gui.add_handlers(SearchGui,
+  function(event, handler)
+    local player = game.get_player(event.player_index)  ---@cast player -?
+    local player_data = storage.players[event.player_index]
+    local element = event.element
+    local mouse_button = event.button
+    handler(player, player_data, element, mouse_button)
   end
 )
 
-event.on_gui_closed(
+--[[event.on_gui_closed(  -- TODO covered by frame element handler?
   function(event)
     if event.element and event.element.name == "fs_frame" then
       local player = game.get_player(event.player_index)
-      Gui.close(player, storage.players[event.player_index])
+      SearchGui.close(player, storage.players[event.player_index])
     end
   end
-)
+)]]
 
-return Gui
+return SearchGui

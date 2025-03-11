@@ -1,13 +1,20 @@
-util = require "__core__.lualib.util"
-event = require "scripts.event"
+---@type event_handler_lib
+event_handler = require "event_handler"
+util = require "util"
+
+gui = require "scripts.flib-gui"
 CustomInput = require "scripts.custom-input"
 Search = require "scripts.search"
 SearchResults = require "scripts.search-results"
 ResultLocation = require "scripts.result-location"
-Gui = require "scripts.search-gui"
+SearchGui = require "scripts.search-gui"
 require "scripts.remote"
 
+---@alias PlayerData any
+
 DEBOUNCE_TICKS = 60
+
+Control = {}
 
 function filtered_surfaces(override_surface, player_surface)
   if override_surface then
@@ -47,8 +54,6 @@ local function update_surface_count()
 
   storage.multiple_surfaces = multiple_surfaces
 end
-
-script.on_event({defines.events.on_surface_created, defines.events.on_surface_deleted}, update_surface_count)
 
 local function generate_item_to_entity_table()
   -- Make map of {item_name -> list[entity_name]}
@@ -101,33 +106,49 @@ local function generate_item_to_entity_table()
   storage.item_to_entities = item_to_entities
 end
 
-script.on_init(
-  function()
-    storage.players = {}
-    storage.current_searches = {}
-    storage.multiple_surfaces = false
-    update_surface_count()
-    generate_item_to_entity_table()
-  end
-)
+local function on_init()
+  ---@type table<PlayerIndex, PlayerData>
+  storage.players = {}
+  ---@type table<PlayerIndex, any>
+  storage.current_searches = {}
+  ---@type boolean
+  storage.multiple_surfaces = false
+  update_surface_count()
+  generate_item_to_entity_table()
+end
 
-script.on_configuration_changed(
-  function()
-    -- Destroy all GUIs
-    for player_index, player_data in pairs(storage.players) do
-      local player = game.get_player(player_index)
-      if player then
-        Gui.destroy(player, player_data)
-      else
-        storage.players[player_index] = nil
-      end
+local function on_configuration_changed()
+  -- Destroy all GUIs
+  for player_index, player_data in pairs(storage.players) do
+    local player = game.get_player(player_index)
+    if player then
+      SearchGui.destroy(player, player_data)
+    else
+      storage.players[player_index] = nil
     end
-
-    -- Stop in-progress non-blocking searches
-    storage.current_searches = {}
-
-    storage.multiple_surfaces = false
-    update_surface_count()
-    generate_item_to_entity_table()
   end
-)
+
+  -- Stop in-progress non-blocking searches
+  storage.current_searches = {}
+
+  storage.multiple_surfaces = false
+  update_surface_count()
+  generate_item_to_entity_table()
+end
+
+Control.on_init = on_init
+Control.on_configuration_changed = on_configuration_changed
+Control.events = {
+  [defines.events.on_surface_created] = update_surface_count,
+  [defines.events.on_surface_deleted] = update_surface_count
+}
+
+event_handler.add_libraries{
+  gui --[[@as event_handler]],
+  Control,
+  CustomInput,
+  Search,
+  SearchResults,
+  ResultLocation,
+  SearchGui,
+}
