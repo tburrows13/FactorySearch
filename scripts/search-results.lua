@@ -68,7 +68,7 @@ local add_entity = SearchResults.add_entity
 
 ---@param entity LuaEntity
 ---@param surface_data CategorisedSurfaceData
----@param recipe LuaRecipe
+---@param recipe LuaRecipe|LuaRecipePrototype
 function SearchResults.add_entity_product(entity, surface_data, recipe)
   local group = add_entity(entity, surface_data)
   local group_recipe_list = group.recipe_list or {}

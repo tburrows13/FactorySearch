@@ -17,7 +17,6 @@ for name, corpse in pairs(data.raw["character-corpse"]) do
         localised_description = corpse.localised_description or {"entity-description." .. name},
         icon = corpse.icon,
         icon_size = corpse.icon_size,
-        icon_mipmaps = corpse.icon_mipmaps,
         icons = corpse.icons,
         subgroup = "virtual-signal-corpse",
       }

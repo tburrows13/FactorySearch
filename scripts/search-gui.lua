@@ -710,7 +710,6 @@ local function generate_state(refs)
     map_tags = refs.include_map_tags.state
   }
 end
-
 ---@param state SearchGuiState
 ---@return boolean
 local function is_valid_state(state)

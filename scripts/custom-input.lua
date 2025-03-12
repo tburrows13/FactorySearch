@@ -15,6 +15,7 @@ local function open_search_prototype_pressed(event)
   local player_data = storage.players[event.player_index]
   if event.selected_prototype then
     local name = event.selected_prototype.name
+    ---@type SignalIDType
     local type
 
     if name == "entity-ghost" or name == "tile-ghost" then
@@ -79,7 +80,7 @@ local function open_search_prototype_pressed(event)
     SearchGui.open(player, player_data)
     player_data = storage.players[event.player_index]
     local refs = player_data.refs
-    refs.item_select.elem_value = {type = type, name = name}
+    refs.item_select.elem_value = {type = type, name = name, quality = event.selected_prototype.quality}
     SearchGui.start_search(player, player_data)
   end
 end
