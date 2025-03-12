@@ -125,11 +125,19 @@ end
 
 ---@param entity LuaEntity
 ---@param surface_data CategorisedSurfaceData
----@param resource_count number
-function SearchResults.add_entity_resource(entity, surface_data, resource_count)
+---@return number
+function SearchResults.add_entity_resource(entity, surface_data)
+  local resource_count
+  if entity.initial_amount then
+    resource_count = entity.amount / 3000  -- Calculate yield from amount
+  else
+    resource_count = entity.amount
+  end
+
   local group = add_entity(entity, surface_data)
   local group_resource_count = group.resource_count or 0
   group.resource_count = group_resource_count + resource_count
+  return resource_count
 end
 
 ---@param tag LuaCustomChartTag

@@ -647,6 +647,32 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
   end
 end
 
+---@param target_item SignalID
+---@return EntityName[]?
+local function get_target_entity_names(target_item)
+  local target_name = target_item.name
+
+  if target_item.type == "entity" then
+    return {target_name}
+  end
+
+  -- Check hardcoded mod overrides
+  if mod_placeholder_entities[target_name] then
+    return mod_placeholder_entities[target_name]
+  end
+
+  -- Get all associated items from entity.items_to_place_this,
+  -- entity.mineable_properties, item.place_result, item.plant_result
+  if storage.item_to_entities[target_name] then
+    return storage.item_to_entities[target_name]
+  end
+
+  -- Or just try an entity with the same name as the item
+  if prototypes.entity[target_name] then
+    return {target_name}
+  end
+end
+
 ---@param force LuaForce
 ---@param state SearchGuiState
 ---@param target_item SignalID
@@ -704,40 +730,16 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
 
     -- Entities
     if state.entities then
-      local target_entity_name = target_is_entity and target_name
-      if target_is_entity then
-        target_entity_name = target_name
-      else
-        target_entity_name = mod_placeholder_entities[target_name]
-      end
-      if not target_entity_name then
-        -- Check if the item is produced by mining any entities
-        target_entity_name = storage.item_to_entities[target_name]
-      end
-      if not target_entity_name and prototypes.item[target_name] and prototypes.item[target_name].place_result then
-        -- Check for the item's place_result
-        target_entity_name = prototypes.item[target_name].place_result.name
-      end
-      if not target_entity_name then
-        -- Or just try an entity with the same name as the item
-        target_entity_name = target_name
-      end
-      -- Type will be table if storage.item_to_entities succeeded. We know they are all valid entities
-      if type(target_entity_name) == "table" or prototypes.entity[target_entity_name] then
+      local target_entity_names = get_target_entity_names(target_item)
+      if target_entity_names then
         entities = surface.find_entities_filtered{
-          name = target_entity_name,
+          name = target_entity_names,
           quality = target_quality ~= "any" and target_quality or nil,
           force = { force, "neutral" },
         }
         for _, entity in pairs(entities) do
           if entity.type == "resource" then
-            local amount
-            if entity.initial_amount then
-              amount = entity.amount / 3000  -- Calculate yield from amount
-            else
-              amount = entity.amount
-            end
-            SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+            local amount = SearchResults.add_entity_resource(entity, surface_data.entities)
             SearchResults.add_surface_statistics("resource_count", amount, surface_statistics)
           else
             SearchResults.add_entity(entity, surface_data.entities)
@@ -895,42 +897,18 @@ function on_tick()
 
     -- Entities
     if state.entities then
-      local target_entity_name = target_is_entity and target_name
-      if target_is_entity then
-        target_entity_name = target_name
-      else
-        target_entity_name = mod_placeholder_entities[target_name]
-      end
-      if not target_entity_name then
-        -- Check if the item is produced by mining any entities
-        target_entity_name = storage.item_to_entities[target_name]
-      end
-      if not target_entity_name and prototypes.item[target_name] and prototypes.item[target_name].place_result then
-        -- Check for the item's place_result
-        target_entity_name = prototypes.item[target_name].place_result.name
-      end
-      if not target_entity_name then
-        -- Or just try an entity with the same name as the item
-        target_entity_name = target_name
-      end
-
-      if type(target_entity_name) == "table" or prototypes.entity[target_entity_name] then
+      local target_entity_names = get_target_entity_names(target_item)
+      if target_entity_names then
         entities = current_surface.find_entities_filtered{
           area = chunk_area,
-          name = target_entity_name,
+          name = target_entity_names,
           quality = target_quality ~= "any" and target_quality or nil,
           force = { force, "neutral" },
         }
         for _, entity in pairs(entities) do
           if math2d.bounding_box.contains_point(chunk_area, entity.position) then
             if entity.type == "resource" then
-              local amount
-              if entity.initial_amount then
-                amount = entity.amount / 3000  -- Calculate yield from amount
-              else
-                amount = entity.amount
-              end
-              SearchResults.add_entity_resource(entity, surface_data.entities, amount)
+              local amount = SearchResults.add_entity_resource(entity, surface_data.entities)
               SearchResults.add_surface_statistics("resource_count", amount, surface_statistics)
             else
               SearchResults.add_entity(entity, surface_data.entities)

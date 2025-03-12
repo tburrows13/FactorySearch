@@ -108,7 +108,7 @@ DEBOUNCE_TICKS = 60
 
 Control = {}
 
-local function map_to_list(map)
+function map_to_list(map)
   local i = 1
   local list = {}
   for name, _ in pairs(map) do
@@ -167,9 +167,8 @@ local function generate_item_to_entity_table()
   end
 
 
-  local prototypes = prototypes.get_entity_filtered({})
   local item_to_entities_maps = {}
-  for _, prototype in pairs(prototypes) do
+  for _, prototype in pairs(prototypes.entity) do
     local items_to_place_this = prototype.items_to_place_this
     if items_to_place_this then
       for _, item in pairs(items_to_place_this) do
@@ -190,6 +189,23 @@ local function generate_item_to_entity_table()
           item_to_entities_maps[item_name] = associated_entities_map
         end
       end
+    end
+  end
+
+  for _, prototype in pairs(prototypes.item) do
+    local place_result = prototype.place_result
+    if place_result then
+      local item_name = prototype.name
+      local associated_entities_map = item_to_entities_maps[item_name] or {}
+      associated_entities_map[place_result.name] = true
+      item_to_entities_maps[item_name] = associated_entities_map
+    end
+    local plant_result = prototype.plant_result
+    if plant_result then
+      local item_name = prototype.name
+      local associated_entities_map = item_to_entities_maps[item_name] or {}
+      associated_entities_map[plant_result.name] = true
+      item_to_entities_maps[item_name] = associated_entities_map
     end
   end
 
