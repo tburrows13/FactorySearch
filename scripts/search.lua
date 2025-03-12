@@ -131,6 +131,17 @@ local function to_chunk_position(map_position)
   return { math.floor(map_position.x / 32), math.floor(map_position.y / 32) }
 end
 
+---@param entity LuaEntity
+---@param entity_type string
+---@return boolean
+local function is_wire_connected(entity, entity_type)
+  if entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" then
+    return not not (entity.get_circuit_network(defines.wire_connector_id.combinator_output_red) or entity.get_circuit_network(defines.wire_connector_id.combinator_output_green))
+  else
+    return not not (entity.get_circuit_network(defines.wire_connector_id.circuit_red) or entity.get_circuit_network(defines.wire_connector_id.circuit_green))
+  end
+end
+
 ---@param entities LuaEntity[]
 ---@param state SearchGuiState
 ---@param surface_data SurfaceData
@@ -303,7 +314,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
               end
             end
           elseif entity_type == "roboport" and target_is_item then
-            if control_behavior.read_items_mode == defines.control_behavior.roboport.read_items_mode.logistics then
+            if control_behavior.read_items_mode == defines.control_behavior.roboport.read_items_mode.logistics and is_wire_connected(entity, entity_type) then
               local logistic_network = entity.logistic_network
               if logistic_network then
                 local signal_count = get_item_count(logistic_network, target_item_and_quality)

@@ -480,6 +480,10 @@ function SearchGui.build(player)
                       handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
+                      type = "line",
+                      visible = script.feature_flags.quality or storage.multiple_surfaces,
+                    },
+                    {
                       type = "checkbox",
                       state = true,
                       caption = {"search-gui.consumers-name"},
@@ -715,9 +719,10 @@ local function generate_state(refs)
     ground_items = refs.include_ground_items.state,
     entities = refs.include_entities.state,
     signals = refs.include_signals.state,
-    map_tags = refs.include_map_tags.state
+    map_tags = refs.include_map_tags.state,
   }
 end
+
 ---@param state SearchGuiState
 ---@return boolean
 local function is_valid_state(state)
