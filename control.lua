@@ -47,6 +47,12 @@ require "scripts.remote"
 ---@field signals boolean
 ---@field map_tags boolean
 
+---@class (exact) CurrentSurfaceSearchData
+---@field surface LuaSurface
+---@field surface_data SurfaceData
+---@field surface_statistics SurfaceStastistics
+---@field chunk_iterator LuaChunkIterator
+
 ---@class (exact) SearchData
 ---@field blocking boolean
 ---@field tick_triggered GameTick
@@ -56,12 +62,11 @@ require "scripts.remote"
 ---@field type_list string[]
 ---@field neutral_type_list string[]
 ---@field player LuaPlayer
----@field data any
+---@field data table<SurfaceName, SurfaceData>
+---@field statistics table<SurfaceName, SurfaceStastistics>
 ---@field not_started_surfaces LuaSurface[]
 ---@field search_complete boolean
----@field current_surface? LuaSurface
----@field SurfaceData? any
----@field chunk_iterator? LuaChunkIterator
+---@field current_surface_search_data? CurrentSurfaceSearchData Used for non-blocking searches
 
 ---@class (exact) EntityGroup
 ---@field count number
@@ -77,15 +82,19 @@ require "scripts.remote"
 ---@field request_count? number
 ---@field signal_count? number
 ---@field resource_count? number
----@
+---@field distance? number
 
 ---@alias EntitySurfaceData EntityGroup[]
 
 ---@alias EntityName string
 ---@alias CategorisedSurfaceData table<EntityName, EntitySurfaceData>
 
----@alias CategoryName "consumers"|"producers"|"storage"|"logistics"|"modules"|"requesters"|"ground_items"|"entities"|"signals"|"map_tags"
----@alias SurfaceData table<CategoryName, CategorisedSurfaceData> TODO and with surface_info
+---@alias SurfaceDataCategoryName "consumers"|"producers"|"storage"|"logistics"|"modules"|"requesters"|"ground_items"|"entities"|"signals"|"map_tags"
+---@alias SurfaceData table<SurfaceDataCategoryName, CategorisedSurfaceData>
+
+---@alias SurfaceStatisticsCategoryName "consumers_count"|"producers_count"|"item_count"|"fluid_count"|"module_count"|"entity_count"|"resource_count"|"ground_count"|"request_count"|"signal_count"|"tag_count"
+---@alias SurfaceStastistics table <SurfaceStatisticsCategoryName, number>
+
 
 DEBOUNCE_TICKS = 60
 

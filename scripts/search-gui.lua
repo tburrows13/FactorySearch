@@ -1,11 +1,5 @@
 local SearchGui = {}
 
----@param elem LuaGuiElement
----@param state boolean
-local function toggle_fab(elem, state)
-  elem.toggled = state
-end
-
 ---@param signal SignalID
 ---@return LocalisedString
 local function get_signal_name(signal)
@@ -21,7 +15,7 @@ local function get_signal_name(signal)
 end
 
 ---@param surface_name string
----@param surface_data any
+---@param surface_data CategorisedSurfaceData
 ---@return GuiElemDef[]
 function SearchGui.build_surface_results(surface_name, surface_data)
   local gui_elements = {}
@@ -144,12 +138,12 @@ local function count_label(string, count)
   }
 end
 
----@param surface_info any
+---@param surface_statistics SurfaceStastistics
 ---@param surface_name_included boolean?
 ---@return GuiElemDef
-function SearchGui.build_surface_count(surface_info, surface_name_included)
+function SearchGui.build_surface_count(surface_statistics, surface_name_included)
   local labels = {}
-  --[[if next(surface_info) then
+  --[[if next(surface_statistics) then
     table.insert(labels, {
       type = "label",
       caption = "Totals",
@@ -158,38 +152,38 @@ function SearchGui.build_surface_count(surface_info, surface_name_included)
       style_mods = {top_margin = -8}  -- TODO don't reduce top margin when no planet name
     })
   end]]
-  if surface_info.consumers_count then
-    table.insert(labels, count_label({"search-gui.total-consumers"}, surface_info.consumers_count))
+  if surface_statistics.consumers_count then
+    table.insert(labels, count_label({"search-gui.total-consumers"}, surface_statistics.consumers_count))
   end
-  if surface_info.producers_count then
-    table.insert(labels, count_label({"search-gui.total-producers"}, surface_info.producers_count))
+  if surface_statistics.producers_count then
+    table.insert(labels, count_label({"search-gui.total-producers"}, surface_statistics.producers_count))
   end
-  if surface_info.item_count then
-    table.insert(labels, count_label({"search-gui.total-items"}, surface_info.item_count))
+  if surface_statistics.item_count then
+    table.insert(labels, count_label({"search-gui.total-items"}, surface_statistics.item_count))
   end
-  if surface_info.fluid_count then
-    table.insert(labels, count_label({"search-gui.total-fluids"}, surface_info.fluid_count))
+  if surface_statistics.fluid_count then
+    table.insert(labels, count_label({"search-gui.total-fluids"}, surface_statistics.fluid_count))
   end
-  if surface_info.module_count then
-    table.insert(labels, count_label({"search-gui.total-modules"}, surface_info.module_count))
+  if surface_statistics.module_count then
+    table.insert(labels, count_label({"search-gui.total-modules"}, surface_statistics.module_count))
   end
-  if surface_info.entity_count then
-    table.insert(labels, count_label({"search-gui.total-entities"}, surface_info.entity_count))
+  if surface_statistics.entity_count then
+    table.insert(labels, count_label({"search-gui.total-entities"}, surface_statistics.entity_count))
   end
-  if surface_info.resource_count then
-    table.insert(labels, count_label({"search-gui.total-resources"}, surface_info.resource_count))
+  if surface_statistics.resource_count then
+    table.insert(labels, count_label({"search-gui.total-resources"}, surface_statistics.resource_count))
   end
-  if surface_info.ground_count then
-    table.insert(labels, count_label({"search-gui.total-ground"}, surface_info.ground_count))
+  if surface_statistics.ground_count then
+    table.insert(labels, count_label({"search-gui.total-ground"}, surface_statistics.ground_count))
   end
-  if surface_info.request_count then
-    table.insert(labels, count_label({"search-gui.total-requested"}, surface_info.request_count))
+  if surface_statistics.request_count then
+    table.insert(labels, count_label({"search-gui.total-requested"}, surface_statistics.request_count))
   end
-  if surface_info.signal_count then
-    table.insert(labels, count_label({"search-gui.total-signals"}, surface_info.signal_count))
+  if surface_statistics.signal_count then
+    table.insert(labels, count_label({"search-gui.total-signals"}, surface_statistics.signal_count))
   end
-  if surface_info.tag_count then
-    table.insert(labels, count_label({"search-gui.total-tags"}, surface_info.tag_count))
+  if surface_statistics.tag_count then
+    table.insert(labels, count_label({"search-gui.total-tags"}, surface_statistics.tag_count))
   end
   local flow = {
     type = "flow",
@@ -205,11 +199,12 @@ function SearchGui.build_surface_count(surface_info, surface_name_included)
   return flow
 end
 
----@param data any
+---@param data table<SurfaceName, SurfaceData>
+---@param statistics table<SurfaceName, SurfaceStastistics>
 ---@param frame LuaGuiElement
 ---@param check_result_found? boolean Default: true
 ---@param include_surface_name? boolean Whether to show the surface name when there's only one surface in `data`
-function SearchGui.build_results(data, frame, check_result_found, include_surface_name)
+function SearchGui.build_results(data, statistics, frame, check_result_found, include_surface_name)
   if not (frame and frame.valid) then return end
 
   frame.clear()
@@ -238,7 +233,7 @@ function SearchGui.build_results(data, frame, check_result_found, include_surfac
     -- TODO sort somewhere before showing storage, modules, requesters, ...
     gui.add(frame, {
       SearchGui.build_surface_name(include_surface_name, surface_name),
-      SearchGui.build_surface_count(surface_data.surface_info, include_surface_name),
+      SearchGui.build_surface_count(statistics[surface_name], include_surface_name),
       {
         type = "frame",
         direction = "vertical",
@@ -363,7 +358,6 @@ end
 ---@param player LuaPlayer
 ---@return PlayerData
 function SearchGui.build(player)
-  ---@type SearchGuiRefs
   local refs = gui.add(player.gui.screen, {
     {
       type = "frame",
@@ -596,10 +590,9 @@ function SearchGui.build(player)
       }
     }
   })
-
-  local player_data = {}
+  ---@cast refs SearchGuiRefs
   refs.frame.force_auto_center()
-  player_data.refs = refs
+  local player_data = {refs = refs}
   storage.players[player.index] = player_data
   return player_data
 end
@@ -651,7 +644,7 @@ end
 ---@param player_data PlayerData
 function SearchGui.toggle_pin(player, player_data)
   player_data.pinned = not player_data.pinned
-  toggle_fab(player_data.refs.pin_button, player_data.pinned)
+  player_data.refs.pin_button.toggled = player_data.pinned
   if player_data.pinned then
     player_data.ignore_close = true
     player.opened = nil
@@ -731,7 +724,7 @@ end
 ---@param player LuaPlayer
 ---@param player_data PlayerData
 ---@param immediate boolean?
-function SearchGui.start_search(player, player_data, immediate)
+function SearchGui.start_search(player, player_data, _, _, immediate)
   local refs = player_data.refs
   local elem_button = refs.item_select
   local item = elem_button.elem_value --[[@as SignalID]]
@@ -745,7 +738,7 @@ function SearchGui.start_search(player, player_data, immediate)
       if search_started then
         SearchGui.build_loading_results(refs.result_flow)
       else
-        SearchGui.build_results({}, refs.result_flow)
+        SearchGui.build_results({}, {}, refs.result_flow)
       end
     else
       SearchGui.build_invalid_state(refs.result_flow)
@@ -762,7 +755,7 @@ end
 ---@param player LuaPlayer
 ---@param player_data PlayerData
 function SearchGui.start_search_immediate(player, player_data)
-  SearchGui.start_search(player, player_data, true)
+  SearchGui.start_search(player, player_data, nil, nil, true)
 end
 
 gui.add_handlers(SearchGui,

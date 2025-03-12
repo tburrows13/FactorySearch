@@ -136,7 +136,7 @@ end
 ---@param surface_data CategorisedSurfaceData
 function SearchResults.add_tag(tag, surface_data)
   -- An alternative to add_entity*, for map tags
-  local icon_name = tag.icon.name
+  local icon_name = tag.icon.name  ---@cast icon_name -?
   local tag_surface_data = surface_data[icon_name] or {}
 
   -- Tag groups always have size 1
@@ -171,9 +171,9 @@ function SearchResults.add_tag(tag, surface_data)
   surface_data[icon_name] = tag_surface_data
 end
 
-function SearchResults.add_surface_info(category, amount, surface_info)
-  surface_info[category] = surface_info[category] or 0
-  surface_info[category] = surface_info[category] + amount
+function SearchResults.add_surface_statistics(category, amount, surface_statistics)
+  surface_statistics[category] = surface_statistics[category] or 0
+  surface_statistics[category] = surface_statistics[category] + amount
 end
 
 return SearchResults
