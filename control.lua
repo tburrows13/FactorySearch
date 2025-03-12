@@ -41,6 +41,8 @@ require "scripts.remote"
 ---@field ignore_close? boolean
 
 ---@class (exact) SearchGuiState
+---@field all_qualities boolean
+---@field all_surfaces boolean
 ---@field consumers boolean
 ---@field producers boolean
 ---@field storage boolean
@@ -103,6 +105,12 @@ require "scripts.remote"
 ---@field position MapPosition
 ---@field surface SurfaceName
 ---@field selection_boxes BoundingBox[]
+
+---@class SearchResults
+---@field target_item SignalID
+---@field state SearchGuiState
+---@field data table<SurfaceName, SurfaceData>
+---@field statistics table<SurfaceName, SurfaceStatistics>
 
 DEBOUNCE_TICKS = 60
 
@@ -233,6 +241,8 @@ local function on_init()
   storage.current_searches = {}
   ---@type boolean
   storage.multiple_surfaces = false
+  ---@type table<PlayerIndex, {undo: SearchResults, redo: SearchResults}>
+  storage.undo_redo_stacks = {}
   update_surface_count()
   generate_item_to_entity_table()
 end

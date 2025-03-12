@@ -385,6 +385,28 @@ function SearchGui.build(player)
             {
               type = "sprite-button",
               style = "frame_action_button",
+              sprite = "utility/backward_arrow",
+              mouse_button_filter = {"left"},
+              tooltip = {"controls.back"},
+              ref = {"back_button"},
+              handler = {
+                --[defines.events.on_gui_click] = SearchGui.toggle_pin,
+              }
+            },
+            {
+              type = "sprite-button",
+              style = "frame_action_button",
+              sprite = "utility/forward_arrow",
+              mouse_button_filter = {"left"},
+              tooltip = {"controls.forward"},
+              ref = {"forward-button"},
+              handler = {
+                --[defines.events.on_gui_click] = SearchGui.toggle_pin,
+              }
+            },
+            {
+              type = "sprite-button",
+              style = "frame_action_button",
               sprite = "fs_flib_pin_white",
               mouse_button_filter = {"left"},
               tooltip = {"search-gui.keep-open"},
@@ -709,6 +731,8 @@ end
 ---@return SearchGuiState
 local function generate_state(refs)
   return {
+    all_qualities = refs.all_qualities.visible and refs.all_qualities.state or false,
+    all_surfaces = refs.all_surfaces.visible and refs.all_surfaces.state or false,
     consumers = refs.include_consumers.state,
     producers = refs.include_machines.state,
     storage = refs.include_inventories.state,
@@ -726,8 +750,10 @@ end
 ---@return boolean
 local function is_valid_state(state)
   local are_any_checked = false
-  for _, checked in pairs(state) do
-    are_any_checked = are_any_checked or checked
+  for name, checked in pairs(state) do
+    if name ~= "all_qualities" and name ~= "all_surfaces" then
+      are_any_checked = are_any_checked or checked
+    end
   end
   return are_any_checked
 end
@@ -744,10 +770,10 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
     local state = generate_state(refs)
     local state_valid = is_valid_state(state)
     if state_valid then
-      if refs.all_qualities.state then
+      if state.all_qualities then
         item.quality = "any"
       end
-      search_started = Search.find_machines(item, force, state, player, not refs.all_surfaces.state, immediate)
+      search_started = Search.find_machines(item, force, state, player, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
         SearchGui.build_loading_results(refs.result_flow)
