@@ -154,7 +154,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
   local target_type = target_item.type or "item"
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
-  local target_is_virtual = target_type == "virtual"
+  local target_is_virtual = not target_is_item and not target_is_fluid  -- Includes all other SignalIDType, e.g "virtual", "entity"
 
   local target_quality = target_item.quality --[[@as string]] or "normal"
   local target_quality_is_any = target_quality == "any"
