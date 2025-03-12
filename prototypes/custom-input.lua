@@ -1,7 +1,7 @@
 local open_search_prototype = {
 	type = "custom-input",
 	name = "open-search-prototype",
-	key_sequence = "CONTROL + SHIFT + mouse-button-1",
+	key_sequence = "ALT + SHIFT + mouse-button-1",
   consuming = "none",
   include_selected_prototype = true,
   order = "a"
