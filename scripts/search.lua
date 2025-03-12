@@ -95,7 +95,7 @@ end
 ---@param entities LuaEntity[]
 ---@param state SearchGuiState
 ---@param surface_data SurfaceData
----@param surface_statistics SurfaceStastistics
+---@param surface_statistics SurfaceStatistics
 ---@param target_item SignalID
 ---@param force? LuaForce
 function Search.process_found_entities(entities, state, surface_data, surface_statistics, target_item, force)
@@ -934,7 +934,12 @@ function Search.find_machines(target_item, force, state, player, override_surfac
   local type_list = map_to_list(entity_types)
   local neutral_type_list = map_to_list(neutral_entity_types)
 
-  local surface_list = filtered_surfaces(override_surface, player.surface)
+  local surface_list
+  if override_surface then
+    surface_list = {player.surface}
+  else
+    surface_list = filtered_surfaces()
+  end
 
   local non_blocking_setting = settings.global["fs-non-blocking-search"].value
   if non_blocking_setting == "on" or (non_blocking_setting == "multiplayer" and game.is_multiplayer()) then

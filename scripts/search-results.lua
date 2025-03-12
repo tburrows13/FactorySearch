@@ -171,6 +171,9 @@ function SearchResults.add_tag(tag, surface_data)
   surface_data[icon_name] = tag_surface_data
 end
 
+---@param category SurfaceStatisticsCategoryName
+---@param amount number
+---@param surface_statistics SurfaceStatistics
 function SearchResults.add_surface_statistics(category, amount, surface_statistics)
   surface_statistics[category] = surface_statistics[category] or 0
   surface_statistics[category] = surface_statistics[category] + amount

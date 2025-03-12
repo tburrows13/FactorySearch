@@ -25,6 +25,9 @@ function ResultLocation.clear_markers(player)
   end
 end
 
+---@param player LuaPlayer
+---@param surface SurfaceName
+---@param selection_boxes BoundingBox[]
 function ResultLocation.draw_markers(player, surface, selection_boxes)
   local time_to_live = player.mod_settings["fs-highlight-duration"].value * 60
   -- Draw new markers
@@ -86,6 +89,9 @@ function ResultLocation.draw_markers(player, surface, selection_boxes)
   end
 end
 
+---@param player LuaPlayer
+---@param surface SurfaceName
+---@param position MapPosition
 function ResultLocation.draw_arrows(player, surface, position)
   local character = player.character
   if (not character) and remote.interfaces["space-exploration"] then
@@ -107,6 +113,8 @@ function ResultLocation.draw_arrows(player, surface, position)
   end
 end
 
+---@param player LuaPlayer
+---@param data ResultLocationData
 function ResultLocation.highlight(player, data)
   local surface_name = data.surface
 
@@ -119,6 +127,8 @@ function ResultLocation.highlight(player, data)
   ResultLocation.draw_arrows(player, surface_name, data.position)
 end
 
+---@param player LuaPlayer
+---@param data ResultLocationData
 function ResultLocation.open(player, data)
   local surface_name = data.surface
   local position = data.position

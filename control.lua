@@ -50,7 +50,7 @@ require "scripts.remote"
 ---@class (exact) CurrentSurfaceSearchData
 ---@field surface LuaSurface
 ---@field surface_data SurfaceData
----@field surface_statistics SurfaceStastistics
+---@field surface_statistics SurfaceStatistics
 ---@field chunk_iterator LuaChunkIterator
 
 ---@class (exact) SearchData
@@ -63,7 +63,7 @@ require "scripts.remote"
 ---@field neutral_type_list string[]
 ---@field player LuaPlayer
 ---@field data table<SurfaceName, SurfaceData>
----@field statistics table<SurfaceName, SurfaceStastistics>
+---@field statistics table<SurfaceName, SurfaceStatistics>
 ---@field not_started_surfaces LuaSurface[]
 ---@field search_complete boolean
 ---@field current_surface_search_data? CurrentSurfaceSearchData Used for non-blocking searches
@@ -93,21 +93,19 @@ require "scripts.remote"
 ---@alias SurfaceData table<SurfaceDataCategoryName, CategorisedSurfaceData>
 
 ---@alias SurfaceStatisticsCategoryName "consumers_count"|"producers_count"|"item_count"|"fluid_count"|"module_count"|"entity_count"|"resource_count"|"ground_count"|"request_count"|"signal_count"|"tag_count"
----@alias SurfaceStastistics table <SurfaceStatisticsCategoryName, number>
+---@alias SurfaceStatistics table <SurfaceStatisticsCategoryName, number>
 
+---@class ResultLocationData
+---@field position MapPosition
+---@field surface SurfaceName
+---@field selection_boxes BoundingBox[]
 
 DEBOUNCE_TICKS = 60
 
 Control = {}
 
----@param override_surface? boolean
----@param player_surface? LuaSurface
 ---@return LuaSurface[]
-function filtered_surfaces(override_surface, player_surface)
-  if override_surface then
-    return {player_surface}
-  end
-
+function filtered_surfaces()
   -- Skip certain modded surfaces that won't have assemblers/chests placed on them
   local surfaces = {}
   for _, surface in pairs(game.surfaces) do

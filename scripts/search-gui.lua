@@ -138,7 +138,7 @@ local function count_label(string, count)
   }
 end
 
----@param surface_statistics SurfaceStastistics
+---@param surface_statistics SurfaceStatistics
 ---@param surface_name_included boolean?
 ---@return GuiElemDef
 function SearchGui.build_surface_count(surface_statistics, surface_name_included)
@@ -200,7 +200,7 @@ function SearchGui.build_surface_count(surface_statistics, surface_name_included
 end
 
 ---@param data table<SurfaceName, SurfaceData>
----@param statistics table<SurfaceName, SurfaceStastistics>
+---@param statistics table<SurfaceName, SurfaceStatistics>
 ---@param frame LuaGuiElement
 ---@param check_result_found? boolean Default: true
 ---@param include_surface_name? boolean Whether to show the surface name when there's only one surface in `data`
@@ -679,7 +679,7 @@ end
 ---@param element LuaGuiElement sprite-button
 ---@param mouse_button defines.mouse_button_type
 function SearchGui.open_location_on_map(player, player_data, element, mouse_button)
-  local tags = element.tags
+  local tags = element.tags  --[[@as ResultLocationData]]
   if mouse_button == defines.mouse_button_type.left then
     ResultLocation.open(player, tags)
   elseif mouse_button == defines.mouse_button_type.right then
