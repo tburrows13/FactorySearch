@@ -21,7 +21,11 @@ end
 ---@param sig2 SignalID
 ---@return boolean
 local function signal_eq(sig1, sig2)
-  return sig1 and sig2 and (sig1.type or "item") == (sig2.type or "item") and sig1.name == sig2.name and (sig1.quality or "normal") == (sig2.quality or "normal")
+  if not (sig1 and sig2) then return false end
+  if (sig1.type or "item") ~= (sig2.type or "item") then return false end
+  if sig1.quality == "any" or sig2.quality == "any" then return true end
+  if (sig1.quality or "normal") ~= (sig2.quality or "normal") then return false end
+  return true
 end
 
 ---@param target SignalID
@@ -29,6 +33,41 @@ end
 ---@return boolean
 local function target_eq(target, other)
   return target.name == other.name and (target.type or "item") == (other.type or "item")
+end
+
+local quality_names = {}
+for name, _ in pairs(prototypes.quality) do
+  table.insert(quality_names, name)
+end
+
+---@param inventory LuaInventory|LuaLogisticNetwork
+---@param target_item_and_quality ItemIDAndQualityIDPair
+---@return number
+local function get_item_count(inventory, target_item_and_quality)
+  if target_item_and_quality.quality == "any" then
+    local count = 0
+    for _, quality in pairs(quality_names) do
+      count = count + inventory.get_item_count({name = target_item_and_quality.name, quality = quality})
+    end
+    return count
+  else
+    return inventory.get_item_count(target_item_and_quality)
+  end
+end
+
+---@param control_behavior LuaCombinatorControlBehavior
+---@param target_item SignalID
+---@return number?
+local function get_signal_last_tick(control_behavior, target_item)
+  if target_item.quality == "any" then
+    local count = 0
+    for _, quality in pairs(quality_names) do
+      count = count + (control_behavior.get_signal_last_tick({name = target_item.name, quality = quality}) or nil)
+    end
+    return count
+  else
+    return control_behavior.get_signal_last_tick(target_item)
+  end
 end
 
 -- Mod-specific overrides for "Entity" search
@@ -116,9 +155,16 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
   local target_is_virtual = target_type == "virtual"
+
   local target_quality = target_item.quality --[[@as string]] or "normal"
+  local target_quality_is_any = target_quality == "any"
+
   ---@type ItemFilter
   local target_item_filter = {name = target_name, quality = target_quality}
+  if target_quality_is_any then
+    target_item_filter.quality = "normal"
+    target_item_filter.comparator = "≥"
+  end
   ---@type ItemIDAndQualityIDPair
   local target_item_and_quality = {name = target_name, quality = target_quality}
 
@@ -225,7 +271,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
             if control_behavior.circuit_read_ingredients then
               local inventory = entity.get_inventory(defines.inventory.assembling_machine_input)
               if inventory then
-                local signal_count = inventory.get_item_count(target_item_and_quality)
+                local signal_count = get_item_count(inventory, target_item_and_quality)
                 if signal_count > 0 and not added_signals[target_type..'/'..target_name] then
                   SearchResults.add_entity(entity, surface_data.signals)
                   SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
@@ -247,20 +293,20 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
             ::break_both::
           elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" or entity_type == "selector-combinator" then
             ---@cast control_behavior LuaCombinatorControlBehavior
-            local signal_count = control_behavior.get_signal_last_tick(target_item)
+            local signal_count = get_signal_last_tick(control_behavior, target_item)
             if signal_count and signal_count > 0 then
               SearchResults.add_entity(entity, surface_data.signals)
               SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
             end
           elseif entity_type == "reactor" and target_is_item then  -- TODO reactors can also burn fluids
             if control_behavior.read_fuel then
-              local signal_count = entity.burner.inventory.get_item_count(target_item_and_quality)
+              local signal_count = get_item_count(entity.burner.inventory, target_item_and_quality)
               if signal_count > 0 then
                 SearchResults.add_entity(entity, surface_data.signals)
                 SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
               else
                 local currently_burning = entity.burner.currently_burning
-                if currently_burning and target_name == currently_burning.name.name and target_quality == currently_burning.quality.name then
+                if currently_burning and target_name == currently_burning.name.name and (target_quality_is_any or target_quality == currently_burning.quality.name) then
                   SearchResults.add_entity(entity, surface_data.signals)
                   SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
                 end
@@ -270,7 +316,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
             if control_behavior.read_items_mode == defines.control_behavior.roboport.read_items_mode.logistics then
               local logistic_network = entity.logistic_network
               if logistic_network then
-                local signal_count = logistic_network.get_item_count(target_item_and_quality)
+                local signal_count = get_item_count(logistic_network, target_item_and_quality)
                 if signal_count > 0 then
                   SearchResults.add_entity(entity, surface_data.signals)
                   SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
@@ -332,7 +378,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
             -- Doesn't check inserter if in pulse mode
             if control_behavior.circuit_read_hand_contents and control_behavior.circuit_hand_read_mode == defines.control_behavior.inserter.hand_read_mode.hold then
               local held_stack = entity.held_stack
-              if held_stack and held_stack.valid_for_read and held_stack.name == target_name and held_stack.quality.name == target_quality then
+              if held_stack and held_stack.valid_for_read and held_stack.name == target_name and (target_quality_is_any or held_stack.quality.name == target_quality) then
                 SearchResults.add_entity(entity, surface_data.signals)
                 SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
               end
@@ -396,7 +442,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
       if recipe and recipe.ingredients and quality_prototype then
         local quality = quality_prototype.name
         for _, ingredient in pairs(recipe.ingredients) do
-          if target_eq(target_item, ingredient) and target_quality == quality then
+          if target_eq(target_item, ingredient) and (target_quality_is_any or target_quality == quality) then
             SearchResults.add_entity_product(entity, surface_data.consumers, recipe)
             SearchResults.add_surface_statistics("consumers_count", 1, surface_statistics)
             break
@@ -427,7 +473,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
       local burner = entity.burner
       if burner then
         local currently_burning = burner.currently_burning
-        if currently_burning and target_name == currently_burning.name.name and target_quality == currently_burning.quality.name then
+        if currently_burning and target_name == currently_burning.name.name and (target_quality_is_any or target_quality == currently_burning.quality.name) then
           SearchResults.add_entity(entity, surface_data.consumers)
           SearchResults.add_surface_statistics("consumers_count", 1, surface_statistics)
         end
@@ -472,7 +518,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
       if recipe and recipe.products and quality_prototype then
         local quality = quality_prototype.name
         for _, product in pairs(recipe.products) do
-          if target_eq(target_item, product) and target_quality == quality then
+          if target_eq(target_item, product) and (target_quality_is_any or target_quality == quality) then
             SearchResults.add_entity_product(entity, surface_data.producers, recipe)
             SearchResults.add_surface_statistics("producers_count", 1, surface_statistics)
             break
@@ -484,7 +530,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
           local mineable_properties = mining_target.prototype.mineable_properties
           local quality = mining_target.quality.name
           for _, product in pairs(mineable_properties.products or {}) do
-            if target_name == product.name and target_quality == quality then
+            if target_name == product.name and (target_quality_is_any or target_quality == quality) then
               SearchResults.add_entity(entity, surface_data.producers)
               SearchResults.add_surface_statistics("producers_count", 1, surface_statistics)
               break
@@ -539,7 +585,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
           inventory = entity.get_inventory(defines.inventory.assembling_machine_modules)
         end
         if inventory then
-          local item_count = inventory.get_item_count(target_item_and_quality)
+          local item_count = get_item_count(inventory, target_item_and_quality)
           if item_count > 0 then
             SearchResults.add_entity_module(entity, surface_data.modules, item_count)
             SearchResults.add_surface_statistics("module_count", item_count, surface_statistics)
@@ -555,7 +601,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
         local logistic_points = entity.get_logistic_point() --[=[@as LuaLogisticPoint[]]=]
         for _, logistic_point in pairs(logistic_points) do
           for _, filter in pairs(logistic_point.filters or {}) do
-            if filter and filter.name == target_name and filter.quality == target_quality then  -- TODO take into account filter.comparator for quality
+            if filter and filter.name == target_name and (target_quality_is_any or filter.quality == target_quality) then  -- TODO take into account filter.comparator for quality
               SearchResults.add_entity_request(entity, surface_data.requesters, filter.count)
               SearchResults.add_surface_statistics("request_count", filter.count, surface_statistics)
             end
@@ -564,7 +610,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
       elseif entity_type == "item-request-proxy" then
         local requests = entity.item_requests
         for _, item in pairs(requests) do
-          if item.name == target_name and item.quality == target_quality then
+          if item.name == target_name and (target_quality_is_any or item.quality == target_quality) then
             SearchResults.add_entity_request(entity.proxy_target, surface_data.requesters, item.count)
             SearchResults.add_surface_statistics("request_count", item.count, surface_statistics)
           end
@@ -575,7 +621,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
     -- Ground
     if target_is_item and state.ground_items then
       if entity_type == "item-entity" and entity.name == "item-on-ground" then
-        if entity.stack.name == target_name and entity.stack.quality.name == target_quality then
+        if entity.stack.name == target_name and (target_quality_is_any or entity.stack.quality.name == target_quality) then
           SearchResults.add_entity(entity, surface_data.ground_items)
           SearchResults.add_surface_statistics("ground_count", 1, surface_statistics)
         end
@@ -587,7 +633,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
       if item_logistic_entities[entity_type] then
         if entity_type == "inserter" then
           local held_stack = entity.held_stack
-          if held_stack and held_stack.valid_for_read and held_stack.name == target_name and held_stack.quality.name == target_quality then
+          if held_stack and held_stack.valid_for_read and held_stack.name == target_name and (target_quality_is_any or held_stack.quality.name == target_quality) then
             SearchResults.add_entity_storage(entity, surface_data.logistics, held_stack.count)
             SearchResults.add_surface_statistics("item_count", held_stack.count, surface_statistics)
           end
@@ -690,7 +736,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
       if type(target_entity_name) == "table" or prototypes.entity[target_entity_name] then
         entities = surface.find_entities_filtered{
           name = target_entity_name,
-          quality = target_quality,
+          quality = target_quality ~= "any" and target_quality or nil,
           force = { force, "neutral" },
         }
         for _, entity in pairs(entities) do
@@ -807,9 +853,6 @@ function on_tick()
     local target_item = search_data.target_item
     local target_name = target_item.name
     local target_type = target_item.type or "item"
-    local target_is_item = target_type == "item"
-    local target_is_fluid = target_type == "fluid"
-    local target_is_virtual = target_type == "virtual"
     local target_is_entity = target_type == "entity"
     local target_quality = target_item.quality --[[@as string]] or "normal"
 
@@ -885,7 +928,7 @@ function on_tick()
         entities = current_surface.find_entities_filtered{
           area = chunk_area,
           name = target_entity_name,
-          quality = target_quality,
+          quality = target_quality ~= "any" and target_quality or nil,
           force = { force, "neutral" },
         }
         for _, entity in pairs(entities) do
@@ -938,7 +981,6 @@ function Search.find_machines(target_item, force, state, player, override_surfac
   local target_type = target_item.type or "item"
   local target_is_item = target_type == "item"
   local target_is_fluid = target_type == "fluid"
-  local target_is_virtual = target_type == "virtual"
 
   local entity_types = {}
   local neutral_entity_types = {}

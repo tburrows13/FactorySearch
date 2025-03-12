@@ -16,6 +16,7 @@ require "scripts.remote"
 ---@field close_button LuaGuiElement sprite-button
 ---@field subheader_title LuaGuiElement label
 ---@field all_surfaces LuaGuiElement checkbox
+---@field all_qualities LuaGuiElement checkbox
 ---@field item_select LuaGuiElement choose-elem-button
 ---@field include_consumers LuaGuiElement checkbox
 ---@field include_machines LuaGuiElement checkbox

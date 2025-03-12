@@ -431,14 +431,6 @@ function SearchGui.build(player)
                       style_mods = {horizontally_stretchable = true, horizontally_squashable = true}
                     },
                     {
-                      type = "checkbox",
-                      state = true,
-                      caption = {"search-gui.all-surfaces"},
-                      visible = storage.multiple_surfaces,
-                      ref = {"all_surfaces"},
-                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
-                    },
-                    {
                       type = "sprite-button",
                       style = "tool_button",
                       sprite = "utility/refresh",
@@ -470,6 +462,22 @@ function SearchGui.build(player)
                         height = 84,
                       },
                       handler = {[defines.events.on_gui_elem_changed] = SearchGui.start_search}
+                    },
+                    {
+                      type = "checkbox",
+                      state = true,
+                      caption = {"search-gui.all-qualities"},
+                      visible = script.feature_flags.quality,
+                      ref = {"all_qualities"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
+                    },
+                    {
+                      type = "checkbox",
+                      state = true,
+                      caption = {"search-gui.all-surfaces"},
+                      visible = storage.multiple_surfaces,
+                      ref = {"all_surfaces"},
+                      handler = {[defines.events.on_gui_checked_state_changed] = SearchGui.start_search}
                     },
                     {
                       type = "checkbox",
@@ -732,6 +740,9 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
     local state = generate_state(refs)
     local state_valid = is_valid_state(state)
     if state_valid then
+      if refs.all_qualities.state then
+        item.quality = "any"
+      end
       search_started = Search.find_machines(item, force, state, player, not refs.all_surfaces.state, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
