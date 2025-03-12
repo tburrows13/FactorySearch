@@ -10,6 +10,10 @@ ResultLocation = require "scripts.result-location"
 SearchGui = require "scripts.search-gui"
 require "scripts.remote"
 
+---@alias ItemName string
+---@alias EntityName string
+---@alias SurfaceName string
+
 ---@class (exact) SearchGuiRefs
 ---@field frame LuaGuiElement frame
 ---@field pin_button LuaGuiElement sprite-button
@@ -87,7 +91,6 @@ require "scripts.remote"
 
 ---@alias EntitySurfaceData EntityGroup[]
 
----@alias EntityName string
 ---@alias CategorisedSurfaceData table<EntityName, EntitySurfaceData>
 
 ---@alias SurfaceDataCategoryName "consumers"|"producers"|"storage"|"logistics"|"modules"|"requesters"|"ground_items"|"entities"|"signals"|"map_tags"
@@ -104,6 +107,16 @@ require "scripts.remote"
 DEBOUNCE_TICKS = 60
 
 Control = {}
+
+local function map_to_list(map)
+  local i = 1
+  local list = {}
+  for name, _ in pairs(map) do
+    list[i] = name
+    i = i + 1
+  end
+  return list
+end
 
 ---@return LuaSurface[]
 function filtered_surfaces()
@@ -155,27 +168,26 @@ local function generate_item_to_entity_table()
 
 
   local prototypes = prototypes.get_entity_filtered({})
-  -- Filter out rocks
-  local item_to_entities = {}
+  local item_to_entities_maps = {}
   for _, prototype in pairs(prototypes) do
     local items_to_place_this = prototype.items_to_place_this
     if items_to_place_this then
       for _, item in pairs(items_to_place_this) do
         local item_name = item.name
-        local associated_entities = item_to_entities[item_name] or {}
-        table.insert(associated_entities, prototype.name)
-        item_to_entities[item_name] = associated_entities
+        local associated_entities_map = item_to_entities_maps[item_name] or {}
+        associated_entities_map[prototype.name] = true
+        item_to_entities_maps[item_name] = associated_entities_map
       end
-    else
-      local properties = prototype.mineable_properties
-      if properties.minable and properties.products then
-        for _, item in pairs(prototype.mineable_properties.products) do
-          local item_name = item.name
-          if prototype.type ~= "simple-entity" or not is_resource[item_name] then
-            local associated_entities = item_to_entities[item_name] or {}
-            table.insert(associated_entities, prototype.name)
-            item_to_entities[item_name] = associated_entities
-          end
+    end
+    local properties = prototype.mineable_properties
+    if properties.minable and properties.products then
+      for _, item in pairs(prototype.mineable_properties.products) do
+        local item_name = item.name
+        -- Filter out rocks
+        if prototype.type ~= "simple-entity" or not is_resource[item_name] then
+          local associated_entities_map = item_to_entities_maps[item_name] or {}
+          associated_entities_map[prototype.name] = true
+          item_to_entities_maps[item_name] = associated_entities_map
         end
       end
     end
@@ -184,11 +196,17 @@ local function generate_item_to_entity_table()
   -- Hardcode some Pyanodons associations
   if script.active_mods["pypetroleumhandling"] then
     --  or {} in case something removed those items or playing an older version of Py
-    table.insert(item_to_entities["raw-gas"] or {}, "bitumen-seep")
-    table.insert(item_to_entities["tar"] or {}, "bitumen-seep")
-    table.insert(item_to_entities["crude-oil"] or {}, "bitumen-seep")
+    table.insert(item_to_entities_maps["raw-gas"] or {}, "bitumen-seep")
+    table.insert(item_to_entities_maps["tar"] or {}, "bitumen-seep")
+    table.insert(item_to_entities_maps["crude-oil"] or {}, "bitumen-seep")
   end
 
+  local item_to_entities = {}
+  for item_name, entity_map in pairs(item_to_entities_maps) do
+    item_to_entities[item_name] = map_to_list(entity_map)
+  end
+
+  ---@type table<ItemName, EntityName[]>
   storage.item_to_entities = item_to_entities
 end
 

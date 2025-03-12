@@ -115,16 +115,6 @@ local function add_entity_type(type_list, to_add_list)
   end
 end
 
-local function map_to_list(map)
-  local i = 1
-  local list = {}
-  for name, _ in pairs(map) do
-    list[i] = name
-    i = i + 1
-  end
-  return list
-end
-
 local function generate_distance_data(surface_data, player_position)
   local distance = math2d.position.distance
   for _, entity_groups in pairs(surface_data) do
