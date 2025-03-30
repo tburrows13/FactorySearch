@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.13.0
+Date: 31 March 2025
+  Features:
+    - Quality of selected item is now taken into account
+    - Added "All qualities" checkbox to instead search for item in any quality
+    - Improved searchability of plantable trees
+  Changes:
+    - Changed default hotkey to Alt + Shift + Left-click
+    - Improved shortcut search icon to fix with 2.0 shortcut icons
+  Bugfixes:
+    - Fixed crash when searching for virtual signals
+---------------------------------------------------------------------------------------------------
 Version: 1.12.3
 Date: 5 November 2024
   Bugfixes:
