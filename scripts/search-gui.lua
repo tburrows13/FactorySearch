@@ -63,11 +63,11 @@ function SearchGui.build_surface_results(surface_name, surface_data)
       if group.signal_count then
         extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
       end
-      local sprite = "item/" .. entity_name
+      local sprite = "entity/" .. entity_name
       if not helpers.is_valid_sprite_path(sprite) then
-        sprite = "fluid/" .. entity_name
+        sprite = "item/" .. entity_name
         if not helpers.is_valid_sprite_path(sprite) then
-          sprite = "entity/" .. entity_name
+          sprite = "fluid/" .. entity_name
           if not helpers.is_valid_sprite_path(sprite) then
             sprite = "recipe/" .. entity_name
             if not helpers.is_valid_sprite_path(sprite) then
