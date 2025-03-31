@@ -211,10 +211,16 @@ local function generate_item_to_entity_table()
 
   -- Hardcode some Pyanodons associations
   if script.active_mods["pypetroleumhandling"] then
-    --  or {} in case something removed those items or playing an older version of Py
-    table.insert(item_to_entities_maps["raw-gas"] or {}, "bitumen-seep")
-    table.insert(item_to_entities_maps["tar"] or {}, "bitumen-seep")
-    table.insert(item_to_entities_maps["crude-oil"] or {}, "bitumen-seep")
+    --  `if` checks in case something removed those items or playing an older version of Py
+    if item_to_entities_maps["raw-gas"] then
+      item_to_entities_maps["raw-gas"]["bitumen-seep"] = true
+    end
+    if item_to_entities_maps["tar"] then
+      item_to_entities_maps["tar"]["bitumen-seep"] = true
+    end
+    if item_to_entities_maps["crude-oil"] then
+      item_to_entities_maps["crude-oil"]["bitumen-seep"] = true
+    end
   end
 
   local item_to_entities = {}
