@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.13.1
+Date: 31 March 2025
+  Bugfixes:
+    - Fixed crash when searching in Background search mode
+    - Fixed Signal and Tag search modes not filtering results correctly
+---------------------------------------------------------------------------------------------------
 Version: 1.13.0
 Date: 31 March 2025
   Features:
