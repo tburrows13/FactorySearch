@@ -23,9 +23,8 @@ end
 local function signal_eq(sig1, sig2)
   if not (sig1 and sig2) then return false end
   if (sig1.type or "item") ~= (sig2.type or "item") then return false end
-  if sig1.quality == "any" or sig2.quality == "any" then return true end
-  if (sig1.quality or "normal") ~= (sig2.quality or "normal") then return false end
-  return true
+  if sig1.quality ~= "any" and sig2.quality ~= "any" and (sig1.quality or "normal") ~= (sig2.quality or "normal") then return false end
+  return sig1.name == sig2.name
 end
 
 ---@param target SignalID
