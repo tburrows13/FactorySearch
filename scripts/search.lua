@@ -843,6 +843,7 @@ function on_tick()
     if not chunk then
       -- Surface is complete
       search_data.data[current_surface.name] = current_surface_search_data.surface_data
+      search_data.statistics[current_surface.name] = current_surface_search_data.surface_statistics
       search_data.current_surface_search_data = nil
       return
     end
