@@ -106,6 +106,12 @@ require "scripts.remote"
 ---@field surface SurfaceName
 ---@field selection_boxes BoundingBox[]
 
+---@class SearchResults
+---@field target_item SignalID
+---@field state SearchGuiState
+---@field data table<SurfaceName, SurfaceData>
+---@field statistics table<SurfaceName, SurfaceStatistics>
+
 DEBOUNCE_TICKS = 60
 
 Control = {}
@@ -234,6 +240,11 @@ local function generate_item_to_entity_table()
   storage.item_to_entities = item_to_entities
 end
 
+---@param event EventData.on_player_created
+local function on_player_created(event)
+  storage.undo_redo_stacks[event.player_index] = {undo = {}, redo = {}}
+end
+
 local function on_init()
   ---@type table<PlayerIndex, PlayerData>
   storage.players = {}
@@ -241,6 +252,8 @@ local function on_init()
   storage.current_searches = {}
   ---@type boolean
   storage.multiple_surfaces = false
+  ---@type table<PlayerIndex, {undo: SearchResults[], redo: SearchResults[]}>
+  storage.undo_redo_stacks = {}
   update_surface_count()
   generate_item_to_entity_table()
 end
@@ -259,6 +272,11 @@ local function on_configuration_changed()
   -- Stop in-progress non-blocking searches
   storage.current_searches = {}
 
+  -- Clear all undo/redo stacks
+  for player_index, player in pairs(game.players) do
+    storage.undo_redo_stacks[player_index] = {undo = {}, redo = {}}
+  end
+
   storage.multiple_surfaces = false
   update_surface_count()
   generate_item_to_entity_table()
@@ -269,6 +287,7 @@ Control.on_configuration_changed = on_configuration_changed
 Control.events = {
   [defines.events.on_surface_created] = update_surface_count,
   [defines.events.on_surface_deleted] = update_surface_count,
+  [defines.events.on_player_created] = on_player_created,
 }
 
 event_handler.add_libraries{

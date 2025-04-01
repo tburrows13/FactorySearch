@@ -767,9 +767,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     ::continue::
   end
 
-  local player_data = storage.players[player.index]
-  local refs = player_data.refs
-  SearchGui.build_results(data, statistics, refs.result_flow)
+  SearchGui.build_results(data, statistics, player.index)
   storage.current_searches[player.index] = nil
 end
 
@@ -787,9 +785,7 @@ function on_tick()
   end
 
   if search_data.search_complete then
-    local player_data = storage.players[player_index]
-    local refs = player_data.refs
-    SearchGui.build_results(search_data.data, search_data.statistics, refs.result_flow)
+    SearchGui.build_results(search_data.data, search_data.statistics, player_index)
     storage.current_searches[player_index] = nil
   end
 
@@ -821,8 +817,8 @@ function on_tick()
     -- Update results
     local player_data = storage.players[player_index]
     local refs = player_data.refs
-    SearchGui.build_results(search_data.data, search_data.statistics, refs.result_flow, false, true)
-    SearchGui.add_loading_results(refs.result_flow)
+    SearchGui.build_results(search_data.data, search_data.statistics, player_index, false, true)
+    SearchGui.add_loading_results(player_index)
     return  -- Start next surface processing on next tick
   end
 

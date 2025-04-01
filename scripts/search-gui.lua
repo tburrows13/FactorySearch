@@ -201,11 +201,21 @@ end
 
 ---@param data table<SurfaceName, SurfaceData>
 ---@param statistics table<SurfaceName, SurfaceStatistics>
----@param frame LuaGuiElement
+---@param player_index PlayerIndex
 ---@param check_result_found? boolean Default: true
 ---@param include_surface_name? boolean Whether to show the surface name when there's only one surface in `data`
-function SearchGui.build_results(data, statistics, frame, check_result_found, include_surface_name)
+function SearchGui.build_results(data, statistics, player_index, check_result_found, include_surface_name)
+  local player_data = storage.players[player_index]
+  local frame = player_data.refs.result_flow
   if not (frame and frame.valid) then return end
+
+  local undo_redo_stacks = storage.undo_redo_stacks[player_index]
+  table.insert(undo_redo_stacks.undo, 1, {target_item = player_data.target_item, state = player_data.state, data = data, statistics = statistics})
+  if #undo_redo_stacks.undo > 20 then
+    table.remove(undo_redo_stacks.undo, -1)
+  end
+  undo_redo_stacks.redo = {}
+
 
   frame.clear()
 
@@ -339,8 +349,9 @@ function SearchGui.build_invalid_state(frame)
   })
 end
 
----@param frame LuaGuiElement
-function SearchGui.add_loading_results(frame)
+---@param player_index PlayerIndex
+function SearchGui.add_loading_results(player_index)
+  local frame = storage.players[player_index].refs.result_flow
   gui.add(frame,
     {
       type = "label",
@@ -350,9 +361,10 @@ function SearchGui.add_loading_results(frame)
   )
 end
 
+---@param frame LuaGuiElement
 function SearchGui.build_loading_results(frame)
   frame.clear()
-  SearchGui.add_loading_results(frame)
+  SearchGui.add_loading_results(frame.player_index)
 end
 
 ---@param player LuaPlayer
@@ -382,6 +394,28 @@ function SearchGui.build(player)
               ignored_by_interaction = true,
             },
             {type = "empty-widget", style = "fs_flib_titlebar_drag_handle", ignored_by_interaction = true},
+            {
+              type = "sprite-button",
+              style = "frame_action_button",
+              sprite = "utility/backward_arrow",
+              mouse_button_filter = {"left"},
+              tooltip = {"controls.back"},
+              ref = {"back_button"},
+              handler = {
+                --[defines.events.on_gui_click] = SearchGui.toggle_pin,
+              }
+            },
+            {
+              type = "sprite-button",
+              style = "frame_action_button",
+              sprite = "utility/forward_arrow",
+              mouse_button_filter = {"left"},
+              tooltip = {"controls.forward"},
+              ref = {"forward-button"},
+              handler = {
+                --[defines.events.on_gui_click] = SearchGui.toggle_pin,
+              }
+            },
             {
               type = "sprite-button",
               style = "frame_action_button",
@@ -757,7 +791,7 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
       if search_started then
         SearchGui.build_loading_results(refs.result_flow)
       else
-        SearchGui.build_results({}, {}, refs.result_flow)
+        SearchGui.build_results({}, {}, player.index)
       end
     else
       SearchGui.build_invalid_state(refs.result_flow)
