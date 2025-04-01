@@ -61,7 +61,7 @@ local function get_signal_last_tick(control_behavior, target_item)
   if target_item.quality == "any" then
     local count = 0
     for _, quality in pairs(quality_names) do
-      count = count + (control_behavior.get_signal_last_tick({name = target_item.name, quality = quality}) or nil)
+      count = count + (control_behavior.get_signal_last_tick({name = target_item.name, quality = quality}) or 0)
     end
     return count
   else
