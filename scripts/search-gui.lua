@@ -222,7 +222,7 @@ function SearchGui.build_results(data, statistics, frame, check_result_found, in
   for surface_name, surface_data in pairs(data) do
     local surface_contains_results = false
     for _, category_data in pairs(surface_data) do
-      -- TODO surface_info check here?
+      -- TODO surface_statistics check here?
       surface_contains_results = surface_contains_results or not not next(category_data)
     end
     result_found = result_found or surface_contains_results
@@ -710,6 +710,8 @@ end
 ---@return SearchGuiState
 local function generate_state(refs)
   return {
+    all_qualities = refs.all_qualities.visible and refs.all_qualities.state or false,
+    all_surfaces = refs.all_surfaces.visible and refs.all_surfaces.state or false,
     consumers = refs.include_consumers.state,
     producers = refs.include_machines.state,
     storage = refs.include_inventories.state,
@@ -727,8 +729,10 @@ end
 ---@return boolean
 local function is_valid_state(state)
   local are_any_checked = false
-  for _, checked in pairs(state) do
-    are_any_checked = are_any_checked or checked
+  for name, checked in pairs(state) do
+    if name ~= "all_qualities" and name ~= "all_surfaces" then
+      are_any_checked = are_any_checked or checked
+    end
   end
   return are_any_checked
 end
@@ -745,10 +749,10 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
     local state = generate_state(refs)
     local state_valid = is_valid_state(state)
     if state_valid then
-      if refs.all_qualities.state then
+      if state.all_qualities then
         item.quality = "any"
       end
-      search_started = Search.find_machines(item, force, state, player, not refs.all_surfaces.state, immediate)
+      search_started = Search.find_machines(item, force, state, player, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
         SearchGui.build_loading_results(refs.result_flow)

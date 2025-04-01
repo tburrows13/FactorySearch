@@ -937,10 +937,9 @@ end
 ---@param force LuaForce
 ---@param state SearchGuiState
 ---@param player LuaPlayer
----@param override_surface boolean
 ---@param immediate? boolean
 ---@return boolean
-function Search.find_machines(target_item, force, state, player, override_surface, immediate)
+function Search.find_machines(target_item, force, state, player, immediate)
   local target_name = target_item.name
   if target_name == nil then
     -- 'Unknown signal selected'
@@ -1005,7 +1004,7 @@ function Search.find_machines(target_item, force, state, player, override_surfac
   local neutral_type_list = map_to_list(neutral_entity_types)
 
   local surface_list
-  if override_surface then
+  if not state.all_surfaces then
     surface_list = {player.surface}
   else
     surface_list = filtered_surfaces()

@@ -41,6 +41,8 @@ require "scripts.remote"
 ---@field ignore_close? boolean
 
 ---@class (exact) SearchGuiState
+---@field all_qualities boolean
+---@field all_surfaces boolean
 ---@field consumers boolean
 ---@field producers boolean
 ---@field storage boolean
@@ -266,7 +268,7 @@ Control.on_init = on_init
 Control.on_configuration_changed = on_configuration_changed
 Control.events = {
   [defines.events.on_surface_created] = update_surface_count,
-  [defines.events.on_surface_deleted] = update_surface_count
+  [defines.events.on_surface_deleted] = update_surface_count,
 }
 
 event_handler.add_libraries{
