@@ -294,7 +294,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
           elseif entity_type == "arithmetic-combinator" or entity_type == "decider-combinator" or entity_type == "selector-combinator" then
             ---@cast control_behavior LuaCombinatorControlBehavior
             local signal_count = get_signal_last_tick(control_behavior, target_item)
-            if signal_count and signal_count > 0 then
+            if signal_count and signal_count ~= 0 then
               SearchResults.add_entity(entity, surface_data.signals)
               SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
             end
