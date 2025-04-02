@@ -1,9 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.13.2
+Date: 2 April 2025
+  Bugfixes:
+    - Fixed crash when searching in 'Signal' search mode if combinators are in use
+    - Fixed crash when searching for certain Py resources
+---------------------------------------------------------------------------------------------------
 Version: 1.13.1
 Date: 31 March 2025
   Bugfixes:
-    - Fixed crash when searching in Background search mode
-    - Fixed Signal and Tag search modes not filtering results correctly
+    - Fixed crash when searching in Background mode
+    - Fixed 'Signal' and 'Tag' search modes not filtering results correctly
 ---------------------------------------------------------------------------------------------------
 Version: 1.13.0
 Date: 31 March 2025
