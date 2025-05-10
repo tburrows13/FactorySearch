@@ -854,6 +854,9 @@ function on_tick()
       search_data.data[current_surface.name] = current_surface_search_data.surface_data
       search_data.statistics[current_surface.name] = current_surface_search_data.surface_statistics
       search_data.current_surface_search_data = nil
+
+      search_data.completed_chunk_count = search_data.completed_chunk_count + chunks_processed
+      SearchGui.build_loading_results(storage.players[player_index].refs.result_flow, search_data.completed_chunk_count / search_data.total_chunk_count)
       return
     end
 
@@ -941,6 +944,9 @@ function on_tick()
     end
     ::continue::
   end
+
+  search_data.completed_chunk_count = search_data.completed_chunk_count + chunks_processed
+  SearchGui.build_loading_results(storage.players[player_index].refs.result_flow, search_data.completed_chunk_count / search_data.total_chunk_count)
 end
 
 ---@param target_item SignalID
@@ -1020,6 +1026,15 @@ function Search.find_machines(target_item, force, state, player, immediate)
     surface_list = filtered_surfaces()
   end
 
+  local total_chunk_count = 0
+  for _, surface in ipairs(surface_list) do
+    for chunk in surface.get_chunks() do
+      if force.is_chunk_charted(surface, chunk) then
+        total_chunk_count = total_chunk_count + 1
+      end
+    end
+  end
+
   local non_blocking_setting = settings.global["fs-non-blocking-search"].value
   if non_blocking_setting == "on" or (non_blocking_setting == "multiplayer" and game.is_multiplayer()) then
     non_blocking_search = true
@@ -1039,6 +1054,8 @@ function Search.find_machines(target_item, force, state, player, immediate)
     statistics = {},
     not_started_surfaces = surface_list,
     search_complete = false,
+    total_chunk_count = total_chunk_count,
+    completed_chunk_count = 0
   }
   storage.current_searches[player.index] = search_data
   return true
