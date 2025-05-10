@@ -262,7 +262,8 @@ function SearchGui.build_results(data, statistics, frame, check_result_found, in
             column_count = 10,
             style = "slot_table",
             children = SearchGui.build_surface_results(surface_name, surface_data.logistics)
-          },          {
+          },
+          {
             type = "table",
             column_count = 10,
             style = "slot_table",
@@ -340,19 +341,37 @@ function SearchGui.build_invalid_state(frame)
 end
 
 ---@param frame LuaGuiElement
-function SearchGui.add_loading_results(frame)
-  gui.add(frame,
+---@param progress double | nil
+function SearchGui.add_loading_results(frame, progress)
+  local children_def = {
     {
       type = "label",
       caption = {"search-gui.searching"},
       tooltip = {"search-gui.searching-tooltip", {"", "[font=default-semibold]", {"mod-setting-name.fs-non-blocking-search"}, "[/font]"}}
     }
+  }
+  if progress ~= nil then
+    table.insert(children_def,
+      {
+        type = "progressbar",
+        value = progress,
+        tooltip = {'', math.floor(progress * 100), '%'}
+      }
+    )
+  end
+
+  gui.add(frame,
+    {
+      type = 'flow',
+      direction = 'vertical',
+      children = children_def
+    }
   )
 end
 
-function SearchGui.build_loading_results(frame)
+function SearchGui.build_loading_results(frame, progress)
   frame.clear()
-  SearchGui.add_loading_results(frame)
+  SearchGui.add_loading_results(frame, progress)
 end
 
 ---@param player LuaPlayer
@@ -755,7 +774,11 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
       search_started = Search.find_machines(item, force, state, player, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
-        SearchGui.build_loading_results(refs.result_flow)
+        if storage.current_searches[player.index].blocking then
+          SearchGui.build_loading_results(refs.result_flow, nil)
+        else
+          SearchGui.build_loading_results(refs.result_flow, 0)
+        end
       else
         SearchGui.build_results({}, {}, refs.result_flow)
       end
