@@ -61,7 +61,7 @@ local function get_signal_last_tick(control_behavior, target_item)
   if target_item.quality == "any" then
     local count = 0
     for _, quality in pairs(quality_names) do
-      count = count + (control_behavior.get_signal_last_tick({name = target_item.name, quality = quality}) or 0)
+      count = count + (control_behavior.get_signal_last_tick({name = target_item.name, type = target_item.type, quality = quality}) or 0)
     end
     return count
   else
@@ -261,7 +261,12 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
 
             if control_behavior.circuit_read_contents then
               -- TODO support "Include in crafting" and "Include fuel"
-              local signal_count = entity.get_item_count(target_item_filter)
+              local signal_count = 0
+              if target_is_item then
+                signal_count = entity.get_item_count(target_item_filter)
+              elseif target_is_fluid then
+                signal_count = entity.get_fluid_count(target_name)
+              end
               if signal_count > 0 then
                 SearchResults.add_entity(entity, surface_data.signals)
                 SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
@@ -271,7 +276,12 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
             if control_behavior.circuit_read_ingredients then
               local inventory = entity.get_inventory(defines.inventory.assembling_machine_input)
               if inventory then
-                local signal_count = get_item_count(inventory, target_item_and_quality)
+                local signal_count = 0
+                if target_is_item then
+                  signal_count = get_item_count(inventory, target_item_and_quality)
+                elseif target_is_fluid then
+                  signal_count = entity.get_fluid_count(target_name)  -- Not strictly speaking accurate since checks entire entity, not just input inventory
+                end
                 if signal_count > 0 and not added_signals[target_type..'/'..target_name] then
                   SearchResults.add_entity(entity, surface_data.signals)
                   SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
