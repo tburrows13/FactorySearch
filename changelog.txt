@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.13.3
-Date: 15 May 2025
+Date: 16 May 2025
   Bugfixes:
-    - Fixed searching for non-item signals causing crash because game couldn't find item signal
+    - Fixed crash when searching for non-items in 'Signal' search mode
 ---------------------------------------------------------------------------------------------------
 Version: 1.13.2
 Date: 2 April 2025
