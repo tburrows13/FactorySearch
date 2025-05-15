@@ -341,7 +341,7 @@ function SearchGui.build_invalid_state(frame)
 end
 
 ---@param frame LuaGuiElement
----@param progress double | nil
+---@param progress? double
 function SearchGui.add_loading_results(frame, progress)
   local children_def = {
     {
