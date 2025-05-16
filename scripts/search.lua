@@ -104,7 +104,7 @@ local fluid_storage_entities = list_to_map{ "storage-tank", "fluid-wagon" }
 local modules_entities = list_to_map{ "assembling-machine", "furnace", "rocket-silo", "mining-drill", "lab", "beacon" }
 local request_entities = list_to_map{ "logistic-container", "character", "spider-vehicle", "roboport", "space-platform-hub", "cargo-landing-pad", "item-request-proxy" }
 local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "linked-belt", "lane-splitter", "loader", "loader-1x1", "inserter", "logistic-robot", "construction-robot" }
-local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump" }
+local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump", "valve" }
 local ground_entities = list_to_map{ "item-entity" }  -- force = "neutral"
 local signal_entities = list_to_map{ "assembling-machine", "furnace", "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "selector-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall", "container", "logistic-container", "inserter", "storage-tank", "mining-drill" }
 
