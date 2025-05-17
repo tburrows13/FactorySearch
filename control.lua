@@ -32,6 +32,8 @@ require "scripts.remote"
 ---@field include_requesters LuaGuiElement checkbox
 ---@field include_signals LuaGuiElement checkbox
 ---@field include_map_tags LuaGuiElement checkbox
+---@field searching_label LuaGuiElement label
+---@field search_progressbar LuaGuiElement progressbar
 ---@field result_flow LuaGuiElement flow
 ---@field highlighted_button? LuaGuiElement sprite-button
 

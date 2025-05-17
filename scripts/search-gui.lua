@@ -340,38 +340,29 @@ function SearchGui.build_invalid_state(frame)
   })
 end
 
----@param frame LuaGuiElement
+---@param refs SearchGuiRefs
 ---@param progress? double
-function SearchGui.add_loading_results(frame, progress)
-  local children_def = {
-    {
-      type = "label",
-      caption = {"search-gui.searching"},
-      tooltip = {"search-gui.searching-tooltip", {"", "[font=default-semibold]", {"mod-setting-name.fs-non-blocking-search"}, "[/font]"}}
-    }
-  }
+function SearchGui.show_search_progress(refs, progress)
+  refs.searching_label.visible = true
+  refs.search_progressbar.visible = progress ~= nil
+  
   if progress ~= nil then
-    table.insert(children_def,
-      {
-        type = "progressbar",
-        value = progress,
-        tooltip = {'', math.floor(progress * 100), '%'}
-      }
-    )
+    refs.search_progressbar.value = progress
+    refs.search_progressbar.tooltip = {'', math.floor(progress * 100), '%'}
   end
-
-  gui.add(frame,
-    {
-      type = 'flow',
-      direction = 'vertical',
-      children = children_def
-    }
-  )
 end
 
-function SearchGui.build_loading_results(frame, progress)
-  frame.clear()
-  SearchGui.add_loading_results(frame, progress)
+---@param refs SearchGuiRefs
+function SearchGui.hide_search_progress(refs)
+  refs.searching_label.visible = false
+  refs.search_progressbar.visible = false
+end
+
+---@param refs SearchGuiRefs
+---@param progress? double
+function SearchGui.build_loading_results(refs, progress)
+  refs.result_flow.clear()
+  SearchGui.show_search_progress(refs, progress)
 end
 
 ---@param player LuaPlayer
@@ -603,12 +594,37 @@ function SearchGui.build(player)
                   children = {
                     {
                       type = "flow",
-                      ref = {"result_flow"},
                       direction = "vertical",
                       children = {
                         {
-                          type = "label",
-                          caption = {"search-gui.explanation"},
+                          type = "flow",
+                          direction = "vertical",
+                          children = {
+                            {
+                              type = "label",
+                              ref = { "searching_label" },
+                              visible = false,
+                              caption = {"search-gui.searching"},
+                              tooltip = {"search-gui.searching-tooltip", {"", "[font=default-semibold]", {"mod-setting-name.fs-non-blocking-search"}, "[/font]"}}
+                            },
+                            {
+                              type = "progressbar",
+                              ref = { "search_progressbar" },
+                              visible = false,
+                              value = 0
+                            }
+                          }
+                        },
+                        {
+                          type = "flow",
+                          ref = {"result_flow"},
+                          direction = "vertical",
+                          children = {
+                            {
+                              type = "label",
+                              caption = {"search-gui.explanation"},
+                            }
+                          }
                         }
                       }
                     }
@@ -775,9 +791,9 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
         if storage.current_searches[player.index].blocking then
-          SearchGui.build_loading_results(refs.result_flow, nil)
+          SearchGui.build_loading_results(refs, nil)
         else
-          SearchGui.build_loading_results(refs.result_flow, 0)
+          SearchGui.build_loading_results(refs, 0)
         end
       else
         SearchGui.build_results({}, {}, refs.result_flow)

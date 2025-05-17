@@ -780,6 +780,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
   local player_data = storage.players[player.index]
   local refs = player_data.refs
   SearchGui.build_results(data, statistics, refs.result_flow)
+  SearchGui.hide_search_progress(refs)
   storage.current_searches[player.index] = nil
 end
 
@@ -800,6 +801,7 @@ function on_tick()
     local player_data = storage.players[player_index]
     local refs = player_data.refs
     SearchGui.build_results(search_data.data, search_data.statistics, refs.result_flow)
+    SearchGui.hide_search_progress(refs)
     storage.current_searches[player_index] = nil
   end
 
@@ -832,7 +834,6 @@ function on_tick()
     local player_data = storage.players[player_index]
     local refs = player_data.refs
     SearchGui.build_results(search_data.data, search_data.statistics, refs.result_flow, false, true)
-    SearchGui.add_loading_results(refs.result_flow)
     return  -- Start next surface processing on next tick
   end
 
@@ -856,7 +857,7 @@ function on_tick()
       search_data.current_surface_search_data = nil
 
       search_data.completed_chunk_count = search_data.completed_chunk_count + chunks_processed
-      SearchGui.build_loading_results(storage.players[player_index].refs.result_flow, search_data.completed_chunk_count / search_data.total_chunk_count)
+      SearchGui.show_search_progress(storage.players[player_index].refs, search_data.completed_chunk_count / search_data.total_chunk_count)
       return
     end
 
@@ -946,7 +947,7 @@ function on_tick()
   end
 
   search_data.completed_chunk_count = search_data.completed_chunk_count + chunks_processed
-  SearchGui.build_loading_results(storage.players[player_index].refs.result_flow, search_data.completed_chunk_count / search_data.total_chunk_count)
+  SearchGui.show_search_progress(storage.players[player_index].refs, search_data.completed_chunk_count / search_data.total_chunk_count)
 end
 
 ---@param target_item SignalID
@@ -1027,17 +1028,17 @@ function Search.find_machines(target_item, force, state, player, immediate)
   end
 
   local total_chunk_count = 0
-  for _, surface in ipairs(surface_list) do
-    for chunk in surface.get_chunks() do
-      if force.is_chunk_charted(surface, chunk) then
-        total_chunk_count = total_chunk_count + 1
-      end
-    end
-  end
-
   local non_blocking_setting = settings.global["fs-non-blocking-search"].value
   if non_blocking_setting == "on" or (non_blocking_setting == "multiplayer" and game.is_multiplayer()) then
     non_blocking_search = true
+
+    for _, surface in ipairs(surface_list) do
+      for chunk in surface.get_chunks() do
+        if force.is_chunk_charted(surface, chunk) then
+          total_chunk_count = total_chunk_count + 1
+        end
+      end
+    end
   else
     non_blocking_search = false
   end
