@@ -19,78 +19,77 @@ end
 ---@return GuiElemDef[]
 function SearchGui.build_surface_results(surface_name, surface_data)
   local gui_elements = {}
-  for entity_name, entity_surface_data in pairs(surface_data) do
-    for _, group in pairs(entity_surface_data) do
-      local distance_info = {""}
-      if group.distance then
-        distance_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.distance-tooltip"}, ":[/color][/font] ", util.format_number(math.ceil(group.distance), true), "m"}
-      end
-      local extra_info = {""}
-      if group.recipe_list then
-        extra_info = {""}
-        local multiple_recipes = false
-        local number_of_recipes = 0
-        for _ in pairs(group.recipe_list) do number_of_recipes = number_of_recipes + 1 end
-
-        if number_of_recipes > 1 then
-          multiple_recipes = true
-        end
-        if number_of_recipes <= 10 then
-          -- Localised strings must not have more than 20 parameters
-          for name, recipe_info in pairs(group.recipe_list) do
-            local string = "\n"
-            if multiple_recipes then
-              string = string .. "[font=default-bold]" .. recipe_info.count .. " × [/font]"
-            end
-            string = string .. "[recipe=" .. name .. "] "
-            table.insert(extra_info, string)
-            table.insert(extra_info, recipe_info.localised_name)
-          end
-        end
-      end
-      if group.item_count then
-        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-item-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.item_count), true)}
-      end
-      if group.fluid_count then
-        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-fluid-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.fluid_count), true)}
-      end
-      if group.module_count then
-        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.module-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.module_count), true)}
-      end
-      if group.request_count then
-        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.request-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.request_count), true)}
-      end
-      if group.signal_count then
-        extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
-      end
-      local sprite = "entity/" .. entity_name
-      if not helpers.is_valid_sprite_path(sprite) then
-        sprite = "item/" .. entity_name
-        if not helpers.is_valid_sprite_path(sprite) then
-          sprite = "fluid/" .. entity_name
-          if not helpers.is_valid_sprite_path(sprite) then
-            sprite = "recipe/" .. entity_name
-            if not helpers.is_valid_sprite_path(sprite) then
-              sprite = "virtual-signal/" .. entity_name
-              if not helpers.is_valid_sprite_path(sprite) then
-                sprite = "utility/questionmark"
-              end
-            end
-          end
-        end
-      end
-      table.insert(gui_elements,
-        {
-          type = "sprite-button",
-          sprite = sprite,
-          tooltip = {"", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"}},
-          style = "slot_button",
-          number = group.resource_count or group.count,
-          tags = {position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes},
-          handler = {[defines.events.on_gui_click] = SearchGui.open_location_on_map}
-        }
-      )
+  for _, group in pairs(surface_data) do
+    local entity_name = group.entity_name
+    local distance_info = {""}
+    if group.distance then
+      distance_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.distance-tooltip"}, ":[/color][/font] ", util.format_number(math.ceil(group.distance), true), "m"}
     end
+    local extra_info = {""}
+    if group.recipe_list then
+      extra_info = {""}
+      local multiple_recipes = false
+      local number_of_recipes = 0
+      for _ in pairs(group.recipe_list) do number_of_recipes = number_of_recipes + 1 end
+
+      if number_of_recipes > 1 then
+        multiple_recipes = true
+      end
+      if number_of_recipes <= 10 then
+        -- Localised strings must not have more than 20 parameters
+        for name, recipe_info in pairs(group.recipe_list) do
+          local string = "\n"
+          if multiple_recipes then
+            string = string .. "[font=default-bold]" .. recipe_info.count .. " × [/font]"
+          end
+          string = string .. "[recipe=" .. name .. "] "
+          table.insert(extra_info, string)
+          table.insert(extra_info, recipe_info.localised_name)
+        end
+      end
+    end
+    if group.item_count then
+      extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-item-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.item_count), true)}
+    end
+    if group.fluid_count then
+      extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"gui-train.add-fluid-count-condition"}, ":[/color][/font] ", util.format_number(math.floor(group.fluid_count), true)}
+    end
+    if group.module_count then
+      extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.module-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.module_count), true)}
+    end
+    if group.request_count then
+      extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.request-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.request_count), true)}
+    end
+    if group.signal_count then
+      extra_info = {"", "\n[font=default-semibold][color=255, 230, 192]", {"search-gui.signal-count-tooltip"}, ":[/color][/font] ", util.format_number(math.floor(group.signal_count), true)}
+    end
+    local sprite = "entity/" .. entity_name
+    if not helpers.is_valid_sprite_path(sprite) then
+      sprite = "item/" .. entity_name
+      if not helpers.is_valid_sprite_path(sprite) then
+        sprite = "fluid/" .. entity_name
+        if not helpers.is_valid_sprite_path(sprite) then
+          sprite = "recipe/" .. entity_name
+          if not helpers.is_valid_sprite_path(sprite) then
+            sprite = "virtual-signal/" .. entity_name
+            if not helpers.is_valid_sprite_path(sprite) then
+              sprite = "utility/questionmark"
+            end
+          end
+        end
+      end
+    end
+    table.insert(gui_elements,
+      {
+        type = "sprite-button",
+        sprite = sprite,
+        tooltip = {"", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"}},
+        style = "slot_button",
+        number = group.resource_count or group.count,
+        tags = {position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes},
+        handler = {[defines.events.on_gui_click] = SearchGui.open_location_on_map}
+      }
+    )
   end
   return gui_elements
 end
@@ -223,14 +222,13 @@ function SearchGui.build_results(data, statistics, frame, check_result_found, in
     local surface_contains_results = false
     for _, category_data in pairs(surface_data) do
       -- TODO surface_statistics check here?
-      surface_contains_results = surface_contains_results or not not next(category_data)
+      surface_contains_results = surface_contains_results or table_size(category_data) > 0
     end
     result_found = result_found or surface_contains_results
     if not surface_contains_results then
       goto continue
     end
 
-    -- TODO sort somewhere before showing storage, modules, requesters, ...
     gui.add(frame, {
       SearchGui.build_surface_name(include_surface_name, surface_name),
       SearchGui.build_surface_count(statistics[surface_name], include_surface_name),
