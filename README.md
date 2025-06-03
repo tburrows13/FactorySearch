@@ -12,8 +12,6 @@ If so, then Factory Search might be the mod for you!
 
 Similar to [BeastFinder](https://mods.factorio.com/mod/BeastFinder) and [Where is it Made?](https://mods.factorio.com/mod/WhereIsItMade). This mod was made to provide an easy-to-use and clean-looking interface that can perform cross-surface searches and immediate viewing of search results in the map view (and across planets with Space Exploration).
 
-Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas).
-
 -----
 ## Doesn't 2.0 have built-in search?
 
@@ -35,17 +33,17 @@ Factorio 2.0 has some brilliant built-in search functionality ([Product, Tag, an
     - Signal: Search for entities that are sending this signal
     - Tag: Search for tags on the map that have this icon
 - Factory Search will present a list of machines matching the selected search modes, grouped by name and proximity
-- Displays results from all surfaces (e.g. all Space Exploration planets are searched)
-- Click on a result group to open it in the map
-- Opens results from other planets in the Navigation Satellite if using Space Exploration
-- `Control + Shift + Click` on any game object (e.g. built entity, inventory item, recipe) to open the search interface with that item selected
+- Displays results from all planets/surfaces, so works well with Space Age and Space Exploration
+- Click on a result group to open it in remote view
+- `Alt + Shift + Click` on any game object (e.g. built entity, inventory item, recipe) to open the search interface with that item selected
 - Supports multiplayer and compatible with any mod. No UPS impact when not in use, but searching may freeze the game for a couple of seconds on larger maps
     - Background search can be enabled to search in the background instead of freezing the game (enabled by default in multiplayer)
+
+Check out Xterminator's mod spotlight [here](https://youtu.be/_60XPAT3uas) (though this version is from 1.1 and quite old).
 
 -----
 ## Future Updates?
 
-- Better categorisation of search modes
 - More streamlined item selection workflow
 - Integration with [Recipe Book](https://mods.factorio.com/mod/RecipeBook) and [Quick Item Search](https://mods.factorio.com/mod/QuickItemSearch)
 - Better support for PvP so that corpses and ground items aren't shown in hidden chunks
@@ -54,11 +52,12 @@ Factorio 2.0 has some brilliant built-in search functionality ([Product, Tag, an
 -----
 ## Translation
 
-You can help by translating this mod into your language using [CrowdIn](https://crowdin.com/project/factorio-mods-localization). Any translations made will be included in the next release.
+You can help by translating this mod into your language using [CrowdIn](https://crowdin.com/project/factorio-mods-localization). Any translations made will automatically be included in the next release.
 
 -----
 Thank you to:
 
 - [raiguard](https://mods.factorio.com/user/raiguard) for [flib](https://mods.factorio.com/mod/flib) (GUI library), [Quick Item Search](https://mods.factorio.com/mod/QuickItemSearch) (provided initial framework), and [Better Alert Arrows](https://mods.factorio.com/mod/BetterAlertArrows) (arrow sprite)
+- [Atria](https://mods.factorio.com/user/Atria) for [various contributions](https://github.com/tburrows13/FactorySearch/issues?q=is%3Apr%20author%3AAtria1234)
 - [justarandomgeek](https://mods.factorio.com/user/justarandomgeek) for the excellent [mod debugger](https://github.com/justarandomgeek/vscode-factoriomod-debug)
 - [Earendel](https://mods.factorio.com/user/Earendel) for the character corpse icon
