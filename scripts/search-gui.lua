@@ -262,7 +262,8 @@ function SearchGui.build_results(data, statistics, frame, check_result_found, in
             column_count = 10,
             style = "slot_table",
             children = SearchGui.build_surface_results(surface_name, surface_data.logistics)
-          },          {
+          },
+          {
             type = "table",
             column_count = 10,
             style = "slot_table",
@@ -339,20 +340,29 @@ function SearchGui.build_invalid_state(frame)
   })
 end
 
----@param frame LuaGuiElement
-function SearchGui.add_loading_results(frame)
-  gui.add(frame,
-    {
-      type = "label",
-      caption = {"search-gui.searching"},
-      tooltip = {"search-gui.searching-tooltip", {"", "[font=default-semibold]", {"mod-setting-name.fs-non-blocking-search"}, "[/font]"}}
-    }
-  )
+---@param refs SearchGuiRefs
+---@param progress? double
+function SearchGui.show_search_progress(refs, progress)
+  refs.searching_label.visible = true
+  refs.search_progressbar.visible = progress ~= nil
+  
+  if progress ~= nil then
+    refs.search_progressbar.value = progress
+    refs.search_progressbar.tooltip = {'', math.floor(progress * 100), '%'}
+  end
 end
 
-function SearchGui.build_loading_results(frame)
-  frame.clear()
-  SearchGui.add_loading_results(frame)
+---@param refs SearchGuiRefs
+function SearchGui.hide_search_progress(refs)
+  refs.searching_label.visible = false
+  refs.search_progressbar.visible = false
+end
+
+---@param refs SearchGuiRefs
+---@param progress? double
+function SearchGui.build_loading_results(refs, progress)
+  refs.result_flow.clear()
+  SearchGui.show_search_progress(refs, progress)
 end
 
 ---@param player LuaPlayer
@@ -584,12 +594,37 @@ function SearchGui.build(player)
                   children = {
                     {
                       type = "flow",
-                      ref = {"result_flow"},
                       direction = "vertical",
                       children = {
                         {
-                          type = "label",
-                          caption = {"search-gui.explanation"},
+                          type = "flow",
+                          direction = "vertical",
+                          children = {
+                            {
+                              type = "label",
+                              ref = { "searching_label" },
+                              visible = false,
+                              caption = {"search-gui.searching"},
+                              tooltip = {"search-gui.searching-tooltip", {"", "[font=default-semibold]", {"mod-setting-name.fs-non-blocking-search"}, "[/font]"}}
+                            },
+                            {
+                              type = "progressbar",
+                              ref = { "search_progressbar" },
+                              visible = false,
+                              value = 0
+                            }
+                          }
+                        },
+                        {
+                          type = "flow",
+                          ref = {"result_flow"},
+                          direction = "vertical",
+                          children = {
+                            {
+                              type = "label",
+                              caption = {"search-gui.explanation"},
+                            }
+                          }
                         }
                       }
                     }
@@ -755,7 +790,11 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
       search_started = Search.find_machines(item, force, state, player, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
-        SearchGui.build_loading_results(refs.result_flow)
+        if storage.current_searches[player.index].blocking then
+          SearchGui.build_loading_results(refs, nil)
+        else
+          SearchGui.build_loading_results(refs, 0)
+        end
       else
         SearchGui.build_results({}, {}, refs.result_flow)
       end

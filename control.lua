@@ -32,6 +32,8 @@ require "scripts.remote"
 ---@field include_requesters LuaGuiElement checkbox
 ---@field include_signals LuaGuiElement checkbox
 ---@field include_map_tags LuaGuiElement checkbox
+---@field searching_label LuaGuiElement label
+---@field search_progressbar LuaGuiElement progressbar
 ---@field result_flow LuaGuiElement flow
 ---@field highlighted_button? LuaGuiElement sprite-button
 
@@ -74,6 +76,8 @@ require "scripts.remote"
 ---@field not_started_surfaces LuaSurface[]
 ---@field search_complete boolean
 ---@field current_surface_search_data? CurrentSurfaceSearchData Used for non-blocking searches
+---@field total_chunk_count number
+---@field completed_chunk_count number
 
 ---@class (exact) EntityGroup
 ---@field count number
