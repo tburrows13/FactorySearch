@@ -11,10 +11,9 @@ function SearchResults.add_entity(entity, surface_data)
   local entity_name = entity.name
   local entity_position = entity.position
   local entity_selection_box = entity.selection_box
-  local entity_surface_data = surface_data[entity_name] or {}
   ---@type EntityGroup?
   local assigned_group
-  for _, group in pairs(entity_surface_data) do
+  for _, group in pairs(surface_data) do
     if entity_name == group.entity_name and math2d.bounding_box.collides_with(entity_selection_box, group.selection_box) then
       -- Add entity to group
       assigned_group = group
@@ -58,9 +57,8 @@ function SearchResults.add_entity(entity, surface_data)
       selection_boxes = {[1] = entity.selection_box},
       localised_name = entity.localised_name,
     }
-    table.insert(entity_surface_data, assigned_group)
+    table.insert(surface_data, assigned_group)
   end
-  surface_data[entity_name] = entity_surface_data
   return assigned_group
 end
 
@@ -143,10 +141,6 @@ end
 ---@param tag LuaCustomChartTag
 ---@param surface_data CategorisedSurfaceData
 function SearchResults.add_tag(tag, surface_data)
-  -- An alternative to add_entity*, for map tags
-  local icon_name = tag.icon.name  ---@cast icon_name -?
-  local tag_surface_data = surface_data[icon_name] or {}
-
   -- Tag groups always have size 1
   local tag_position = tag.position
   local tag_box_size = 8
@@ -174,9 +168,7 @@ function SearchResults.add_tag(tag, surface_data)
     },
     localised_name = localised_name,
   }
-  table.insert(tag_surface_data, group)
-
-  surface_data[icon_name] = tag_surface_data
+  table.insert(surface_data, group)
 end
 
 ---@param category SurfaceStatisticsCategoryName
