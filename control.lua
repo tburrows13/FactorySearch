@@ -95,10 +95,8 @@ require "scripts.remote"
 ---@field resource_count? number
 ---@field distance? number
 
----@alias CategorisedSurfaceData EntityGroup[]
-
 ---@alias SurfaceDataCategoryName "consumers"|"producers"|"storage"|"logistics"|"modules"|"requesters"|"ground_items"|"entities"|"signals"|"map_tags"
----@alias SurfaceData table<SurfaceDataCategoryName, CategorisedSurfaceData>
+---@alias SurfaceData table<SurfaceDataCategoryName, EntityGroup[]>
 
 ---@alias SurfaceStatisticsCategoryName "consumers_count"|"producers_count"|"item_count"|"fluid_count"|"module_count"|"entity_count"|"resource_count"|"ground_count"|"request_count"|"signal_count"|"tag_count"
 ---@alias SurfaceStatistics table <SurfaceStatisticsCategoryName, number>

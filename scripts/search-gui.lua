@@ -15,11 +15,11 @@ local function get_signal_name(signal)
 end
 
 ---@param surface_name string
----@param surface_data CategorisedSurfaceData
+---@param entity_groups EntityGroup[]
 ---@return GuiElemDef[]
-function SearchGui.build_surface_results(surface_name, surface_data)
+function SearchGui.build_surface_category_results(surface_name, entity_groups)
   local gui_elements = {}
-  for _, group in pairs(surface_data) do
+  for _, group in pairs(entity_groups) do
     local entity_name = group.entity_name
     local distance_info = {""}
     if group.distance then
@@ -241,61 +241,61 @@ function SearchGui.build_results(data, statistics, frame, check_result_found, in
             type = "table",
             column_count = 10,
             style = "slot_table",  --       padding = 0, TODO 2.0
-            children = SearchGui.build_surface_results(surface_name, surface_data.consumers)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.consumers)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.producers)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.producers)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.storage)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.storage)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.logistics)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.logistics)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.modules)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.modules)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.entities)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.entities)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.ground_items)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.ground_items)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.requesters)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.requesters)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.signals)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.signals)
           },
           {
             type = "table",
             column_count = 10,
             style = "slot_table",
-            children = SearchGui.build_surface_results(surface_name, surface_data.map_tags)
+            children = SearchGui.build_surface_category_results(surface_name, surface_data.map_tags)
           },
         }
       }
