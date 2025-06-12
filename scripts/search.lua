@@ -114,14 +114,13 @@ local function add_entity_type(type_list, to_add_list)
   end
 end
 
+---@param surface_data SurfaceData
+---@param player_position MapPosition
 local function generate_distance_data(surface_data, player_position)
   local distance = math2d.position.distance
-  for _, entity_groups in pairs(surface_data) do
-    for _, groups in pairs(entity_groups) do
-      for _, group in pairs(groups) do
-        group.distance = distance(group.avg_position, player_position)
-      end
-      table.sort(groups, function (k1, k2) return k1.distance < k2.distance end)
+  for _, groups in pairs(surface_data) do
+    for _, group in pairs(groups) do
+      group.distance = distance(group.avg_position, player_position)
     end
   end
 end
@@ -693,6 +692,41 @@ local function get_target_entity_names(target_item)
   end
 end
 
+--- @type table<SurfaceDataCategoryName, string[]>
+local sort_categories_by = {
+  consumers = {'count'},
+  producers = {'count'},
+  storage = {'item_count', 'fluid_count'},
+  logistics = {'item_count', 'fluid_count'},
+  modules = {'module_count'},
+  requesters = {'request_count'},
+  ground_items = {'count'},
+  entities = {'resource_count', 'count'},
+  signals = {'count'}
+}
+
+---@param surface_data SurfaceData
+---@param player LuaPlayer
+local function sort_surface_data(surface_data, player)
+  for category, groups in pairs(surface_data) do
+    local sort_by = player.mod_settings["fs-sort-results-by"].value
+    if sort_by == 'distance' then
+      table.sort(groups, function (k1, k2) return (k1.distance or math.huge) < (k2.distance or math.huge) end)
+    elseif sort_by == 'name' then
+      table.sort(groups, function (k1, k2) return k1.entity_name < k2.entity_name end)
+    elseif sort_by == 'count' and sort_categories_by[category] then
+      table.sort(groups, function (k1, k2)
+        for _, property_name in ipairs(sort_categories_by[category]) do
+          if k1[property_name] ~= nil and k2[property_name] ~= nil then
+            return k1[property_name] > k2[property_name]
+          end
+        end
+        return false
+      end)
+    end
+  end
+end
+
 ---@param force LuaForce
 ---@param state SearchGuiState
 ---@param target_item SignalID
@@ -772,6 +806,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     if surface == player.surface then
       generate_distance_data(surface_data, player.position)
     end
+    sort_surface_data(surface_data, player)
     data[surface.name] = surface_data
     statistics[surface.name] = surface_statistics
     ::continue::
@@ -811,11 +846,6 @@ function on_tick()
     next_surface = table.remove(search_data.not_started_surfaces)
     if not next_surface then
       -- All surfaces are complete
-      local player = search_data.player
-      local surface_data = search_data.data[player.surface.name]
-      if surface_data then
-        generate_distance_data(surface_data, player.position)
-      end
       search_data.search_complete = true
       return
     end
@@ -852,6 +882,11 @@ function on_tick()
     local chunk = chunk_iterator()
     if not chunk then
       -- Surface is complete
+      if current_surface_search_data.surface == search_data.player.surface then
+        generate_distance_data(current_surface_search_data.surface_data, search_data.player.position)
+      end
+      sort_surface_data(current_surface_search_data.surface_data, search_data.player)
+
       search_data.data[current_surface.name] = current_surface_search_data.surface_data
       search_data.statistics[current_surface.name] = current_surface_search_data.surface_statistics
       search_data.current_surface_search_data = nil
