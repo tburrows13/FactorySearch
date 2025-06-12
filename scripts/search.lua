@@ -819,7 +819,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
   storage.current_searches[player.index] = nil
 end
 
-function on_tick()
+function Search.on_tick()
   local player_index, search_data = next(storage.current_searches)
   if not player_index or not search_data then return end
 
@@ -1079,7 +1079,7 @@ function Search.find_machines(target_item, force, state, player, immediate)
   end
   search_data = {
     blocking = not non_blocking_search,
-    tick_triggered = game.tick - (immediate and DEBOUNCE_TICKS or 0),
+    tick_triggered = immediate and -10000 or game.tick,
     force = force,
     state = state,
     target_item = target_item,
@@ -1098,7 +1098,7 @@ function Search.find_machines(target_item, force, state, player, immediate)
 end
 
 Search.events = {
-  [defines.events.on_tick] = on_tick,
+  [defines.events.on_tick] = Search.on_tick,
 }
 
 return Search

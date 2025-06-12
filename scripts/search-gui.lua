@@ -343,7 +343,7 @@ end
 function SearchGui.show_search_progress(refs, progress)
   refs.searching_label.visible = true
   refs.search_progressbar.visible = progress ~= nil
-  
+
   if progress ~= nil then
     refs.search_progressbar.value = progress
     refs.search_progressbar.tooltip = {'', math.floor(progress * 100), '%'}
@@ -758,6 +758,23 @@ local function generate_state(refs)
   }
 end
 
+---@param refs SearchGuiRefs
+---@param state SearchGuiState
+function SearchGui.set_state(refs, state)
+  refs.all_qualities.state = state.all_qualities or refs.all_qualities.state
+  refs.all_surfaces.state = state.all_surfaces or refs.all_surfaces.state
+  refs.include_consumers.state = state.consumers or refs.include_consumers.state
+  refs.include_machines.state = state.producers or refs.include_machines.state
+  refs.include_inventories.state = state.storage or refs.include_inventories.state
+  refs.include_logistics.state = state.logistics or refs.include_logistics.state
+  refs.include_modules.state = state.modules or refs.include_modules.state
+  refs.include_requesters.state = state.requesters or refs.include_requesters.state
+  refs.include_ground_items.state = state.ground_items or refs.include_ground_items.state
+  refs.include_entities.state = state.entities or refs.include_entities.state
+  refs.include_signals.state = state.signals or refs.include_signals.state
+  refs.include_map_tags.state = state.map_tags or refs.include_map_tags.state
+end
+
 ---@param state SearchGuiState
 ---@return boolean
 local function is_valid_state(state)
@@ -796,6 +813,7 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
       else
         SearchGui.build_results({}, {}, refs.result_flow)
       end
+      if immediate then Search.on_tick() end
     else
       SearchGui.build_invalid_state(refs.result_flow)
       storage.current_searches[player.index] = nil
