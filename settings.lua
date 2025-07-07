@@ -41,12 +41,4 @@ data:extend{
     maximum_value = 1000,
     order = "bb"
   },
-  {
-    type = "string-setting",
-    name = "fs-sort-results-by",
-    setting_type = "runtime-per-user",
-    default_value = "name",
-    allowed_values = {"name", "distance", "count"},
-    order = "bc"
-  },
 }

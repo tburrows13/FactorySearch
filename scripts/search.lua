@@ -694,27 +694,28 @@ end
 
 --- @type table<SurfaceDataCategoryName, string[]>
 local sort_categories_by = {
-  consumers = {'count'},
-  producers = {'count'},
-  storage = {'item_count', 'fluid_count'},
-  logistics = {'item_count', 'fluid_count'},
-  modules = {'module_count'},
-  requesters = {'request_count'},
-  ground_items = {'count'},
-  entities = {'resource_count', 'count'},
-  signals = {'count'}
+  consumers = {"count"},
+  producers = {"count"},
+  storage = {"item_count", "fluid_count"},
+  logistics = {"item_count", "fluid_count"},
+  modules = {"module_count"},
+  requesters = {"request_count"},
+  ground_items = {"count"},
+  entities = {"resource_count", "count"},
+  signals = {"count"}
 }
 
 ---@param surface_data SurfaceData
 ---@param player LuaPlayer
 local function sort_surface_data(surface_data, player)
   for category, groups in pairs(surface_data) do
-    local sort_by = player.mod_settings["fs-sort-results-by"].value
-    if sort_by == 'distance' then
+    local player_data = storage.players[player.index]
+    local sort_by = player_data.sort_results_by
+    if sort_by == "distance" then
       table.sort(groups, function (k1, k2) return (k1.distance or math.huge) < (k2.distance or math.huge) end)
-    elseif sort_by == 'name' then
+    elseif sort_by == "name" then
       table.sort(groups, function (k1, k2) return k1.entity_name < k2.entity_name end)
-    elseif sort_by == 'count' and sort_categories_by[category] then
+    elseif sort_by == "count" and sort_categories_by[category] then
       table.sort(groups, function (k1, k2)
         for _, property_name in ipairs(sort_categories_by[category]) do
           if k1[property_name] ~= nil and k2[property_name] ~= nil then
@@ -816,6 +817,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
   local refs = player_data.refs
   SearchGui.build_results(data, statistics, refs.result_flow)
   SearchGui.hide_search_progress(refs)
+  refs.sort_results_dropdown.enabled = true
   storage.current_searches[player.index] = nil
 end
 
@@ -837,6 +839,7 @@ function on_tick()
     local refs = player_data.refs
     SearchGui.build_results(search_data.data, search_data.statistics, refs.result_flow)
     SearchGui.hide_search_progress(refs)
+    refs.sort_results_dropdown.enabled = true
     storage.current_searches[player_index] = nil
   end
 

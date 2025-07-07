@@ -439,12 +439,25 @@ function SearchGui.build(player)
                       style_mods = {horizontally_stretchable = true, horizontally_squashable = true}
                     },
                     {
+                      type = "label",
+                      caption = {"", {"gui-explore-mods.sort-by"}, ":"},
+                      style_mods = {right_padding = -8}
+                    },
+                    {
+                      type = "drop-down",
+                      items = {{"description.name"}, {"search-gui.distance"}, {"gui-logistic.count"}},
+                      selected_index = 1,
+                      mouse_button_filter = {"left"},
+                      ref = {"sort_results_dropdown"},
+                      handler = {[defines.events.on_gui_selection_state_changed] = SearchGui.sort_results_dropdown_changed},
+                    },
+                    {
                       type = "sprite-button",
                       style = "tool_button",
                       sprite = "utility/refresh",
                       tooltip = {"gui.refresh"},
                       mouse_button_filter = {"left"},
-                      handler = {[defines.events.on_gui_click] = SearchGui.start_search_immediate,},
+                      handler = {[defines.events.on_gui_click] = SearchGui.start_search_immediate},
                     },
                   }
                 }
@@ -637,7 +650,7 @@ function SearchGui.build(player)
   })
   ---@cast refs SearchGuiRefs
   refs.frame.force_auto_center()
-  local player_data = {refs = refs}
+  local player_data = {refs = refs, sort_results_by = "name"}
   storage.players[player.index] = player_data
   return player_data
 end
@@ -785,6 +798,7 @@ function SearchGui.start_search(player, player_data, _, _, immediate)
       if state.all_qualities then
         item.quality = "any"
       end
+      refs.sort_results_dropdown.enabled = false
       search_started = Search.find_machines(item, force, state, player, immediate)
       refs.subheader_title.caption = get_signal_name(item) or ""
       if search_started then
@@ -812,6 +826,14 @@ end
 ---@param player_data PlayerData
 function SearchGui.start_search_immediate(player, player_data)
   SearchGui.start_search(player, player_data, nil, nil, true)
+end
+
+---@param player LuaPlayer
+---@param player_data PlayerData
+function SearchGui.sort_results_dropdown_changed(player, player_data)
+  local dropdown = player_data.refs.sort_results_dropdown
+  local sort_results_by_options = {"count", "distance", "name"}
+  player_data.sort_results_by = sort_results_by_options[dropdown.selected_index]
 end
 
 gui.add_handlers(SearchGui,

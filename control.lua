@@ -19,6 +19,7 @@ require "scripts.remote"
 ---@field pin_button LuaGuiElement sprite-button
 ---@field close_button LuaGuiElement sprite-button
 ---@field subheader_title LuaGuiElement label
+---@field sort_results_dropdown LuaGuiElement drop-down
 ---@field all_surfaces LuaGuiElement checkbox
 ---@field all_qualities LuaGuiElement checkbox
 ---@field item_select LuaGuiElement choose-elem-button
@@ -41,6 +42,7 @@ require "scripts.remote"
 ---@field refs SearchGuiRefs
 ---@field pinned? boolean
 ---@field ignore_close? boolean
+---@field sort_results_by "name"|"distance"|"count"
 
 ---@class (exact) SearchGuiState
 ---@field all_qualities boolean
