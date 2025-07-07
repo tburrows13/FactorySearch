@@ -86,7 +86,7 @@ function SearchGui.build_surface_category_results(surface_name, entity_groups)
         tooltip = {"", "[font=default-bold]", group.localised_name, "[/font]", distance_info, extra_info, "\n", {"search-gui.result-tooltip"}},
         style = "slot_button",
         number = group.resource_count or group.count,
-        tags = {position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes},
+        tags = {position = group.avg_position, surface = surface_name, selection_boxes = group.selection_boxes, group_selection_box = group.selection_box},
         handler = {[defines.events.on_gui_click] = SearchGui.open_location_on_map}
       }
     )

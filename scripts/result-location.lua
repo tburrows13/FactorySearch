@@ -77,22 +77,31 @@ function ResultLocation.draw_markers(player, surface, selection_boxes)
         players = {player},
       }
     end
-    --[[game.get_surface(surface).create_entity{
-      name = "highlight-box",
-      position = {0, 0},  -- Ignored by game
-      bounding_box = selection_box,
-      box_type = "copy",  -- Green
-      render_player_index = player.index,
-      time_to_live = 600,
-
-    }]]
   end
 end
 
 ---@param player LuaPlayer
 ---@param surface SurfaceName
+---@param selection_box BoundingBox
+function ResultLocation.draw_chart_marker(player, surface, selection_box)
+  local time_to_live = player.mod_settings["fs-highlight-duration"].value * 60
+  rendering.draw_rectangle{
+    color = LINE_COLOR,
+    width = LINE_WIDTH * 16,
+    filled = false,
+    left_top = selection_box.left_top,
+    right_bottom = selection_box.right_bottom,
+    surface = surface,
+    time_to_live = time_to_live,
+    players = {player},
+    render_mode = "chart",
+  }
+end
+
+---@param player LuaPlayer
+---@param surface SurfaceName
 ---@param position MapPosition
-function ResultLocation.draw_arrows(player, surface, position)
+function ResultLocation.draw_arrow(player, surface, position)
   local character = player.character
   if (not character) and remote.interfaces["space-exploration"] then
     character = remote.call("space-exploration", "get_player_character", { player = player })
@@ -124,7 +133,10 @@ function ResultLocation.highlight(player, data)
   if not game.surfaces[surface_name] then return end
 
   ResultLocation.draw_markers(player, surface_name, data.selection_boxes)
-  ResultLocation.draw_arrows(player, surface_name, data.position)
+  ResultLocation.draw_arrow(player, surface_name, data.position)
+  if helpers.compare_versions(helpers.game_version, "2.0.56") >= 0 then
+    ResultLocation.draw_chart_marker(player, surface_name, data.group_selection_box)
+  end
 end
 
 ---@param player LuaPlayer

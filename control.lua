@@ -107,6 +107,7 @@ require "scripts.remote"
 ---@field position MapPosition
 ---@field surface SurfaceName
 ---@field selection_boxes BoundingBox[]
+---@field group_selection_box BoundingBox
 
 DEBOUNCE_TICKS = 60
 
