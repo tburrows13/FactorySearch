@@ -805,7 +805,7 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     end
 
     if surface == player.surface then
-      generate_distance_data(surface_data, player.position)
+      generate_distance_data(surface_data, player.physical_position)
     end
     sort_surface_data(surface_data, player)
     data[surface.name] = surface_data
@@ -886,7 +886,7 @@ function on_tick()
     if not chunk then
       -- Surface is complete
       if current_surface_search_data.surface == search_data.player.surface then
-        generate_distance_data(current_surface_search_data.surface_data, search_data.player.position)
+        generate_distance_data(current_surface_search_data.surface_data, search_data.player.physical_position)
       end
       sort_surface_data(current_surface_search_data.surface_data, search_data.player)
 
