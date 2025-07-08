@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.14.0
+Date: 8 July 2025
+  Features:
+    - Added "Sort by" drop-down to select between "Name", "Distance", or "Count" sort options
+    - Added progress bar when searching in Background mode
+    - Search result highlight square is also drawn on the map (2.0.56+ only)
+    - "Valve" entities can now be search for in 'Logistic' search mode
+  Changes:
+    - "Distance" values are now calculated from the character position rather than remote view position
+---------------------------------------------------------------------------------------------------
 Version: 1.13.3
 Date: 16 May 2025
   Bugfixes:
