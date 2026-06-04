@@ -106,7 +106,7 @@ local request_entities = list_to_map{ "logistic-container", "character", "spider
 local item_logistic_entities = list_to_map{ "transport-belt", "splitter", "underground-belt", "linked-belt", "lane-splitter", "loader", "loader-1x1", "inserter", "logistic-robot", "construction-robot" }
 local fluid_logistic_entities = list_to_map{ "pipe", "pipe-to-ground", "pump", "valve" }
 local ground_entities = list_to_map{ "item-entity" }  -- force = "neutral"
-local signal_entities = list_to_map{ "assembling-machine", "furnace", "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "selector-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall", "container", "logistic-container", "inserter", "storage-tank", "mining-drill" }
+local signal_entities = list_to_map{ "assembling-machine", "furnace", "roboport", "train-stop", "arithmetic-combinator", "decider-combinator", "selector-combinator", "constant-combinator", "accumulator", "rail-signal", "rail-chain-signal", "wall", "container", "logistic-container", "inserter", "pipe", "pipe-to-ground", "storage-tank", "mining-drill" }
 
 local function add_entity_type(type_list, to_add_list)
   for name, _ in pairs(to_add_list) do
@@ -375,7 +375,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
             end
           elseif entity_type == "logistic-container" and target_is_item then
             ---@cast control_behavior LuaLogisticContainerControlBehavior
-            if control_behavior.circuit_exclusive_mode_of_operation == defines.control_behavior.logistic_container.exclusive_mode.send_contents then
+            if control_behavior.read_contents then
               local signal_count = entity.get_item_count(target_item_filter)
               if signal_count > 0 then
                 SearchResults.add_entity(entity, surface_data.signals)
@@ -392,13 +392,16 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
                 SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
               end
             end
-          elseif entity_type == "storage-tank" and target_is_fluid then
-            if control_behavior.read_contents then
+          elseif (entity_type == "pipe" or entity_type == "pipe-to-ground" or entity_type == "storage-tank") and target_is_fluid then
+            ---@cast control_behavior LuaSingleFluidBoxControlBehavior
+            if control_behavior.circuit_exclusive_mode_of_operation == defines.control_behavior.single_fluid_box.exclusive_mode.send_contents then
               local signal_count = entity.get_fluid_count(target_name)
               if signal_count > 0 then
                 SearchResults.add_entity(entity, surface_data.signals)
                 SearchResults.add_surface_statistics("signal_count", 1, surface_statistics)
               end
+            --elseif control_behavior.circuit_exclusive_mode_of_operation == defines.control_behavior.single_fluid_box.exclusive_mode.send_segment_contents then
+            -- TODO
             end
           elseif entity_type == "mining-drill" then
             ---@cast control_behavior LuaMiningDrillControlBehavior
@@ -593,7 +596,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
         elseif entity_type == "assembling-machine" or entity_type == "furnace" or entity_type == "rocket-silo" then
           inventory = entity.get_inventory(defines.inventory.crafter_modules)
         elseif entity_type == "agricultural-tower" then
-          --inventory = entity.get_inventory(defines.inventory.agricultural_tower_modules)
+          inventory = entity.get_inventory(defines.inventory.agricultural_tower_modules)
         end
         if inventory then
           local item_count = get_item_count(inventory, target_item_and_quality)
@@ -641,7 +644,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
 
     -- Logistics
     if state.logistics then
-      if item_logistic_entities[entity_type] then
+      if target_is_item and item_logistic_entities[entity_type] then
         if entity_type == "inserter" then
           local held_stack = entity.held_stack
           if held_stack and held_stack.valid_for_read and held_stack.name == target_name and (target_quality_is_any or held_stack.quality.name == target_quality) then
@@ -655,7 +658,7 @@ function Search.process_found_entities(entities, state, surface_data, surface_st
             SearchResults.add_surface_statistics("item_count", item_count, surface_statistics)
           end
         end
-      elseif fluid_logistic_entities[entity_type] then
+      elseif target_is_fluid and fluid_logistic_entities[entity_type] then
         -- So target.type == "fluid"
         local fluid_count = entity.get_fluid_count(target_name)
         if fluid_count > 0 then
