@@ -789,9 +789,13 @@ function Search.blocking_search(force, state, target_item, surface_list, type_li
     if state.entities then
       local target_entity_names = get_target_entity_names(target_item)
       if target_entity_names then
+        local quality_filter
+        if target_quality ~= "any" and script.feature_flags.quality then
+          quality_filter = target_quality
+        end
         entities = surface.find_entities_filtered{
           name = target_entity_names,
-          quality = target_quality ~= "any" and target_quality or nil,
+          quality = quality_filter,  -- Only nil will find resources/corpses
           force = { force, "neutral" },
         }
         for _, entity in pairs(entities) do
@@ -964,10 +968,14 @@ function on_tick()
     if state.entities then
       local target_entity_names = get_target_entity_names(target_item)
       if target_entity_names then
+        local quality_filter
+        if target_quality ~= "any" and script.feature_flags.quality then
+          quality_filter = target_quality
+        end
         entities = current_surface.find_entities_filtered{
           area = chunk_area,
           name = target_entity_names,
-          quality = target_quality ~= "any" and target_quality or nil,
+          quality = quality_filter,
           force = { force, "neutral" },
         }
         for _, entity in pairs(entities) do
